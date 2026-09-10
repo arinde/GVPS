@@ -3,6 +3,8 @@
 Delivery plan, architecture, and the decisions that are expensive to reverse.
 
 Read alongside `FEATURES.md` (what) and `TESTS.md` (how it's verified).
+`FEATURES.md` is the source of truth for scope and phasing. Where this file
+disagrees with it, this file is wrong.
 
 ---
 
@@ -167,9 +169,11 @@ class level throughout the codebase.
 Assessment components, weights, grade boundaries, comment banks, trait lists,
 fee items. Every one of these changes, and every school does it differently.
 
-### 4.9 Offline-first score entry from the start
+### 4.9 Offline-first score entry and attendance from the start
 Retrofitting local persistence and a sync queue onto an online-only form means
-rewriting the most-used screen in the system. Build the sync model first.
+rewriting the most-used screens in the system. Score entry and daily attendance
+are both marked on phones on weak connections. Build one sync model, before
+either screen exists, and reuse it.
 
 ### 4.10 Audit log from day one
 Cheap to add at the start, effectively impossible to backfill.
@@ -186,6 +190,20 @@ one gate either stalls data entry or hands privilege escalation to a secretary.
 Separating them afterwards means re-deriving who granted what, from an audit
 log that was never designed to answer it.
 
+### 4.13 The whitelist is never authentication on its own
+A whitelisted number answers *"is this person allowed?"*, never *"is this
+person who they claim to be?"* Parent numbers circulate freely in class
+WhatsApp groups, so possession must be proved by OTP before any session is
+issued. Shipping on a whitelist-only check and tightening it later invalidates
+every existing session and means re-explaining the login to 600 people at once.
+
+### 4.14 Parent contact details are never self-editable
+Allowing a parent to change their own phone number from inside the account
+turns one session into permanent account takeover. Contact changes route
+through the school office like any other record change. Closing this afterwards
+means auditing every account whose number moved while the route was open, with
+no way to tell a legitimate change from a hostile one.
+
 ---
 
 ## 5. Phases
@@ -197,10 +215,13 @@ Each phase must be usable on its own. Nothing ships half-wired.
 academic structure exists.
 
 - Auth, roles, permission guards, audit log
+- Privilege separation: staff accounts, role grants and guardian links are
+  superadmin-only; student and guardian records are secretary work
 - School profile and branding
 - Sessions, terms, sections, levels, arms, streams
 - Subjects, offerings, teacher assignments
 - Student registry, guardians, enrolments
+- Admission number format and generator
 - Fast keyboard-driven bulk entry grid
 - Backup and restore, tested with real data volume
 
@@ -226,6 +247,8 @@ follow closely so they get something back for the effort.
 - Result snapshotting
 - Audit log viewer
 - Parent detail form: claim codes, staged submissions, field-level approval queue
+- Student movement: promotion, repetition, transfer, withdrawal, alumni
+- CSV import, now that there is data worth exporting and re-importing
 
 **Done when:** a full term's results are compiled, approved, and printed
 entirely in the system, and the principal signs off that the cards match the
@@ -245,6 +268,7 @@ near-total.
 - Bursar payment recording, part payments, receipts
 - Student and family ledger
 - Debtor reports
+- Withhold result on outstanding fees (school-configurable toggle)
 - Admissions pipeline
 
 **Done when:** a full term is invoiced, payments are recorded through the
@@ -256,13 +280,13 @@ system, and the debtor list reconciles against the bursar's own records.
 - Daily and period attendance, offline-capable
 - Attendance summary feeding the report card
 - WhatsApp/SMS adapters, templates, broadcast
-- Triggered notifications: result published, fee reminder, receipt
+- Triggered notifications: result published, fee reminder, receipt, absence alert
 - **Parent accounts: whitelist + OTP, device sessions**
 - **Parent portal: ward views, results, ledger, attendance**
 - **Request objects: result review, fee review, message threads**
 - Student ID cards
 - Export to Excel/PDF across all list views
-- Student movement: promotion, transfer, withdrawal, alumni
+- Full-school data export in an open format
 
 ---
 

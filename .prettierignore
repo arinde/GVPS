@@ -1,0 +1,15 @@
+.next/
+out/
+build/
+node_modules/
+next-env.d.ts
+package-lock.json
+
+# Spec documents are hand-wrapped at ~78 columns for readability.
+# Prettier's prose wrapping would reflow every paragraph and make the
+# diffs on them unreadable.
+FEATURES.md
+PLAN.md
+TESTS.md
+AGENTS.md
+CLAUDE.md

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Enforces AGENTS.md at commit time. See scripts/precommit-checks.mjs for the
+# rules ESLint cannot express.
+#
+# The package root is not the git root in this repo, so cd into it first.
+cd "$(dirname "$0")/.." || exit 1
+
+npx lint-staged || exit 1
+node scripts/precommit-checks.mjs || exit 1
