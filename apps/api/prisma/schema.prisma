@@ -1,0 +1,13 @@
+// Schema before code (AGENTS.md §11): models land here one module at a time,
+// migration-first, starting with whichever module is built first per
+// PLAN.md §6. Nothing is modelled yet — this file only wires the generator
+// and datasource so `prisma generate`/`migrate` work from day one.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

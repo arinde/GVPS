@@ -13,7 +13,7 @@
 import { execFileSync } from "node:child_process";
 
 const HARD_CAP = 400;
-const UI_DIR = "src/components/ui/";
+const UI_DIR = "apps/web/src/components/ui/";
 const CODE = /\.(ts|tsx|js|jsx|mjs|cjs)$/;
 
 const git = (args) => execFileSync("git", args, { encoding: "utf8" });
@@ -25,7 +25,9 @@ function stagedChanges() {
   return out.split("\n").map((line) => {
     const [status, ...rest] = line.split("\t");
     // Renames report as "R100\told\tnew" — the new path is what we check.
-    return [status[0], rest[rest.length - 1]];
+    // Kept as the full status (not just status[0]) so a pure rename (R100)
+    // can be told apart from a rename that also changed content (R<100).
+    return [status, rest[rest.length - 1]];
   });
 }
 
@@ -41,17 +43,20 @@ const errors = [];
 
 for (const [status, path] of stagedChanges()) {
   const normalised = path.replace(/\\/g, "/");
+  // "A" is a fresh add; "R100" is a pure rename (git found the old and new
+  // blob byte-identical) — both leave the generated file's content untouched.
+  const isAllowedForUiDir = status === "A" || status === "R100";
 
-  if (normalised.startsWith(UI_DIR) && status !== "A") {
+  if (normalised.startsWith(UI_DIR) && !isAllowedForUiDir) {
     errors.push(
-      `${normalised} — generated shadcn file was ${status === "D" ? "deleted" : "modified"}.\n` +
+      `${normalised} — generated shadcn file was ${status[0] === "D" ? "deleted" : "modified"}.\n` +
         `    AGENTS.md §6: wrap it in components/common/ instead. Re-running\n` +
         `    'npx shadcn add' must produce no diff here.`,
     );
     continue;
   }
 
-  if (status !== "D" && CODE.test(normalised)) {
+  if (status[0] !== "D" && CODE.test(normalised)) {
     const lines = stagedLineCount(normalised);
     if (lines > HARD_CAP) {
       errors.push(
