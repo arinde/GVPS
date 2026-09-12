@@ -57,6 +57,10 @@ teacher; a principal may teach).
 - Session via httpOnly refresh token + short-lived access token.
 - Account lockout after repeated failures.
 - Password reset by admin (staff are physically present; no email round-trip needed).
+- Account creation and admin-issued reset both generate a temporary password
+  shown to the admin **once**, in the response to that action — never emailed,
+  never retrievable again. The admin relays it to the staff member in person,
+  who is then forced through the password-change flow above on first login.
 
 ### 1.3 Parent accounts — passwordless `P4`
 
