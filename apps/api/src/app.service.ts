@@ -1,0 +1,21 @@
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "@/prisma/prisma.service";
+
+export type HealthStatus = {
+  status: "ok" | "error";
+  database: "connected" | "unreachable";
+};
+
+@Injectable()
+export class AppService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async getHealth(): Promise<HealthStatus> {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      return { status: "ok", database: "connected" };
+    } catch {
+      return { status: "error", database: "unreachable" };
+    }
+  }
+}

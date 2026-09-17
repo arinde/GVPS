@@ -1,0 +1,19 @@
+# Local dev only. PLAN.md §7 puts the real deployment on one Oracle Cloud
+# VM via Docker Compose too, but with volumes/backups/other containers this
+# doesn't have yet — this file is just enough to run apps/api against a
+# real Postgres locally, matching apps/api/.env.example.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gvps
+      POSTGRES_PASSWORD: gvps
+      POSTGRES_DB: gvps
+    ports:
+      - "5432:5432"
+    volumes:
+      - gvps-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  gvps-postgres-data:

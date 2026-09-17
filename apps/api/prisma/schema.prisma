@@ -1,0 +1,113 @@
+// Schema before code (AGENTS.md §11): models land here one module at a time,
+// migration-first. This pass adds the auth module's models only — staff
+// identity, roles, sessions, and the audit trail every privilege change
+// must write to (PLAN.md §4.10). Parent/guardian auth (FEATURES.md §1.3) is
+// a separate, later model — it isn't staff, and isn't password-based.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// PLAN.md §4.1: school_id on every table, even single-tenant today.
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  staff     Staff[]
+  auditLogs AuditLog[]
+
+  @@map("schools")
+}
+
+// The 7 roles in FEATURES.md §1.1, minus parent/guardian — that role has no
+// password and isn't a Staff row (see §1.3: passwordless, OTP-based).
+enum Role {
+  SUPERADMIN
+  PRINCIPAL
+  BURSAR
+  FORM_TEACHER
+  SUBJECT_TEACHER
+  ADMIN_SECRETARY
+}
+
+// FEATURES.md §1.2: email + password (argon2), forced change on first login,
+// lockout after repeated failures. Fine-grained scope (which arm, which
+// subject) isn't modelled here — it lives on teacher_assignments once the
+// academic-structure module exists; this module only owns identity + role
+// membership, per the auth/ vs subjects/ split in PLAN.md §3.
+model Staff {
+  id                  String    @id @default(cuid())
+  schoolId            String
+  email               String
+  passwordHash        String
+  mustChangePassword  Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  school        School         @relation(fields: [schoolId], references: [id])
+  roles         StaffRole[]
+  refreshTokens RefreshToken[]
+
+  // Email is unique per school, not globally — PLAN.md §4.1 keeps every
+  // school's data independent even while there's only one school today.
+  @@unique([schoolId, email])
+  @@map("staff")
+}
+
+// A staff member can hold several roles at once (AGENTS.md's own example:
+// a form teacher who is also a subject teacher).
+model StaffRole {
+  id        String   @id @default(cuid())
+  staffId   String
+  role      Role
+  createdAt DateTime @default(now())
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, role])
+  @@map("staff_roles")
+}
+
+// Access tokens are short-lived and stateless (not stored). Refresh tokens
+// are stored hashed so a logout/revocation can actually take effect —
+// a purely stateless refresh JWT can't be invalidated before it expires.
+model RefreshToken {
+  id         String    @id @default(cuid())
+  staffId    String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// PLAN.md §4.10: audit log from day one, append-only. Only auth-module
+// actions (account creation, role grants, password resets) write here for
+// now; results/fees/students add their own entries as those modules land.
+model AuditLog {
+  id           String   @id @default(cuid())
+  schoolId     String
+  actorStaffId String?
+  action       String
+  entityType   String
+  entityId     String
+  before       Json?
+  after        Json?
+  reason       String?
+  createdAt    DateTime @default(now())
+
+  school School @relation(fields: [schoolId], references: [id])
+
+  @@map("audit_logs")
+}

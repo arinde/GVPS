@@ -1,0 +1,9 @@
+# Normalize line endings regardless of the checkout machine's core.autocrlf.
+# Without this, a Windows checkout with autocrlf=true gets CRLF files while
+# .prettierrc.json sets endOfLine: "lf", so `prettier --check` (and therefore
+# `npm run check`) fails on every tracked file even though nothing changed.
+* text=auto eol=lf
+
+# Hand-wrapped spec docs (see .prettierignore) — still normalized to LF, just
+# not reflowed by Prettier.
+*.md text eol=lf
