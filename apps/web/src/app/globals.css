@@ -7,9 +7,20 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+  --font-heading: var(--font-libre);
+
+  /* Status colours. The design system double-encodes status as shape + word
+     so it survives photocopying and poor lighting, which means these pairs
+     are always used together with a label — never colour alone. */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-brand: var(--brand);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,73 +59,110 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* "Administrative Authority" tokens, from the Stitch design system export.
+   Hex rather than oklch so the values stay greppable against DESIGN.md. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #eef3f7; /* Page background */
+  --foreground: #17242f; /* Primary text / dark UI */
+  --card: #ffffff; /* Surface */
+  --card-foreground: #17242f;
+  --popover: #ffffff;
+  --popover-foreground: #17242f;
+
+  /* Buttons are primary solid; the brand accent is deliberately never used
+     on them — it is reserved for the nav underline and crest mark. */
+  --primary: #17242f;
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: #17242f;
+
+  --muted: #e9eef2;
+  --muted-foreground: #7c8b97; /* Muted text */
+  --accent: #e5edf4;
+  --accent-foreground: #3c5a78;
+
+  --destructive: #9b2226; /* Danger state */
+  --border: #dee6ec;
+  --input: #b9c5ce; /* Strong borders — inputs need a visible outline */
+  --ring: #17242f;
+
+  --success: #e4f0ea;
+  --success-foreground: #1f6b45;
+  --warning: #f7eedc;
+  --warning-foreground: #8a6316;
+  --info: #e5edf4;
+  --info-foreground: #3c5a78;
+  --brand: #6e1d22; /* Sparing: nav underline, crest mark. Never a button. */
+
+  --chart-1: #17242f;
+  --chart-2: #4a5a67;
+  --chart-3: #7c8b97;
+  --chart-4: #b9c5ce;
+  --chart-5: #6e1d22;
+
+  /* Design system: card radius 7px, button radius 5px. shadcn derives its
+     smaller radii from --radius, and 0.4375rem lands buttons at ~5px. */
+  --radius: 0.4375rem;
+
+  --sidebar: #17242f;
+  --sidebar-foreground: #eef3f7;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #17242f;
+  --sidebar-accent: #4a5a67;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #4a5a67;
+  --sidebar-ring: #b9c5ce;
 }
 
+/* The design system specifies no dark variant — this is derived from the same
+   hues so a dark toggle degrades gracefully rather than falling back to
+   shadcn's neutral greys. Treat it as provisional: if the school ever asks
+   for dark mode, it needs designing, not inferring. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #101a22;
+  --foreground: #eef3f7;
+  --card: #17242f;
+  --card-foreground: #eef3f7;
+  --popover: #17242f;
+  --popover-foreground: #eef3f7;
+
+  --primary: #eef3f7;
+  --primary-foreground: #17242f;
+  --secondary: #223341;
+  --secondary-foreground: #eef3f7;
+
+  --muted: #223341;
+  --muted-foreground: #9aa8b3;
+  --accent: #223341;
+  --accent-foreground: #cfe0f0;
+
+  --destructive: #e26b6f;
+  --border: #2c3e4d;
+  --input: #3c5061;
+  --ring: #b9c5ce;
+
+  --success: #16301f;
+  --success-foreground: #7fd0a5;
+  --warning: #2f2716;
+  --warning-foreground: #dcb87a;
+  --info: #1a2835;
+  --info-foreground: #9dc0e0;
+  --brand: #c4666b;
+
+  --chart-1: #eef3f7;
+  --chart-2: #b9c5ce;
+  --chart-3: #7c8b97;
+  --chart-4: #4a5a67;
+  --chart-5: #c4666b;
+
+  --sidebar: #0b1218;
+  --sidebar-foreground: #eef3f7;
+  --sidebar-primary: #eef3f7;
+  --sidebar-primary-foreground: #17242f;
+  --sidebar-accent: #223341;
+  --sidebar-accent-foreground: #eef3f7;
+  --sidebar-border: #2c3e4d;
+  --sidebar-ring: #3c5061;
 }
 
 @layer base {
@@ -126,5 +174,20 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Every heading is Libre Baskerville in the design system, so this is the
+     default rather than a class each screen has to remember. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading font-bold;
+  }
+  /* Money and any other figure compared down a column needs tabular figures,
+     or the digits do not line up between rows. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }

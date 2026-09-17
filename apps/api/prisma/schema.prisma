@@ -24,8 +24,22 @@ model School {
   name      String
   createdAt DateTime @default(now())
 
-  staff     Staff[]
-  auditLogs AuditLog[]
+  // FEATURES.md §3.2: admission number format is configurable. Tokens are
+  // {PREFIX}, {YEAR} and {SEQ}; {SEQ} is left-padded to `admissionNoPadding`.
+  // Agreeing this with the school before the first record is a PLAN.md §8
+  // prerequisite, because it is baked into every student from then on.
+  admissionNoFormat  String @default("{PREFIX}/{YEAR}/{SEQ}")
+  admissionNoPrefix  String @default("GVPS")
+  admissionNoPadding Int    @default(4)
+
+  staff            Staff[]
+  auditLogs        AuditLog[]
+  academicSessions AcademicSession[]
+  terms            Term[]
+  classLevels      ClassLevel[]
+  classArms        ClassArm[]
+  students         Student[]
+  guardians        Guardian[]
 
   @@map("schools")
 }
@@ -85,12 +99,12 @@ model StaffRole {
 // are stored hashed so a logout/revocation can actually take effect —
 // a purely stateless refresh JWT can't be invalidated before it expires.
 model RefreshToken {
-  id         String    @id @default(cuid())
-  staffId    String
-  tokenHash  String    @unique
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(cuid())
+  staffId   String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
   staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
@@ -115,4 +129,262 @@ model AuditLog {
   school School @relation(fields: [schoolId], references: [id])
 
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Academic structure (FEATURES.md §2). Everything downstream hangs off this:
+// enrolment is student × session × class_arm (PLAN.md §4.2), and subject
+// offerings are subject × level × stream (FEATURES.md §2.3). Nothing here
+// references students or subjects — those modules land next.
+// ---------------------------------------------------------------------------
+
+// PLAN.md §4.7: section is first-class, not derived by branching on level
+// name. It drives grading scale, report card template and teaching model.
+enum Section {
+  PRIMARY
+  JUNIOR
+  SENIOR
+}
+
+// FEATURES.md §2.2: senior only. Determines which subjects are offered.
+enum Stream {
+  SCIENCE
+  ARTS
+  COMMERCIAL
+}
+
+model AcademicSession {
+  id        String   @id @default(cuid())
+  schoolId  String
+  name      String // "2026/2027"
+  startDate DateTime
+  endDate   DateTime
+  // FEATURES.md §2.1: exactly one session is current; almost every screen
+  // filters by it. Enforced by a partial unique index in the migration, not
+  // just in the service — two current sessions would silently split the roll.
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school     School      @relation(fields: [schoolId], references: [id])
+  terms      Term[]
+  enrolments Enrolment[]
+
+  @@unique([schoolId, name])
+  @@map("academic_sessions")
+}
+
+model Term {
+  id                String   @id @default(cuid())
+  schoolId          String
+  sessionId         String
+  sequence          Int // 1, 2, 3 — ordering is meaningful for cumulative averages
+  name              String // "First Term"
+  startDate         DateTime
+  endDate           DateTime
+  // FEATURES.md §2.1: printed on every report card. Nullable because the
+  // figure is not known until the term has actually run.
+  timesSchoolOpened Int?
+  isCurrent         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  school  School          @relation(fields: [schoolId], references: [id])
+  session AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, sequence])
+  @@map("terms")
+}
+
+model ClassLevel {
+  id        String   @id @default(cuid())
+  schoolId  String
+  section   Section
+  name      String // "Primary 1", "JSS 1", "SSS 1"
+  // Promotion order and list ordering. Primary 1 = 1 … SSS 3 = 12, so "the
+  // next level up" is arithmetic rather than string parsing.
+  rank      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school   School     @relation(fields: [schoolId], references: [id])
+  arms     ClassArm[]
+  students Student[]
+
+  @@unique([schoolId, name])
+  @@unique([schoolId, rank])
+  @@map("class_levels")
+}
+
+model ClassArm {
+  id           String   @id @default(cuid())
+  schoolId     String
+  classLevelId String
+  name         String // "A", "B" — rendered with the level as "Primary 4A"
+  capacity     Int?
+  // Senior arms only. A junior or primary arm has no stream, which is why
+  // this is nullable rather than defaulted.
+  stream       Stream?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  school     School      @relation(fields: [schoolId], references: [id])
+  classLevel ClassLevel  @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  enrolments Enrolment[]
+
+  @@unique([classLevelId, name])
+  @@map("class_arms")
+}
+
+// ---------------------------------------------------------------------------
+// Student registry, guardians and enrolment (FEATURES.md §3.2–3.4).
+// ---------------------------------------------------------------------------
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+enum GuardianRelationship {
+  FATHER
+  MOTHER
+  GUARDIAN
+}
+
+// FEATURES.md §3.4 / PLAN.md §4.2: enrolment carries the class, not the
+// student. Promotion inserts a row and never updates one, so "what was
+// Tunde's JSS2 result" stays answerable forever.
+enum EnrolmentStatus {
+  ACTIVE
+  TRANSFERRED
+  WITHDRAWN
+  GRADUATED
+  REPEATING
+}
+
+model Student {
+  id       String @id @default(cuid())
+  schoolId String
+
+  // System-generated (FEATURES.md §3.2), format configurable on School.
+  admissionNo String
+
+  // Bio data: permanent facts only. Anything that changes yearly belongs on
+  // the enrolment, not here.
+  firstName     String
+  lastName      String
+  otherNames    String?
+  dateOfBirth   DateTime
+  sex           Sex
+  nationality   String   @default("Nigerian")
+  stateOfOrigin String?
+  lga           String?
+
+  // Deferred to a second pass: FEATURES.md §3.5 is explicit that photograph
+  // capture must never block data entry.
+  photoUrl String?
+
+  dateOfAdmission     DateTime
+  admittedIntoLevelId String
+
+  address        String?
+  bloodGroup     String?
+  medicalNote    String?
+  previousSchool String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school            School            @relation(fields: [schoolId], references: [id])
+  admittedIntoLevel ClassLevel        @relation(fields: [admittedIntoLevelId], references: [id])
+  guardians         StudentGuardian[]
+  enrolments        Enrolment[]
+
+  // Unique per school, and the index the registry search leans on.
+  @@unique([schoolId, admissionNo])
+  @@index([schoolId, lastName, firstName])
+  @@map("students")
+}
+
+// PLAN.md §4.6: guardians are entities with a join table, never fields on the
+// student. Families have siblings, and both the family fee statement and the
+// parent portal break under one-parent-per-student.
+model Guardian {
+  id         String  @id @default(cuid())
+  schoolId   String
+  firstName  String
+  lastName   String
+  phone      String
+  altPhone   String?
+  email      String?
+  address    String?
+  occupation String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school   School            @relation(fields: [schoolId], references: [id])
+  students StudentGuardian[]
+
+  // Phone is the primary channel and the natural duplicate check: re-entering
+  // the same parent for a second child should find them, not clone them.
+  @@unique([schoolId, phone])
+  @@map("guardians")
+}
+
+model StudentGuardian {
+  id           String               @id @default(cuid())
+  schoolId     String
+  studentId    String
+  guardianId   String
+  relationship GuardianRelationship
+  // FEATURES.md §3.3: who the school rings first.
+  isPrimary    Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  guardian Guardian @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, guardianId])
+  @@map("student_guardians")
+}
+
+model Enrolment {
+  id         String          @id @default(cuid())
+  schoolId   String
+  studentId  String
+  sessionId  String
+  classArmId String
+  status     EnrolmentStatus @default(ACTIVE)
+  enrolledOn DateTime        @default(now())
+  exitedOn   DateTime?
+  exitReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student  Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  session  AcademicSession @relation(fields: [sessionId], references: [id])
+  classArm ClassArm        @relation(fields: [classArmId], references: [id])
+
+  // One enrolment per student per session. Repeating a year happens in a new
+  // session, so this does not block it.
+  @@unique([studentId, sessionId])
+  @@index([schoolId, sessionId, classArmId])
+  @@map("enrolments")
+}
+
+// Admission numbers must be unique under concurrent creation (TESTS.md §7).
+// A counter row per school per year, incremented inside the same transaction
+// that creates the student, so two secretaries saving at once cannot collide.
+// The unique index on students is the backstop if this is ever bypassed.
+model AdmissionCounter {
+  id         String   @id @default(cuid())
+  schoolId   String
+  year       Int
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([schoolId, year])
+  @@map("admission_counters")
 }
