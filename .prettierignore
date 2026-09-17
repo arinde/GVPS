@@ -13,3 +13,8 @@ PLAN.md
 TESTS.md
 AGENTS.md
 CLAUDE.md
+
+# Design exports from Stitch. Reference material, not source — reformatting
+# them would only create noise against the next export.
+stitch_school_management_system_ui*/
+design/

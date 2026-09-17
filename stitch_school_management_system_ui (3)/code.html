@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"error-container":"#ffdad6","secondary-container":"#ff8d8d","error":"#ba1a1a","secondary-fixed":"#ffdad8","on-surface-variant":"#44474b","on-primary-fixed":"#101d28","surface-variant":"#dee3e7","on-primary-fixed-variant":"#3b4854","surface-container":"#e9eef2","surface-container-low":"#eff4f8","outline":"#74777c","on-error":"#ffffff","inverse-on-surface":"#ecf1f5","surface-bright":"#f5fafe","inverse-primary":"#bac8d7","outline-variant":"#c4c7cb","on-tertiary-fixed":"#281809","on-tertiary-fixed-variant":"#584330","inverse-surface":"#2c3134","surface-container-lowest":"#ffffff","surface-container-highest":"#dee3e7","on-secondary":"#ffffff","surface-container-high":"#e4e9ed","on-secondary-container":"#772428","surface-tint":"#53606d","on-background":"#171c1f","background":"#f5fafe","tertiary":"#170901","on-secondary-fixed-variant":"#7e292d","primary":"#020e18","on-tertiary-container":"#9f856f","secondary-fixed-dim":"#ffb3b2","on-error-container":"#93000a","on-primary-container":"#7e8b99","primary-fixed":"#d6e4f3","primary-container":"#17242f","surface-dim":"#d5dbdf","tertiary-fixed-dim":"#dfc1a9","on-tertiary":"#ffffff","secondary":"#9d4043","primary-fixed-dim":"#bac8d7","on-surface":"#171c1f","on-secondary-fixed":"#410008","tertiary-fixed":"#fdddc3","on-primary":"#ffffff","tertiary-container":"#301f0f","surface":"#f5fafe"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin-desktop":"2rem","space-sm":"0.5rem","space-md":"0.75rem","space-xs":"0.25rem","space-lg":"1.25rem","margin":"1rem","space-xl":"2rem","gutter-desktop":"1.5rem","gutter":"1rem"},fontFamily:{"body-md":["IBM Plex Sans"],"label-md":["IBM Plex Sans"],"label-sm":["IBM Plex Sans"],"data-mono":["IBM Plex Mono"],"headline-xl-mobile":["Libre Baskerville"],"body-sm":["IBM Plex Sans"],"headline-xl":["Libre Baskerville"],"headline-md":["Libre Baskerville"],"headline-sm":["Libre Baskerville"],"headline-lg":["Libre Baskerville"],"body-lg":["IBM Plex Sans"]},fontSize:{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"16px","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.5px","fontWeight":"600"}],"data-mono":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-xl-mobile":["26px",{"lineHeight":"34px","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-xl":["32px",{"lineHeight":"40px","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"700"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"700"}],"headline-lg":["24px",{"lineHeight":"32px","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-surface-variant shadow-[0_1px_2px_rgba(23,36,47,0.06)]"><div class="h-14 px-gutter-desktop border-b border-surface-variant flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm pr-space-lg border-r border-surface-variant"><div class="w-7 h-7 bg-primary-container flex items-center justify-center rounded"><span class="material-symbols-outlined text-on-primary text-[18px]">account_balance</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm leading-none text-primary tracking-tight">Edura Nigeria</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">School Registry</span></div></div><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-low border border-surface-variant rounded"><div class="w-4 h-4 bg-secondary flex items-center justify-center rounded-sm"><span class="material-symbols-outlined text-on-secondary text-[12px]">shield</span></div><span class="font-label-md text-label-md text-on-surface">Federal Government College, Lagos</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">unfold_more</span></div><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-lowest border border-surface-variant rounded"><span class="material-symbols-outlined text-on-surface-variant text-[16px]">calendar_today</span><span class="font-label-md text-label-md text-on-surface">Second Term 2026/2027</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm border-r border-surface-variant pr-space-lg"><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-[20px]">search</span></button><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded relative"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full"></span></button><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-[20px]">help_outline</span></button></div><div class="flex items-center gap-space-md"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-primary leading-tight">Dr. (Mrs.) C. N. Okonjo</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Superadmin / Principal</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div><div class="h-11 px-gutter-desktop bg-surface-container-lowest flex items-center overflow-x-auto"><nav class="flex items-center gap-space-lg h-full" data-active-classes="text-primary font-bold border-b-2 border-secondary"><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="dashboard" href="#">Dashboard</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="students" href="#">Students</a><a aria-current="page" class="h-full flex items-center px-space-xs transition-colors whitespace-nowrap text-primary font-bold border-b-2 border-secondary" data-path="results" href="#">Results</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="fees" href="#">Fees</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="attendance" href="#">Attendance</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="staff" href="#">Staff</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="messages" href="#">Messages</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="requests" href="#">Requests</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="settings" href="#">Settings</a></nav></div></header><main class="w-full pt-[100px] px-gutter-desktop min-h-[calc(100vh-48px)]"><div class="flex flex-col w-full pb-margin-desktop">
+<!-- Sub-header Breadcrumb and Ledger Context -->
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-space-md mb-space-md border-b border-surface-variant">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm uppercase tracking-wider">
+<span class="hover:text-primary cursor-pointer transition-colors">Registry</span>
+<span>/</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Examinations</span>
+<span>/</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Broadsheet Validation</span>
+<span>/</span>
+<span class="text-primary font-bold">Ledger JSS-3B-2027</span>
+</div>
+<div class="flex items-center gap-space-md mt-space-xs md:mt-0 font-data-mono text-body-sm text-on-surface-variant">
+<span>REF: <span class="text-primary font-semibold">FGC/LAG/SEC-26-7B</span></span>
+<span class="text-outline-variant">|</span>
+<span>CLASS QUORUM: <span class="text-primary font-semibold">31/31</span></span>
+</div>
+</div>
+<!-- Page Main Control & Title Header -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg mb-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<span class="px-space-xs py-0.5 bg-primary text-on-primary font-label-sm uppercase rounded">Terminal Dossier</span>
+<span class="font-data-mono text-body-sm text-secondary">SUBMISSION WINDOW CLOSES: 24-MAR-2027</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-primary tracking-tight">JSS 3B — Second Term</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+        31 students · 14 subjects · Session 2026/2027 · Junior Secondary Ledger
+      </p>
+</div>
+<!-- Administrative Action Bar -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="relative">
+<label class="sr-only" for="class-arm-select">Filter Class Arm</label>
+<select class="h-9 px-space-md pr-8 bg-surface-container-lowest border border-outline-variant text-on-surface font-label-md text-label-md rounded focus:border-primary focus:outline-none appearance-none cursor-pointer" id="class-arm-select">
+<option selected="" value="JSS 3B">Class Arm: JSS 3B (Active)</option>
+<option value="JSS 3A">Class Arm: JSS 3A</option>
+<option value="JSS 3C">Class Arm: JSS 3C</option>
+<option value="JSS 3D">Class Arm: JSS 3D</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+<button class="h-9 px-space-md bg-surface-container-lowest border border-outline-variant text-primary font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors flex items-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[18px]">table_chart</span>
+<span>Export broadsheet (.csv)</span>
+</button>
+<button class="h-9 px-space-md bg-surface-container-low text-outline font-label-md text-label-md rounded cursor-not-allowed border border-surface-variant flex items-center gap-space-xs select-none" disabled="" title="Approval blocked due to missing submissions" type="button">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Approve all</span>
+</button>
+</div>
+</div>
+<!-- High-Visibility Regulatory Banner / Callout -->
+<div class="w-full bg-[#F7E4E4] border border-[#9B2226] text-[#9B2226] p-space-md rounded flex items-start gap-space-md mb-space-lg">
+<div class="flex items-center justify-center w-5 h-5 bg-[#9B2226] text-surface-container-lowest rounded-sm shrink-0 mt-0.5">
+<span class="font-data-mono text-label-sm leading-none">█</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wide">Ledger Condition: Approval Blocked</span>
+<p class="font-body-md text-body-md mt-0.5 text-[#772428]">
+        Results approval blocked because two subjects (<strong>Agricultural Science</strong>, <strong>Civic Education</strong>) have not been submitted by assigned teachers. All subjects must be submitted before principal sign-off.
+      </p>
+</div>
+</div>
+<!-- Metric Summary Cards (Administrative Density) -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-space-md mb-space-lg">
+<div class="bg-surface-container-lowest border border-outline-variant p-space-md rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Required Subjects</span>
+<span class="font-data-mono text-headline-sm text-primary mt-1">14</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Statutory curriculum</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-space-md rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Submitted</span>
+<span class="font-data-mono text-headline-sm text-[#1F6B45] mt-1">12 <span class="text-body-sm text-on-surface-variant font-normal">/ 14</span></span>
+<span class="font-body-sm text-body-sm text-[#1F6B45] mt-0.5">85.7% Complete</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-space-md rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Pending Submission</span>
+<span class="font-data-mono text-headline-sm text-[#8A6316] mt-1">02</span>
+<span class="font-body-sm text-body-sm text-secondary mt-0.5">Action required</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-space-md rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Class Composite Avg</span>
+<span class="font-data-mono text-headline-sm text-primary mt-1">68.7%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">+2.3% from 1st Term</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-space-md rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Critical Failures</span>
+<span class="font-data-mono text-headline-sm text-[#9B2226] mt-1">05</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Scores &lt; 40% threshold</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-space-md rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Verification Status</span>
+<div class="mt-1 flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 bg-[#9B2226] rounded-xs"></span>
+<span class="font-label-md text-label-md text-[#9B2226] uppercase">Incomplete</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Locked by Superadmin</span>
+</div>
+</div>
+<!-- Subject Queue Register Table Container -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded overflow-hidden shadow-[0_1px_2px_rgba(23,36,47,0.06)]">
+<div class="px-space-md py-space-sm border-b border-outline-variant bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">ballot</span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wide">Academic Department Returns Queue</span>
+<span class="font-data-mono text-label-sm text-on-surface-variant px-1.5 py-0.5 bg-surface-container border border-surface-variant rounded">10 OF 14 DISPLAYED</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Minimum Pass Mark: <strong class="text-primary font-data-mono">40%</strong></span>
+<div class="h-3 w-[1px] bg-outline-variant"></div>
+<button class="font-label-sm text-label-sm text-secondary hover:underline cursor-pointer flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[14px]">refresh</span> Reload Return Statuses
+        </button>
+</div>
+</div>
+<!-- Table Responsive Scroller -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container border-b-2 border-[#B9C5CE] font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+<th class="py-2.5 px-3 font-semibold">Subject Name</th>
+<th class="py-2.5 px-3 font-semibold">Assigned Teacher</th>
+<th class="py-2.5 px-3 font-semibold text-center">Status</th>
+<th class="py-2.5 px-3 font-semibold text-right">Entered Count</th>
+<th class="py-2.5 px-3 font-semibold text-right">Class Avg</th>
+<th class="py-2.5 px-3 font-semibold text-right">Highest</th>
+<th class="py-2.5 px-3 font-semibold text-right">Lowest</th>
+<th class="py-2.5 px-3 font-semibold text-right">Failing (&lt;40%)</th>
+<th class="py-2.5 px-3 font-semibold text-center">Row Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant font-body-md text-body-md">
+<!-- Row 1: Mathematics -->
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Mathematics</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">MTH-302</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Mr. D. O. Adeleke</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Approved
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">68.4%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">94</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">42</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">0</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-primary font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Review
+              </button>
+</td>
+</tr>
+<!-- Row 2: English Language -->
+<tr class="bg-[#FAFCFD] hover:bg-[#F2F6F9] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">English Language</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">ENG-301</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Mrs. F. N. Okoye</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Submitted
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">71.2%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">88</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">45</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">0</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-[#3C5A78] font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Approve
+              </button>
+</td>
+</tr>
+<!-- Row 3: Basic Science -->
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Basic Science</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">BSC-304</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Mr. K. A. Babatunde</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Submitted
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">64.0%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">89</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-[#9B2226] font-semibold">38</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-[#9B2226] font-semibold">2</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-[#3C5A78] font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Approve
+              </button>
+</td>
+</tr>
+<!-- Row 4: Basic Technology -->
+<tr class="bg-[#FAFCFD] hover:bg-[#F2F6F9] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Basic Technology</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">BTE-305</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Engr. T. S. Danladi</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Approved
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">74.5%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">96</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">51</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">0</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-primary font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Review
+              </button>
+</td>
+</tr>
+<!-- Row 5: Agricultural Science (Defaulter) -->
+<tr class="bg-[#FFF9F5] hover:bg-[#FFF2EA] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Agricultural Science</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">AGR-308</div>
+</td>
+<td class="py-2 px-3 text-on-surface">
+<span class="font-medium text-primary">Mr. E. C. Nwosu</span>
+<span class="block text-body-sm text-[#8A6316]">Dept of Voc. Studies</span>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F7EEDC] text-[#8A6316] font-label-sm text-label-sm uppercase font-semibold">
+<span class="text-[9px] leading-none">♦</span> Not submitted
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-[#8A6316] font-semibold">0 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-[#17242F] text-surface-container-lowest font-label-md text-label-md rounded hover:bg-[#253847] transition-colors shadow-sm flex items-center gap-1 mx-auto" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span> Remind
+              </button>
+</td>
+</tr>
+<!-- Row 6: Civic Education (Defaulter) -->
+<tr class="bg-[#FFF9F5] hover:bg-[#FFF2EA] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Civic Education</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">CVE-303</div>
+</td>
+<td class="py-2 px-3 text-on-surface">
+<span class="font-medium text-primary">Mrs. B. O. Adeleke</span>
+<span class="block text-body-sm text-[#8A6316]">Dept of Humanities</span>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F7EEDC] text-[#8A6316] font-label-sm text-label-sm uppercase font-semibold">
+<span class="text-[9px] leading-none">♦</span> Not submitted
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-[#8A6316] font-semibold">0 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-right font-data-mono text-outline-variant">—</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-[#17242F] text-surface-container-lowest font-label-md text-label-md rounded hover:bg-[#253847] transition-colors shadow-sm flex items-center gap-1 mx-auto" type="button">
+<span class="material-symbols-outlined text-[14px]">send</span> Remind
+              </button>
+</td>
+</tr>
+<!-- Row 7: Social Studies -->
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Social Studies</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">SST-306</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Mr. O. A. Ibrahim</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Submitted
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">65.8%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">86</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">40</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">0</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-[#3C5A78] font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Approve
+              </button>
+</td>
+</tr>
+<!-- Row 8: Business Studies -->
+<tr class="bg-[#FAFCFD] hover:bg-[#F2F6F9] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Business Studies</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">BUS-309</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Mrs. H. M. Bello</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm uppercase">
+<span class="text-[12px] leading-none">○</span> Reviewed
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">70.1%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">92</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">48</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">0</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-[#3C5A78] font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Approve
+              </button>
+</td>
+</tr>
+<!-- Row 9: French -->
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">French</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">FRN-311</div>
+</td>
+<td class="py-2 px-3 text-on-surface">M. J. P. Kouassi</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Approved
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">62.3%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">85</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-[#9B2226] font-semibold">36</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-[#9B2226] font-semibold">3</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-primary font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Review
+              </button>
+</td>
+</tr>
+<!-- Row 10: Yoruba / Hausa / Igbo -->
+<tr class="bg-[#FAFCFD] hover:bg-[#F2F6F9] transition-colors">
+<td class="py-2 px-3">
+<div class="font-semibold text-primary">Yoruba / Hausa / Igbo</div>
+<div class="font-data-mono text-body-sm text-on-surface-variant">NIG-314</div>
+</td>
+<td class="py-2 px-3 text-on-surface">Mrs. C. Eze</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm uppercase">
+<span class="text-[10px] leading-none">•</span> Submitted
+              </span>
+</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">31 of 31</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-primary font-semibold">73.0%</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">90</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">50</td>
+<td class="py-2 px-3 text-right font-data-mono tabular-nums text-on-surface">0</td>
+<td class="py-2 px-3 text-center">
+<button class="px-space-md py-1 bg-surface-container-lowest border border-outline-variant text-[#3C5A78] font-label-md text-label-md rounded hover:bg-surface-container-low transition-colors" type="button">
+                Approve
+              </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer with Ledger Summary & Verification Stamp -->
+<div class="p-space-md border-t border-outline-variant bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant uppercase">
+<span>Legend:</span>
+<span class="inline-flex items-center gap-1 text-[#1F6B45]"><span class="text-[10px]">•</span> Approved</span>
+<span class="inline-flex items-center gap-1 text-[#3C5A78]"><span class="text-[10px]">•</span> Submitted</span>
+<span class="inline-flex items-center gap-1 text-[#3C5A78]"><span class="text-[12px]">○</span> Reviewed</span>
+<span class="inline-flex items-center gap-1 text-[#8A6316]"><span class="text-[9px]">♦</span> Not submitted</span>
+<span class="inline-flex items-center gap-1 text-[#9B2226]"><span class="text-[10px]">█</span> Blocked</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm font-data-mono text-body-sm text-on-surface-variant">
+<span>BATCH VERIFICATION HASH:</span>
+<span class="px-1.5 py-0.5 bg-surface-container-lowest border border-outline-variant rounded text-primary">e9f2::77a1::4cb0</span>
+</div>
+</div>
+</div>
+<!-- Administrative Audit Trail & Direct Sign-off Requirements Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg mt-space-lg">
+<!-- Protocol Card -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded p-space-lg">
+<div class="flex items-center justify-between border-b border-surface-variant pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">gavel</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">National Educational Policy: Broadsheet Sign-off Rules</h2>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container px-2 py-0.5 text-on-surface-variant uppercase rounded">Section 4(b) Gazette</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md text-body-md text-on-surface-variant">
+<div class="flex flex-col gap-space-xs p-space-sm bg-surface-container-low border border-surface-variant rounded">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[#1F6B45] text-[18px]">check_circle</span>
+            Continuous Assessment (CA) Cap
+          </span>
+<p class="text-body-sm">C.A. scores (Tests 1 &amp; 2, Practical/Project) are locked at 40% aggregate. Terminal Examination forms the remaining 60% mark weight.</p>
+</div>
+<div class="flex flex-col gap-space-xs p-space-sm bg-surface-container-low border border-surface-variant rounded">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[#9B2226] text-[18px]">lock</span>
+            Superadmin Strict Concurrency
+          </span>
+<p class="text-body-sm">Principal approval initiates permanent crypto-signing and transfers broadsheet data directly to the Ministry of Education Central Database.</p>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-variant flex items-center justify-between">
+<span class="text-body-sm text-secondary">Assigned Class Master: <strong>Mr. O. A. Ibrahim</strong> (Verified)</span>
+<button class="text-secondary hover:text-primary font-label-md text-label-md underline cursor-pointer" type="button">
+          Download Blank Supplementary Assessment Ledger
+        </button>
+</div>
+</div>
+<!-- Official Signature Panel (Inactive/Blocked State) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between border-b border-surface-variant pb-space-sm mb-space-md">
+<span class="font-headline-sm text-headline-sm text-primary">Principal Seal</span>
+<span class="font-data-mono text-label-sm text-[#9B2226] bg-[#F7E4E4] px-1.5 py-0.5 rounded uppercase">Pending All Submissions</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-space-md">
+          Federal Government College Lagos institutional stamp requires 100% subject reconciliation before cryptographic token endorsement.
+        </p>
+<div class="p-space-md bg-surface-container-low border border-surface-variant rounded flex flex-col items-center justify-center text-center mb-space-md">
+<span class="material-symbols-outlined text-[36px] text-outline mb-1">lock_clock</span>
+<span class="font-label-md text-label-md text-primary">Sign-off Trigger Locked</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">2 pending returns blocking digital wax</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<button class="w-full h-9 bg-surface-container-low text-outline font-label-md text-label-md rounded border border-surface-variant cursor-not-allowed text-center" disabled="" type="button">
+          Authorize Broadheet Release
+        </button>
+<span class="font-label-sm text-label-sm text-center text-on-surface-variant uppercase">Signer: Dr. (Mrs.) C. N. Okonjo</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Administrative toast micro-interaction for reminding teachers
+  document.querySelectorAll('button').forEach(btn => {
+    if (btn.textContent.trim().includes('Remind')) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const originalHtml = this.innerHTML;
+        this.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span> Dispatched';
+        this.classList.replace('bg-[#17242F]', 'bg-[#1F6B45]');
+        this.disabled = true;
+        setTimeout(() => {
+          this.innerHTML = originalHtml;
+          this.classList.replace('bg-[#1F6B45]', 'bg-[#17242F]');
+          this.disabled = false;
+        }, 3000);
+      });
+    }
+  });
+</script></main><footer class="w-full bg-surface-container-lowest border-t border-surface-variant py-space-sm"><div class="px-gutter-desktop flex flex-col md:flex-row items-center justify-between gap-space-xs text-on-surface-variant"><div class="flex items-center gap-space-sm font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Federal Ministry of Education Registry Node: LAG-FGC-004</span><span class="text-outline-variant">|</span><span class="font-data-mono text-data-mono">SECURE-SESSION-AUTH: OKONJO-C284</span></div><div class="font-body-sm text-body-sm">© 2026 Edura Nigeria System. Institutional Educational Ledger.</div></div></footer></body></html>

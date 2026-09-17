@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"error-container":"#ffdad6","secondary-container":"#ff8d8d","error":"#ba1a1a","secondary-fixed":"#ffdad8","on-surface-variant":"#44474b","on-primary-fixed":"#101d28","surface-variant":"#dee3e7","on-primary-fixed-variant":"#3b4854","surface-container":"#e9eef2","surface-container-low":"#eff4f8","outline":"#74777c","on-error":"#ffffff","inverse-on-surface":"#ecf1f5","surface-bright":"#f5fafe","inverse-primary":"#bac8d7","outline-variant":"#c4c7cb","on-tertiary-fixed":"#281809","on-tertiary-fixed-variant":"#584330","inverse-surface":"#2c3134","surface-container-lowest":"#ffffff","surface-container-highest":"#dee3e7","on-secondary":"#ffffff","surface-container-high":"#e4e9ed","on-secondary-container":"#772428","surface-tint":"#53606d","on-background":"#171c1f","background":"#f5fafe","tertiary":"#170901","on-secondary-fixed-variant":"#7e292d","primary":"#020e18","on-tertiary-container":"#9f856f","secondary-fixed-dim":"#ffb3b2","on-error-container":"#93000a","on-primary-container":"#7e8b99","primary-fixed":"#d6e4f3","primary-container":"#17242f","surface-dim":"#d5dbdf","tertiary-fixed-dim":"#dfc1a9","on-tertiary":"#ffffff","secondary":"#9d4043","primary-fixed-dim":"#bac8d7","on-surface":"#171c1f","on-secondary-fixed":"#410008","tertiary-fixed":"#fdddc3","on-primary":"#ffffff","tertiary-container":"#301f0f","surface":"#f5fafe"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin-desktop":"2rem","space-sm":"0.5rem","space-md":"0.75rem","space-xs":"0.25rem","space-lg":"1.25rem","margin":"1rem","space-xl":"2rem","gutter-desktop":"1.5rem","gutter":"1rem"},fontFamily:{"body-md":["IBM Plex Sans"],"label-md":["IBM Plex Sans"],"label-sm":["IBM Plex Sans"],"data-mono":["IBM Plex Mono"],"headline-xl-mobile":["Libre Baskerville"],"body-sm":["IBM Plex Sans"],"headline-xl":["Libre Baskerville"],"headline-md":["Libre Baskerville"],"headline-sm":["Libre Baskerville"],"headline-lg":["Libre Baskerville"],"body-lg":["IBM Plex Sans"]},fontSize:{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"16px","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.5px","fontWeight":"600"}],"data-mono":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-xl-mobile":["26px",{"lineHeight":"34px","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-xl":["32px",{"lineHeight":"40px","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"700"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"700"}],"headline-lg":["24px",{"lineHeight":"32px","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-surface-variant shadow-[0_1px_2px_rgba(23,36,47,0.06)]"><div class="h-14 px-gutter-desktop border-b border-surface-variant flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm pr-space-lg border-r border-surface-variant"><div class="w-7 h-7 bg-primary-container flex items-center justify-center rounded"><span class="material-symbols-outlined text-on-primary text-[18px]">account_balance</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm leading-none text-primary tracking-tight">Edura Nigeria</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">School Registry</span></div></div><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-low border border-surface-variant rounded"><div class="w-4 h-4 bg-secondary flex items-center justify-center rounded-sm"><span class="material-symbols-outlined text-on-secondary text-[12px]">shield</span></div><span class="font-label-md text-label-md text-on-surface">Federal Government College, Lagos</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">unfold_more</span></div><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-lowest border border-surface-variant rounded"><span class="material-symbols-outlined text-on-surface-variant text-[16px]">calendar_today</span><span class="font-label-md text-label-md text-on-surface">Second Term 2026/2027</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm border-r border-surface-variant pr-space-lg"><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-[20px]">search</span></button><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded relative"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full"></span></button><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-[20px]">help_outline</span></button></div><div class="flex items-center gap-space-md"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-primary leading-tight">Dr. (Mrs.) C. N. Okonjo</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Superadmin / Principal</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div><div class="h-11 px-gutter-desktop bg-surface-container-lowest flex items-center overflow-x-auto"><nav class="flex items-center gap-space-lg h-full" data-active-classes="text-primary font-bold border-b-2 border-secondary"><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="dashboard" href="#">Dashboard</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="students" href="#">Students</a><a aria-current="page" class="h-full flex items-center px-space-xs transition-colors whitespace-nowrap text-primary font-bold border-b-2 border-secondary" data-path="results" href="#">Results</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="fees" href="#">Fees</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="attendance" href="#">Attendance</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="staff" href="#">Staff</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="messages" href="#">Messages</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="requests" href="#">Requests</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="settings" href="#">Settings</a></nav></div></header><main class="w-full pt-[100px] px-gutter-desktop min-h-[calc(100vh-48px)]"><div class="flex flex-col w-full pb-space-xl">
+<!-- Operational Ledger Context & Registry Banner -->
+<div class="bg-surface-container-lowest p-space-lg mb-space-md shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-on-surface-variant mb-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Registry Ledger Module</span>
+<span class="text-outline-variant">/</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Academic Performance Record</span>
+<span class="text-outline-variant">/</span>
+<span class="font-data-mono text-data-mono text-primary font-semibold">FORM-J2A-BRD-2027</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">Class Broadsheet — Continuous Assessment &amp; Examination Matrix</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          32 students enrolled • Class Form Teacher: <span class="font-semibold text-primary">Mrs. A. T. Balogun</span> • Compiled: <span class="font-data-mono text-data-mono text-primary">18 Mar 2027</span> • Status: <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary px-1.5 py-0.5 bg-surface-container"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>PROVISIONAL GAZETTE</span>
+</p>
+</div>
+<!-- Controls & Filter Toolbar -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<div class="flex items-center bg-surface-container-low px-space-xs py-1 rounded">
+<label class="font-label-sm text-label-sm text-on-surface-variant mr-1.5 uppercase">Class:</label>
+<select class="bg-surface-container-lowest text-primary font-label-md text-label-md px-2 py-1 outline-none">
+<option selected="">JSS 2A — Primary Arm</option>
+<option>JSS 2B — Secondary Arm</option>
+<option>JSS 2C — Technical Arm</option>
+</select>
+</div>
+<div class="flex items-center bg-surface-container-low px-space-xs py-1 rounded">
+<label class="font-label-sm text-label-sm text-on-surface-variant mr-1.5 uppercase">Term:</label>
+<select class="bg-surface-container-lowest text-primary font-label-md text-label-md px-2 py-1 outline-none">
+<option selected="">Second Term 2026/2027</option>
+<option>First Term 2026/2027</option>
+<option>Third Term 2025/2026</option>
+</select>
+</div>
+<div class="flex items-center bg-surface-container-low px-space-xs py-1 rounded">
+<label class="font-label-sm text-label-sm text-on-surface-variant mr-1.5 uppercase">Mode:</label>
+<select class="bg-surface-container-lowest text-primary font-label-md text-label-md px-2 py-1 outline-none">
+<option selected="">Comprehensive (CA + Exam)</option>
+<option>Continuous Assessment (40%)</option>
+<option>Terminal Examination (60%)</option>
+</select>
+</div>
+<div class="flex items-center gap-space-xs pl-space-xs">
+<button class="px-3 py-1.5 bg-surface-container-lowest text-primary hover:bg-surface-container-low font-label-md text-label-md flex items-center gap-1 transition-colors shadow-sm" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span>Print</span>
+</button>
+<button class="px-3 py-1.5 bg-surface-container-lowest text-primary hover:bg-surface-container-low font-label-md text-label-md flex items-center gap-1 transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>Export (.xlsx)</span>
+</button>
+<button class="px-3 py-1.5 bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>Lock Ledger</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Performance Distribution Summary Strip -->
+<div class="grid grid-cols-2 md:grid-cols-6 gap-space-xs mb-space-md">
+<div class="bg-surface-container-lowest p-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Cohort Size</span>
+<span class="font-headline-sm text-headline-sm text-primary">32</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">100% Sitting</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Class Mean Total</span>
+<span class="font-headline-sm text-headline-sm text-primary">824.5</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">68.7% Aggregate</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Distinction Rate</span>
+<span class="font-headline-sm text-headline-sm text-primary">28.1%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">9 Candidates (&gt;75%)</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Pass Rate (≥50%)</span>
+<span class="font-headline-sm text-headline-sm text-primary">93.8%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">30 Qualified</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Academic At-Risk</span>
+<span class="font-headline-sm text-headline-sm text-secondary">2 Candidates</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">&lt;50% Aggregate</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Highest Cumulative</span>
+<span class="font-headline-sm text-headline-sm text-primary">1,000</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">83.3% Mean Score</span>
+</div>
+</div>
+<!-- Broadsheet Scrollable Score Matrix Container -->
+<div class="w-full bg-surface-container-lowest shadow-sm flex flex-col">
+<!-- Matrix Operational Subheader -->
+<div class="p-space-sm bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-space-md">
+<span class="font-label-md text-label-md text-primary uppercase tracking-wide">Gazette Matrix 2026/2027</span>
+<span class="text-outline-variant">|</span>
+<span>Pass Standard: <span class="font-semibold text-primary">50.0%</span></span>
+<span class="text-outline-variant">|</span>
+<span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-error-container inline-block"></span> Red highlight: &lt;40% (Fail)</span>
+</div>
+<div class="flex items-center gap-space-sm font-data-mono text-data-mono text-on-surface-variant">
+<span>COLUMNS: 12 RAW + 5 COMPUTED</span>
+</div>
+</div>
+<!-- The Scrollable Table Canvas -->
+<div class="overflow-x-auto w-full max-h-[640px] relative scroll-smooth focus:outline-none" tabindex="0">
+<table class="w-full text-left border-collapse text-[13px] leading-tight">
+<!-- Table Header (Sticky) -->
+<thead class="sticky top-0 z-30 bg-surface-container shadow-[0_1px_0_#B9C5CE]">
+<tr>
+<th class="sticky left-0 z-40 bg-surface-container px-3 py-2 text-left font-label-md text-label-md uppercase tracking-wider text-on-surface-variant min-w-[240px] shadow-[1px_0_0_#B9C5CE]" scope="col">
+              Student Name / ID
+            </th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">MTH</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">ENG</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">BSC</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">BTH</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">AGR</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">CIV</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">SOS</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">BUS</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">FRE</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">CCA</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[62px]" scope="col">
+<span class="block text-primary">PHE</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<th class="px-2 py-2 text-right font-label-md text-label-md text-on-surface-variant min-w-[70px]" scope="col">
+<span class="block text-primary">CRS/IRS</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant font-normal">/100</span>
+</th>
+<!-- COMPUTED DIVIDER (Primary Navy delimiter) -->
+<th class="bg-primary-container px-3 py-2 text-right font-label-md text-label-md text-on-primary min-w-[90px] shadow-[-2px_0_0_#17242F]" scope="col">
+<span>TOTAL</span>
+<span class="font-data-mono text-[11px] block text-inverse-primary font-normal">/1200</span>
+</th>
+<th class="bg-primary-container px-3 py-2 text-right font-label-md text-label-md text-on-primary min-w-[75px]" scope="col">
+<span>AVG %</span>
+</th>
+<th class="bg-primary-container px-3 py-2 text-center font-label-md text-label-md text-on-primary min-w-[65px]" scope="col">
+<span>GRADE</span>
+</th>
+<th class="bg-primary-container px-3 py-2 text-center font-label-md text-label-md text-on-primary min-w-[65px]" scope="col">
+<span>POS</span>
+</th>
+<th class="bg-primary-container px-3 py-2 text-left font-label-md text-label-md text-on-primary min-w-[130px]" scope="col">
+<span>REMARK</span>
+</th>
+</tr>
+</thead>
+<!-- Dense Data Body -->
+<tbody class="divide-y divide-surface-variant font-body-md text-on-surface">
+<!-- Row 1: Adebayo (1st) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="sticky left-0 z-20 bg-surface-container-lowest px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Adebayo, Oluwaseun Emmanuel</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0101</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">88</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">82</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">90</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">85</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">84</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">88</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">72</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">86</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">91</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">1,000</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">83.3%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">A</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-secondary font-bold">1st</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#1F6B45]">● Excellent</span>
+</td>
+</tr>
+<!-- Row 2: Bello (2nd) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-bright">
+<td class="sticky left-0 z-20 bg-surface-bright px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Bello, Amina Zainab</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0104</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">84</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">88</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">82</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">81</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">79</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">85</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">82</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">87</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">980</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">81.7%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">A</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-secondary font-bold">2nd</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#1F6B45]">● Excellent</span>
+</td>
+</tr>
+<!-- Row 3: Chukwuma (3rd) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="sticky left-0 z-20 bg-surface-container-lowest px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Chukwuma, Emeka David</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0112</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">75</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">79</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">84</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">74</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">81</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">70</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">83</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">942</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">78.5%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">B</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-secondary font-bold">3rd</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#1F6B45]">● Very Good</span>
+</td>
+</tr>
+<!-- Row 4: Danladi (4th) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-bright">
+<td class="sticky left-0 z-20 bg-surface-bright px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Danladi, Yakubu Garba</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0118</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">72</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">75</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">70</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">79</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">68</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">74</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">80</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">908</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">75.7%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">B</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">4th</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#1F6B45]">● Very Good</span>
+</td>
+</tr>
+<!-- Row 5: Ibrahim (5th) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="sticky left-0 z-20 bg-surface-container-lowest px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Ibrahim, Fatima Zahra</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0184</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">75</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">74</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">72</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">74</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">76</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">70</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">72</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">75</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">78</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">896</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">74.7%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">B</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">5th</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#1F6B45]">● Good</span>
+</td>
+</tr>
+<!-- Row 6: Okafor (18th) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-bright">
+<td class="sticky left-0 z-20 bg-surface-bright px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Okafor, Somtochukwu</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0195</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">65</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">68</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">62</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">70</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">64</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">60</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">66</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">68</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">60</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">64</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">68</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">70</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">785</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">65.4%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">C</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">18th</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#3C5A78]">○ Satisfactory</span>
+</td>
+</tr>
+<!-- Row 7: Usman (28th) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-lowest">
+<td class="sticky left-0 z-20 bg-surface-container-lowest px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Usman, Bilkisu</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0208</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">58</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">60</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">54</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">62</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">56</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">52</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">58</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">60</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">50</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">56</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">60</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">62</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low shadow-[-2px_0_0_#17242F]">688</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-primary bg-surface-container-low">57.3%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">C</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-primary">28th</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-[#3C5A78]">○ Pass</span>
+</td>
+</tr>
+<!-- Row 8: Williams (31st - Scores <40% highlighted in subtle red) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-bright">
+<td class="sticky left-0 z-20 bg-surface-bright px-3 py-2 text-left shadow-[1px_0_0_#B9C5CE]">
+<div class="font-label-md text-label-md text-primary leading-tight">Williams, Babatunde K.</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ADM-2026-0215</span>
+</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">42</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">45</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums bg-error-container text-error font-semibold">38</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">50</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">44</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">40</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">48</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">46</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums bg-error-container text-error font-semibold">35</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">42</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">48</td>
+<td class="px-2 py-2 text-right font-data-mono tabular-nums">50</td>
+<!-- Computed -->
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-secondary bg-surface-container-low shadow-[-2px_0_0_#17242F]">528</td>
+<td class="px-3 py-2 text-right font-data-mono text-data-mono font-semibold text-secondary bg-surface-container-low">44.0%</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-secondary">F</td>
+<td class="px-3 py-2 text-center font-label-md text-label-md bg-surface-container-low text-secondary font-bold">31st</td>
+<td class="px-3 py-2 text-left bg-surface-container-low">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm uppercase text-secondary">■ Probation</span>
+</td>
+</tr>
+</tbody>
+<!-- Class Summary Aggregation Block at bottom of ledger -->
+<tfoot class="sticky bottom-0 z-30 bg-surface-container-highest shadow-[0_-2px_0_#17242F]">
+<!-- Average Row -->
+<tr class="font-data-mono text-data-mono text-primary border-t border-surface-variant">
+<th class="sticky left-0 z-40 bg-surface-container-highest px-3 py-1.5 text-left font-label-md text-label-md uppercase tracking-wider text-primary shadow-[1px_0_0_#B9C5CE]" scope="row">
+              Subject Average
+            </th>
+<td class="px-2 py-1.5 text-right font-semibold">71.4</td>
+<td class="px-2 py-1.5 text-right font-semibold">69.4</td>
+<td class="px-2 py-1.5 text-right font-semibold">68.5</td>
+<td class="px-2 py-1.5 text-right font-semibold">74.8</td>
+<td class="px-2 py-1.5 text-right font-semibold">71.4</td>
+<td class="px-2 py-1.5 text-right font-semibold">66.9</td>
+<td class="px-2 py-1.5 text-right font-semibold">70.8</td>
+<td class="px-2 py-1.5 text-right font-semibold">72.9</td>
+<td class="px-2 py-1.5 text-right font-semibold">62.6</td>
+<td class="px-2 py-1.5 text-right font-semibold">68.8</td>
+<td class="px-2 py-1.5 text-right font-semibold">73.4</td>
+<td class="px-2 py-1.5 text-right font-semibold">75.1</td>
+<td class="px-3 py-1.5 text-right font-bold text-primary bg-surface-container-high shadow-[-2px_0_0_#17242F]">824.5</td>
+<td class="px-3 py-1.5 text-right font-bold text-primary bg-surface-container-high">68.7%</td>
+<td class="px-3 py-1.5 text-center font-bold bg-surface-container-high text-on-surface-variant">--</td>
+<td class="px-3 py-1.5 text-center font-bold bg-surface-container-high text-on-surface-variant">--</td>
+<td class="px-3 py-1.5 text-left font-label-sm text-label-sm uppercase bg-surface-container-high text-on-surface-variant">Ledger Mean</td>
+</tr>
+<!-- Subject Highest Score Row -->
+<tr class="font-data-mono text-data-mono text-primary">
+<th class="sticky left-0 z-40 bg-surface-container-highest px-3 py-1.5 text-left font-label-md text-label-md uppercase tracking-wider text-on-surface-variant shadow-[1px_0_0_#B9C5CE]" scope="row">
+              Highest in Subject
+            </th>
+<td class="px-2 py-1.5 text-right">88</td>
+<td class="px-2 py-1.5 text-right">80</td>
+<td class="px-2 py-1.5 text-right">82</td>
+<td class="px-2 py-1.5 text-right">90</td>
+<td class="px-2 py-1.5 text-right">85</td>
+<td class="px-2 py-1.5 text-right">81</td>
+<td class="px-2 py-1.5 text-right">84</td>
+<td class="px-2 py-1.5 text-right">88</td>
+<td class="px-2 py-1.5 text-right">76</td>
+<td class="px-2 py-1.5 text-right">80</td>
+<td class="px-2 py-1.5 text-right">86</td>
+<td class="px-2 py-1.5 text-right">91</td>
+<td class="px-3 py-1.5 text-right font-semibold text-primary bg-surface-container-high shadow-[-2px_0_0_#17242F]">1,000</td>
+<td class="px-3 py-1.5 text-right font-semibold text-primary bg-surface-container-high">83.3%</td>
+<td class="px-3 py-1.5 text-center bg-surface-container-high font-semibold text-primary">A</td>
+<td class="px-3 py-1.5 text-center bg-surface-container-high font-semibold text-secondary">1st</td>
+<td class="px-3 py-1.5 text-left font-label-sm text-label-sm uppercase bg-surface-container-high text-on-surface-variant">Class Top</td>
+</tr>
+<!-- Subject Lowest Score Row -->
+<tr class="font-data-mono text-data-mono text-primary">
+<th class="sticky left-0 z-40 bg-surface-container-highest px-3 py-1.5 text-left font-label-md text-label-md uppercase tracking-wider text-on-surface-variant shadow-[1px_0_0_#B9C5CE]" scope="row">
+              Lowest in Subject
+            </th>
+<td class="px-2 py-1.5 text-right">42</td>
+<td class="px-2 py-1.5 text-right">45</td>
+<td class="px-2 py-1.5 text-right text-error font-semibold">38</td>
+<td class="px-2 py-1.5 text-right">50</td>
+<td class="px-2 py-1.5 text-right">44</td>
+<td class="px-2 py-1.5 text-right">40</td>
+<td class="px-2 py-1.5 text-right">48</td>
+<td class="px-2 py-1.5 text-right">46</td>
+<td class="px-2 py-1.5 text-right text-error font-semibold">35</td>
+<td class="px-2 py-1.5 text-right">42</td>
+<td class="px-2 py-1.5 text-right">48</td>
+<td class="px-2 py-1.5 text-right">50</td>
+<td class="px-3 py-1.5 text-right font-semibold text-secondary bg-surface-container-high shadow-[-2px_0_0_#17242F]">528</td>
+<td class="px-3 py-1.5 text-right font-semibold text-secondary bg-surface-container-high">44.0%</td>
+<td class="px-3 py-1.5 text-center bg-surface-container-high font-semibold text-secondary">F</td>
+<td class="px-3 py-1.5 text-center bg-surface-container-high font-semibold text-secondary">31st</td>
+<td class="px-3 py-1.5 text-left font-label-sm text-label-sm uppercase bg-surface-container-high text-on-surface-variant">Class Floor</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<!-- Broadsheet Ledger Footer & Registry Endorsement Sign-off -->
+<div class="p-space-lg bg-surface-container-low border-t border-surface-variant flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-1 max-w-xl">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Institutional Certification Notice</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          This document serves as the official broadsheet assessment register for Federal Government College, Lagos. Computation algorithms adhere to National Examination Council (NECO) and Federal Ministry of Education standard grade banding: A (75-100), B (65-74), C (50-64), P (40-49), F (0-39).
+        </p>
+</div>
+<div class="flex flex-wrap items-center gap-space-lg w-full md:w-auto">
+<div class="flex flex-col text-left md:text-right border-l md:border-l-0 md:border-r border-surface-variant pl-3 md:pl-0 md:pr-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Form Master Approval</span>
+<span class="font-label-md text-label-md text-primary font-semibold">Balogun, A. T. (Mrs.)</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">CERT-OK: 18-03-2027 14:22</span>
+</div>
+<div class="flex flex-col text-left md:text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Registry Node Gate</span>
+<span class="font-label-md text-label-md text-secondary font-semibold">UNLOCKED / DRAFT SEAL</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant text-[11px]">FGC-LAG-REG-2027-V1</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Ledger interaction micro-scripts
+  document.addEventListener('DOMContentLoaded', () => {
+    // Enable seamless arrow keyboard scrolling in the broadsheet table
+    const tableContainer = document.querySelector('.overflow-x-auto');
+    if (tableContainer) {
+      tableContainer.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') {
+          tableContainer.scrollLeft += 80;
+        } else if (e.key === 'ArrowLeft') {
+          tableContainer.scrollLeft -= 80;
+        }
+      });
+    }
+  });
+</script></main><footer class="w-full bg-surface-container-lowest border-t border-surface-variant py-space-sm"><div class="px-gutter-desktop flex flex-col md:flex-row items-center justify-between gap-space-xs text-on-surface-variant"><div class="flex items-center gap-space-sm font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Federal Ministry of Education Registry Node: LAG-FGC-004</span><span class="text-outline-variant">|</span><span class="font-data-mono text-data-mono">SECURE-SESSION-AUTH: OKONJO-C284</span></div><div class="font-body-sm text-body-sm">© 2026 Edura Nigeria System. Institutional Educational Ledger.</div></div></footer></body></html>

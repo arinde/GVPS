@@ -8,9 +8,14 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Neon serves two endpoints. DATABASE_URL is the pooled one the app runs on;
+// DIRECT_URL is the unpooled one migrations need, because Prisma Migrate takes
+// advisory locks and the pooler (PgBouncer, transaction mode) does not support
+// them. Pointing both at the pooled URL makes migrations fail intermittently.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // PLAN.md §4.1: school_id on every table, even single-tenant today.

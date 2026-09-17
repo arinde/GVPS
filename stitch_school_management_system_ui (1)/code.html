@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"error-container":"#ffdad6","secondary-container":"#ff8d8d","error":"#ba1a1a","secondary-fixed":"#ffdad8","on-surface-variant":"#44474b","on-primary-fixed":"#101d28","surface-variant":"#dee3e7","on-primary-fixed-variant":"#3b4854","surface-container":"#e9eef2","surface-container-low":"#eff4f8","outline":"#74777c","on-error":"#ffffff","inverse-on-surface":"#ecf1f5","surface-bright":"#f5fafe","inverse-primary":"#bac8d7","outline-variant":"#c4c7cb","on-tertiary-fixed":"#281809","on-tertiary-fixed-variant":"#584330","inverse-surface":"#2c3134","surface-container-lowest":"#ffffff","surface-container-highest":"#dee3e7","on-secondary":"#ffffff","surface-container-high":"#e4e9ed","on-secondary-container":"#772428","surface-tint":"#53606d","on-background":"#171c1f","background":"#f5fafe","tertiary":"#170901","on-secondary-fixed-variant":"#7e292d","primary":"#020e18","on-tertiary-container":"#9f856f","secondary-fixed-dim":"#ffb3b2","on-error-container":"#93000a","on-primary-container":"#7e8b99","primary-fixed":"#d6e4f3","primary-container":"#17242f","surface-dim":"#d5dbdf","tertiary-fixed-dim":"#dfc1a9","on-tertiary":"#ffffff","secondary":"#9d4043","primary-fixed-dim":"#bac8d7","on-surface":"#171c1f","on-secondary-fixed":"#410008","tertiary-fixed":"#fdddc3","on-primary":"#ffffff","tertiary-container":"#301f0f","surface":"#f5fafe"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin-desktop":"2rem","space-sm":"0.5rem","space-md":"0.75rem","space-xs":"0.25rem","space-lg":"1.25rem","margin":"1rem","space-xl":"2rem","gutter-desktop":"1.5rem","gutter":"1rem"},fontFamily:{"body-md":["IBM Plex Sans"],"label-md":["IBM Plex Sans"],"label-sm":["IBM Plex Sans"],"data-mono":["IBM Plex Mono"],"headline-xl-mobile":["Libre Baskerville"],"body-sm":["IBM Plex Sans"],"headline-xl":["Libre Baskerville"],"headline-md":["Libre Baskerville"],"headline-sm":["Libre Baskerville"],"headline-lg":["Libre Baskerville"],"body-lg":["IBM Plex Sans"]},fontSize:{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"16px","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.5px","fontWeight":"600"}],"data-mono":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-xl-mobile":["26px",{"lineHeight":"34px","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-xl":["32px",{"lineHeight":"40px","fontWeight":"700"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"700"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"700"}],"headline-lg":["24px",{"lineHeight":"32px","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-surface-variant shadow-[0_1px_2px_rgba(23,36,47,0.06)]"><div class="h-14 px-gutter-desktop border-b border-surface-variant flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm pr-space-lg border-r border-surface-variant"><div class="w-7 h-7 bg-primary-container flex items-center justify-center rounded"><span class="material-symbols-outlined text-on-primary text-[18px]">account_balance</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm leading-none text-primary tracking-tight">Edura Nigeria</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">School Registry</span></div></div><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-low border border-surface-variant rounded"><div class="w-4 h-4 bg-secondary flex items-center justify-center rounded-sm"><span class="material-symbols-outlined text-on-secondary text-[12px]">shield</span></div><span class="font-label-md text-label-md text-on-surface">Federal Government College, Lagos</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">unfold_more</span></div><div class="flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-lowest border border-surface-variant rounded"><span class="material-symbols-outlined text-on-surface-variant text-[16px]">calendar_today</span><span class="font-label-md text-label-md text-on-surface">Second Term 2026/2027</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm border-r border-surface-variant pr-space-lg"><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-[20px]">search</span></button><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded relative"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full"></span></button><button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-[20px]">help_outline</span></button></div><div class="flex items-center gap-space-md"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-primary leading-tight">Dr. (Mrs.) C. N. Okonjo</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Superadmin / Principal</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div><div class="h-11 px-gutter-desktop bg-surface-container-lowest flex items-center overflow-x-auto"><nav class="flex items-center gap-space-lg h-full" data-active-classes="text-primary font-bold border-b-2 border-secondary"><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="dashboard" href="#">Dashboard</a><a aria-current="page" class="h-full flex items-center px-space-xs transition-colors whitespace-nowrap text-primary font-bold border-b-2 border-secondary" data-path="students" href="#">Students</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="results" href="#">Results</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="fees" href="#">Fees</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="attendance" href="#">Attendance</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="staff" href="#">Staff</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="messages" href="#">Messages</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="requests" href="#">Requests</a><a class="h-full flex items-center px-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" data-path="settings" href="#">Settings</a></nav></div></header><main class="w-full pt-[100px] px-gutter-desktop min-h-[calc(100vh-48px)]"><div class="flex flex-col w-full pb-margin-desktop">
+<div class="w-full bg-surface-container-lowest border border-surface-variant rounded mb-space-md p-space-sm flex flex-col md:flex-row md:items-center md:justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span>Student Ledger Index</span>
+</a>
+<span class="text-outline-variant">/</span>
+<span class="font-data-mono text-data-mono text-primary font-bold">ADM-2026-0184</span>
+<span class="text-outline-variant">/</span>
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider">Institutional Dossier</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Registry Verification Status: Verified Valid</span>
+<span class="text-outline-variant px-1">|</span>
+<span class="font-data-mono text-data-mono">NIN-SYNC: 8493-9201-1184</span>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg w-full items-start">
+<div class="xl:col-span-4 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest border border-surface-variant rounded overflow-hidden">
+<div class="p-space-lg flex flex-col items-center text-center border-b border-surface-variant bg-surface-container-low">
+<div class="relative w-36 h-44 rounded border border-outline-variant bg-surface-container-lowest p-1 shadow-sm mb-space-md">
+<img class="w-full h-full object-cover rounded-sm" data-alt="Institutional passport portrait of a 13-year-old Nigerian female student named Fatima Zahra Ibrahim wearing a navy blue secondary school uniform blazer, cream collared shirt, and navy blue hijab against a crisp off-white administrative studio background. Clean, dignified, sharp focus, official academic registrar aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZdn8zLaeDTgyD4YGVBs3DFq-YY3GY80lBng3lnmwfUGnt1nmrORBkPzVU4Jgd5MrwV1bj33KYv_JydgPft83fRaI3e5pS77k7wbf1s8Uyv4G3V1-oEaH1ypfYR6dNO0goYzzNkuUK7LX3SdFsKurs3PzpijMClLgIAaRTxjVXR-EbjenwpJ9EWw09Ktl1i5wRreLjS1SnxnooFdoHc_X-wz86inJyUDU6WUYBTLxOCpplp_7gQTji"/>
+<div class="absolute bottom-2 right-2 bg-primary text-on-primary px-1.5 py-0.5 rounded-sm font-data-mono text-[10px] tracking-wider uppercase border border-outline-variant">
+              SECURE
+            </div>
+</div>
+<h1 class="font-headline-md text-headline-md text-primary leading-tight">Ibrahim, Fatima Zahra</h1>
+<div class="flex items-center gap-2 mt-1 mb-2">
+<span class="font-data-mono text-data-mono font-semibold text-primary">ADM-2026-0184</span>
+<span class="text-outline-variant">•</span>
+<span class="font-label-md text-label-md text-on-surface-variant">JSS 2A — Junior Secondary</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-bold tracking-wider uppercase">
+<span>●</span>
+<span>Active Student</span>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between border-b border-surface-variant pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Demographic Particulars</span>
+<span class="font-data-mono text-[11px] text-outline">SEC-01</span>
+</div>
+<div class="grid grid-cols-2 gap-y-space-sm gap-x-space-md font-body-sm text-body-sm">
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Date of Birth</div>
+<div class="font-label-md text-label-md text-primary mt-0.5">14 May 2013 (13 yrs)</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Gender</div>
+<div class="font-label-md text-label-md text-primary mt-0.5">Female</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Admission Date</div>
+<div class="font-label-md text-label-md text-primary mt-0.5">12 September 2024</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">State of Origin</div>
+<div class="font-label-md text-label-md text-primary mt-0.5">Kano State (Dala LGA)</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Blood Group / Genotype</div>
+<div class="font-data-mono text-data-mono text-primary font-semibold mt-0.5">O+ / AA</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">House Arm</div>
+<div class="font-label-md text-label-md text-primary mt-0.5">Dan Fodio Blue House</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between border-b border-surface-variant pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Legal Guardian &amp; Contact</span>
+<span class="font-data-mono text-[11px] text-outline">SEC-02</span>
+</div>
+<div class="flex flex-col gap-space-sm font-body-sm text-body-sm">
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Primary Guardian</div>
+<div class="font-label-md text-label-md text-primary font-semibold mt-0.5">Alhaji Haruna Ibrahim (Father)</div>
+<div class="text-on-surface-variant text-[11px]">Managing Director, Kano Trading Co.</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Primary Phone</div>
+<div class="font-data-mono text-data-mono text-primary mt-0.5">+234 803 214 7890</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Alternate Phone</div>
+<div class="font-data-mono text-data-mono text-primary mt-0.5">+234 802 555 9811</div>
+</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Official Contact Email</div>
+<div class="font-data-mono text-data-mono text-primary mt-0.5">h.ibrahim@kanotrade.ng</div>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase">Official Residence Address</div>
+<div class="font-body-sm text-body-sm text-primary mt-0.5">Plot 14B, Walter Carrington Crescent, Victoria Island, Lagos</div>
+</div>
+</div>
+</div>
+<div class="p-space-md bg-surface-container-low border-t border-surface-variant flex flex-col gap-space-xs">
+<button class="w-full bg-primary hover:bg-[#253847] text-on-primary font-label-md text-label-md h-9 rounded flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[16px]">edit_document</span>
+<span>Edit Profile Particulars</span>
+</button>
+<div class="grid grid-cols-2 gap-space-xs">
+<button class="w-full bg-surface-container-lowest hover:bg-surface-variant border border-surface-variant text-primary font-label-md text-label-md h-8 rounded flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+<span>Print ID Card</span>
+</button>
+<button class="w-full bg-surface-container-lowest hover:bg-error-container hover:text-error border border-surface-variant text-secondary font-label-md text-label-md h-8 rounded flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[15px]">assignment_return</span>
+<span>Transfer Cert.</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-surface-variant rounded p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Medical &amp; Clinic Flag</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 bg-[#E4F0EA] text-[#1F6B45] rounded font-bold">FIT</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">No known chronic drug allergies registered. Routine immunisations fully verified by FGC Lagos Sickbay.</p>
+<div class="text-[11px] font-data-mono text-outline pt-1 border-t border-surface-variant flex justify-between">
+<span>SICKBAY LOG: SB-2026-77</span>
+<span>DR. M. B. BELLO</span>
+</div>
+</div>
+</div>
+<div class="xl:col-span-8 flex flex-col gap-space-lg">
+<div class="bg-surface-container-lowest border border-surface-variant rounded overflow-hidden">
+<div class="border-b border-surface-variant px-space-md bg-surface-container-lowest flex items-center justify-between">
+<nav class="flex items-center gap-space-md">
+<button class="py-3 px-1 font-label-md text-label-md text-primary font-bold border-b-[3px] border-[#6E1D22] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">assessment</span>
+<span>Results &amp; Academic Terms</span>
+</button>
+<button class="py-3 px-1 font-label-md text-label-md text-on-surface-variant hover:text-primary border-b-[3px] border-transparent flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+<span>Fees &amp; Ledger</span>
+</button>
+<button class="py-3 px-1 font-label-md text-label-md text-on-surface-variant hover:text-primary border-b-[3px] border-transparent flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">fact_check</span>
+<span>Attendance Record</span>
+</button>
+<button class="py-3 px-1 font-label-md text-label-md text-on-surface-variant hover:text-primary border-b-[3px] border-transparent flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+<span>Enrolment History</span>
+</button>
+</nav>
+<div class="hidden sm:flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Cumulative GPA:</span>
+<span class="font-data-mono text-data-mono font-bold text-primary bg-surface-container-low px-2 py-0.5 rounded border border-surface-variant">3.78 / 4.00</span>
+</div>
+</div>
+<div class="p-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-space-md mb-space-md border-b border-surface-variant gap-space-xs">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">Academic Term Summaries</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Continuous evaluation records under the National Education Curriculum.</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-2.5 bg-surface-container-low hover:bg-surface-variant border border-surface-variant rounded font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+<span>Filter Terms</span>
+</button>
+<button class="h-8 px-2.5 bg-surface-container-low hover:bg-surface-variant border border-surface-variant rounded font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">print</span>
+<span>Print Ledger Sheet</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto border border-surface-variant rounded">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#EEF3F7] border-b-2 border-[#B9C5CE]">
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider">Term &amp; Session</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider text-right">Term Avg</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider text-right">Class Rank</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider text-center">Status</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider text-right">Official Document</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant font-body-sm text-body-sm">
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD]">
+<td class="p-space-sm">
+<div class="font-label-md text-label-md text-primary">Second Term 2026/2027</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Class: JSS 2A • Current Session</div>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-data-mono text-data-mono font-bold text-primary">74.7%</span>
+<span class="block text-[11px] text-outline">AGG: 747/1000</span>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-label-md text-label-md text-primary">5th</span>
+<span class="text-on-surface-variant text-[11px]"> of 32</span>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm font-semibold tracking-wider uppercase whitespace-nowrap">
+<span>○</span>
+<span>Pending Verification</span>
+</span>
+</td>
+<td class="p-space-sm text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-low hover:bg-surface-variant text-primary border border-surface-variant rounded font-label-sm text-label-sm transition-colors">
+<span class="material-symbols-outlined text-[14px]">preview</span>
+<span>View Draft Sheet</span>
+</button>
+</td>
+</tr>
+<tr class="bg-[#FAFCFD] hover:bg-surface-container-low">
+<td class="p-space-sm">
+<div class="font-label-md text-label-md text-primary">First Term 2026/2027</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Class: JSS 2A • Term Ended Dec 2026</div>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-data-mono text-data-mono font-bold text-primary">76.2%</span>
+<span class="block text-[11px] text-outline">AGG: 762/1000</span>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-label-md text-label-md text-primary">3rd</span>
+<span class="text-on-surface-variant text-[11px]"> of 32</span>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-semibold tracking-wider uppercase whitespace-nowrap">
+<span>●</span>
+<span>Approved</span>
+</span>
+</td>
+<td class="p-space-sm text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-lowest hover:bg-surface-variant text-primary border border-surface-variant rounded font-label-sm text-label-sm transition-colors">
+<span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+<span>Report (PDF)</span>
+</button>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD]">
+<td class="p-space-sm">
+<div class="font-label-md text-label-md text-primary">Third Term 2025/2026</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Class: JSS 1A • Annual Promotion Term</div>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-data-mono text-data-mono font-bold text-primary">78.4%</span>
+<span class="block text-[11px] text-outline">AGG: 784/1000</span>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-label-md text-label-md text-primary">2nd</span>
+<span class="text-on-surface-variant text-[11px]"> of 34</span>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-semibold tracking-wider uppercase whitespace-nowrap">
+<span>●</span>
+<span>Promoted</span>
+</span>
+</td>
+<td class="p-space-sm text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-lowest hover:bg-surface-variant text-primary border border-surface-variant rounded font-label-sm text-label-sm transition-colors">
+<span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+<span>Report (PDF)</span>
+</button>
+</td>
+</tr>
+<tr class="bg-[#FAFCFD] hover:bg-surface-container-low">
+<td class="p-space-sm">
+<div class="font-label-md text-label-md text-primary">Second Term 2025/2026</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Class: JSS 1A • Term Ended Apr 2026</div>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-data-mono text-data-mono font-bold text-primary">72.1%</span>
+<span class="block text-[11px] text-outline">AGG: 721/1000</span>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-label-md text-label-md text-primary">6th</span>
+<span class="text-on-surface-variant text-[11px]"> of 34</span>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-semibold tracking-wider uppercase whitespace-nowrap">
+<span>●</span>
+<span>Approved</span>
+</span>
+</td>
+<td class="p-space-sm text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-lowest hover:bg-surface-variant text-primary border border-surface-variant rounded font-label-sm text-label-sm transition-colors">
+<span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+<span>Report (PDF)</span>
+</button>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD]">
+<td class="p-space-sm">
+<div class="font-label-md text-label-md text-primary">First Term 2025/2026</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Class: JSS 1A • Matriculation Term</div>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-data-mono text-data-mono font-bold text-primary">75.0%</span>
+<span class="block text-[11px] text-outline">AGG: 750/1000</span>
+</td>
+<td class="p-space-sm text-right tabular-nums">
+<span class="font-label-md text-label-md text-primary">4th</span>
+<span class="text-on-surface-variant text-[11px]"> of 34</span>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-semibold tracking-wider uppercase whitespace-nowrap">
+<span>●</span>
+<span>Approved</span>
+</span>
+</td>
+<td class="p-space-sm text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-lowest hover:bg-surface-variant text-primary border border-surface-variant rounded font-label-sm text-label-sm transition-colors">
+<span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+<span>Report (PDF)</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-md p-space-sm bg-surface-container-low border border-surface-variant rounded flex items-center justify-between font-label-sm text-label-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span>Official report sheets require Principal seal &amp; Academic Board digital authentication before external issuance.</span>
+</div>
+<a class="font-bold text-primary underline hover:text-secondary" href="#">Regulatory Policy Code →</a>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-surface-variant rounded overflow-hidden">
+<div class="p-space-md border-b border-surface-variant bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">school</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Enrolment &amp; Progression History</h3>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Registry Track Record</span>
+</div>
+<div class="p-space-lg">
+<div class="overflow-x-auto border border-surface-variant rounded">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#EEF3F7] border-b-2 border-[#B9C5CE]">
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider">Academic Session</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider">Class Arm</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider">Form Teacher / Advisor</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider text-center">Outcome</th>
+<th class="p-space-sm font-label-sm text-[11px] font-bold text-[#4A5A67] uppercase tracking-wider text-right">Attendance</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant font-body-sm text-body-sm">
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD]">
+<td class="p-space-sm font-data-mono text-data-mono font-semibold text-primary">2026 / 2027</td>
+<td class="p-space-sm font-label-md text-label-md text-primary">JSS 2A</td>
+<td class="p-space-sm">
+<div class="text-primary font-medium">Mr. Babatunde Sanusi</div>
+<div class="text-[11px] text-on-surface-variant font-data-mono">T-ID: FGC-LAG-114</div>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E5EDF4] text-[#3C5A78] font-label-sm text-label-sm font-semibold uppercase">
+<span>○</span>
+<span>In Progress</span>
+</span>
+</td>
+<td class="p-space-sm text-right font-data-mono text-data-mono tabular-nums text-primary">
+                    96.8% <span class="text-outline text-[11px] block">(122/126 Days)</span>
+</td>
+</tr>
+<tr class="bg-[#FAFCFD] hover:bg-surface-container-low">
+<td class="p-space-sm font-data-mono text-data-mono font-semibold text-primary">2025 / 2026</td>
+<td class="p-space-sm font-label-md text-label-md text-primary">JSS 1A</td>
+<td class="p-space-sm">
+<div class="text-primary font-medium">Mrs. Grace E. Adeniyi</div>
+<div class="text-[11px] text-on-surface-variant font-data-mono">T-ID: FGC-LAG-089</div>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-semibold uppercase">
+<span>●</span>
+<span>Promoted</span>
+</span>
+</td>
+<td class="p-space-sm text-right font-data-mono text-data-mono tabular-nums text-primary">
+                    98.4% <span class="text-outline text-[11px] block">(185/188 Days)</span>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-[#FAFCFD]">
+<td class="p-space-sm font-data-mono text-data-mono font-semibold text-primary">2024 / 2025</td>
+<td class="p-space-sm font-label-md text-label-md text-primary">Primary 6 (Cedar)</td>
+<td class="p-space-sm">
+<div class="text-primary font-medium">Staff Primary Registry</div>
+<div class="text-[11px] text-on-surface-variant font-data-mono">ENTRY-REF: ADM-EX-401</div>
+</td>
+<td class="p-space-sm text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E4F0EA] text-[#1F6B45] font-label-sm text-label-sm font-semibold uppercase">
+<span>●</span>
+<span>Graduated</span>
+</span>
+</td>
+<td class="p-space-sm text-right font-data-mono text-data-mono tabular-nums text-primary">
+                    99.0% <span class="text-outline text-[11px] block">(FSLC Cert. Ex.)</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-md border border-surface-variant bg-surface-container-low p-space-sm rounded">
+<div class="font-label-sm text-label-sm uppercase text-on-surface-variant tracking-wider mb-1">Session Record Notes &amp; Administrative Endorsement</div>
+<p class="font-body-sm text-body-sm text-primary">
+              Student admitted under the Federal Unity Schools Common Entrance Examination (FUSCEE 2024/2025) with high academic distinction (Aggregate Score: 174/200). Demonstrates consistent intellectual aptitude, exemplary decorum, and serves as Assistant Form Captain for Junior Secondary Class 2A.
+            </p>
+<div class="mt-2 pt-2 border-t border-surface-variant flex flex-wrap items-center justify-between text-[11px] text-on-surface-variant font-data-mono">
+<span>LEDGER OFFICER: ARCHIBONG, U. E.</span>
+<span>RECORD REVISION: 24-FEB-2027 09:14:22 GMT+1</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest border-t border-surface-variant py-space-sm"><div class="px-gutter-desktop flex flex-col md:flex-row items-center justify-between gap-space-xs text-on-surface-variant"><div class="flex items-center gap-space-sm font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Federal Ministry of Education Registry Node: LAG-FGC-004</span><span class="text-outline-variant">|</span><span class="font-data-mono text-data-mono">SECURE-SESSION-AUTH: OKONJO-C284</span></div><div class="font-body-sm text-body-sm">© 2026 Edura Nigeria System. Institutional Educational Ledger.</div></div></footer></body></html>
