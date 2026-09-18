@@ -55,6 +55,35 @@ const eslintConfig = defineConfig([
       // the rule's cwd-relative lookup only ever resolves against the repo
       // root in this monorepo, not apps/web.
       "@next/next/no-html-link-for-pages": "off",
+      // Toasts go through lib/notify.ts, never the library directly, so tone,
+      // timing and error wording stay consistent and the library can be
+      // swapped in one file.
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            { group: ["../../**"], message: "Use the @/ alias instead of climbing directories (AGENTS.md §8)." },
+          ],
+          paths: [{ name: "sonner", message: "Use notify from @/lib/notify instead of importing sonner directly." }],
+        },
+      ],
+    },
+  },
+
+  // The two files allowed to import sonner: the wrapper, and shadcn's
+  // generated Toaster.
+  {
+    name: "gvps/web-notify",
+    files: ["apps/web/src/lib/notify.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            { group: ["../../**"], message: "Use the @/ alias instead of climbing directories (AGENTS.md §8)." },
+          ],
+        },
+      ],
     },
   },
 

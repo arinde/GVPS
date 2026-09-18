@@ -1,5 +1,7 @@
 import { BadRequestException, type PipeTransform } from "@nestjs/common";
 import type { ZodType } from "zod";
+// Side effect: installs plain-English messages before any schema is parsed.
+import "@/common/zod-messages";
 
 /**
  * AGENTS.md §8: validate every API boundary with a zod schema and derive the

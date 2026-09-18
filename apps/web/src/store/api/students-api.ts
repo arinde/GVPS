@@ -23,6 +23,8 @@ export type RegisterStudentRequest = {
   lga?: string;
   dateOfAdmission: string;
   classArmId: string;
+  /** Department — senior (SSS) students only. */
+  stream?: "SCIENCE" | "ARTS" | "COMMERCIAL";
   address?: string;
   bloodGroup?: string;
   medicalNote?: string;

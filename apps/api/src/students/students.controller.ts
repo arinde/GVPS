@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Roles } from "@/common/decorators/roles.decorator";
@@ -42,6 +42,15 @@ export class StudentsController {
     const safeLimit = Number.isFinite(parsed) ? Math.min(Math.max(parsed, 1), 100) : 50;
 
     return this.students.search(actor.schoolId, { query, classArmId, cursor, limit: safeLimit });
+  }
+
+  // Query parameter, not a path segment: admission numbers contain slashes
+  // ("GVPS/2026/0001"), which a route parameter would split. Declared before
+  // ":studentId" so "lookup" is not captured as an id.
+  @Get("lookup")
+  lookup(@CurrentUser() actor: AuthenticatedStaff, @Query("admissionNo") admissionNo?: string) {
+    if (!admissionNo?.trim()) throw new BadRequestException([{ path: ["admissionNo"], message: "Required" }]);
+    return this.students.findByAdmissionNo(actor.schoolId, admissionNo);
   }
 
   @Get(":studentId")

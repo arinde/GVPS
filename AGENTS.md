@@ -20,6 +20,10 @@ These rules are strict. If following one makes a task impossible or absurd, say
 so and stop — do not quietly work around it. Sections 7–9 apply to the NestJS
 backend as well; the rest is frontend.
 
+**User experience is a priority, not a finishing touch.** §12 sets the standard
+every screen is held to. It is last only because earlier sections are cited by
+number in code comments.
+
 ---
 
 ## 1. Reusability is the default
@@ -236,3 +240,68 @@ of this file instructs.
 
 Then: schema before code, one module at a time, finished before the next
 (`PLAN.md` §6).
+
+---
+
+## 12. User experience
+
+The people using this are school office staff, often on a phone, often on a
+weak connection, entering a whole class at a time. Every screen is judged by
+whether they can get through it without help, without losing work, and
+without guessing what happened.
+
+**Every action gets feedback — through `notify`, and only `notify`.**
+- `notify` in `lib/notify.ts` is the single way to say an action finished or
+  failed. Never import `sonner` directly; ESLint rejects it.
+- Success, failure, and anything that changes where the user is (signed out,
+  redirected to change a password) all get a toast.
+- `notify.error(error, fallback)` parses the API error and returns it, so the
+  same call both toasts and supplies field errors to the form.
+- Something that must be copied down, like an admission number, stays up
+  longer (`durationMs`) and is also shown on the page.
+
+**Errors are readable and sit beside the field that caused them.**
+- Never show raw JSON or a developer message. The API's plain-English zod
+  messages (`common/zod-messages.ts`) and `parseApiError` exist for this.
+- Field errors go beside the input via `FormField` + `controlProps`, which set
+  `aria-invalid` and `aria-describedby`. A summary above the submit button says
+  what to fix; it never replaces the inline message.
+- Clear a field's error as soon as that field is edited — not all errors.
+- A network failure says the server is unreachable. It must never read as
+  "invalid password" or any other message that blames the input.
+
+**Catch mistakes before the round trip.** Validate what the client can know —
+length, matching confirmation, required fields — and show it instantly. The
+API validates again; client checks only save the wait.
+
+**Prefer choosing to typing.** Where the valid answers are a known list —
+states, LGAs, blood groups, departments, classes — use `NativeSelect`, never a
+free-text field. Dependent choices narrow each other: a state fixes its LGAs,
+a senior class reveals the department. Lists come from the API so the form
+offers exactly what the server accepts.
+
+**Show only what applies.** A field that cannot apply is hidden, not disabled
+with a note — no department for a Primary 3 pupil. A field that depends on
+another is disabled with a hint until it can be answered ("Choose the state
+first").
+
+**Passwords always use `PasswordInput`**, which has a show/hide toggle. Staff
+type temporary passwords read off a slip, and a hidden typo becomes a lockout.
+Any new password is entered twice.
+
+**Don't make people repeat themselves.** After saving, keep what the next entry
+will share — the class and department during registration — and clear the
+rest. Focus the first field. Labels say exactly what is wanted: "Home address",
+not "Address".
+
+**Never lose work, never leave a dead end.** Disable controls while saving so a
+double tap cannot submit twice. Every screen has a way forward: a signed-out
+visitor reaches sign-in, an empty list offers the action that fills it.
+
+**Accessible by default.** Every input has a visible label. Status is never
+colour alone — it pairs an icon or shape with a word, which also survives
+photocopying. Interactive elements are reachable and usable by keyboard.
+
+**Reuse the building blocks.** `FormField`, `controlProps`, `NativeSelect`,
+`PasswordInput`, `DataTable`, `EmptyState` and `notify` already solve these
+problems. A new form that re-solves any of them is a defect (§1).

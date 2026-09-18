@@ -356,6 +356,12 @@ model Enrolment {
   sessionId  String
   classArmId String
   status     EnrolmentStatus @default(ACTIVE)
+  // Department for senior students (Science, Arts, Commercial). On the
+  // enrolment, not the student or the arm: many schools run one mixed SSS 1
+  // class, and a student can change department between sessions — this keeps
+  // each session's choice. Required for senior arms, absent otherwise;
+  // enforced in StudentsService.
+  stream     Stream?
   enrolledOn DateTime        @default(now())
   exitedOn   DateTime?
   exitReason String?

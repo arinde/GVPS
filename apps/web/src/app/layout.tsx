@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Libre_Baskerville } from "next/font/google";
 import { AppShell } from "@/components/layout/app-shell";
+import { Toaster } from "@/components/ui/sonner";
 import { StoreProvider } from "@/store/store-provider";
 import "./globals.css";
 
@@ -44,6 +45,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <StoreProvider>
           <AppShell>{children}</AppShell>
         </StoreProvider>
+        {/* Mounted once; everything else calls notify from @/lib/notify. Top
+            centre so it is seen on a phone, where the corners sit under thumbs. */}
+        <Toaster position="top-center" closeButton />
       </body>
     </html>
   );

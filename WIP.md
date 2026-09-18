@@ -27,7 +27,7 @@ Phase 1 of `PLAN.md` §5, item by item:
 | School profile and branding                      | Not started                |
 | Backup and restore                               | Not started                |
 
-Tests: **127 passing** — 64 API (Jest, 8 suites), 63 web (Vitest, 10 files).
+Tests: **230 passing** — 100 API (Jest, 10 suites), 130 web (Vitest, 16 files).
 
 Database: Neon Postgres, three migrations applied. Seeded with school "GVPS",
 one superadmin, 12 class levels each with arm A, session 2026/2027 and its
@@ -124,6 +124,29 @@ the latter — Postgres forbids subqueries in CHECK.
 - Student registry list at `/students`, with search.
 - `db:reset-password` CLI — the only way back into a locked-out superadmin.
 
+Then, on registration and UX (2026-09-18):
+
+- **Errors.** API validation messages are plain English (`common/zod-messages.ts`).
+  The web parses every error shape (`lib/api-error.ts`) and puts field errors
+  beside their inputs via `FormField` + `controlProps`.
+- **Toasts.** Sonner behind a single wrapper, `lib/notify.ts`. ESLint rejects a
+  direct `sonner` import anywhere else. Every action toasts.
+- **Passwords.** `PasswordInput` with show/hide on every password field; the
+  change-password screen has a confirmation field, a live length count, and
+  client-side checks before sending.
+- **Registration form.** Sections (Student / Class / Home and health / Parents
+  and guardians). State of origin and LGA are dependent dropdowns; blood group
+  and department are dropdowns; "Home address". At least one guardian required.
+- **Department (stream)** for SSS students, stored on the **enrolment**
+  (migration `enrolment_stream`) — required for senior, refused otherwise.
+- **States and LGAs** vendored as `apps/api/src/reference/nigeria-states.data.json`
+  (37 states, 774 LGAs, counts pinned by tests), served at `GET /reference/states`.
+  Source package audited; a second candidate was rejected for listing 846 LGAs.
+- **Admission number is permanent.** A database trigger (migration
+  `admission_no_immutable`) refuses any change to an issued number. Exact
+  lookup at `GET /students/lookup?admissionNo=GVPS/2026/0001`.
+- AGENTS.md §12 — the user-experience standard every screen is held to.
+
 Verified end to end over HTTP against live Neon: consecutive admission numbers,
 duplicate rejection naming the existing number, one guardian row shared between
 two siblings, enrolment into the current session, search, and detail.
@@ -132,6 +155,16 @@ two siblings, enrolment into the current session, search, and detail.
 
 ## 5. Next, in order
 
+0. **Staff profiles and teacher class allocation** — asked for, next module.
+   Staff accounts collect basic details (names, phone, etc., not just email).
+   The superadmin allocates one or two classes to a teacher, per session. A
+   teacher then sees only students in their classes, and can register students
+   only into them. This is `FEATURES.md` §2.4 (teacher assignments) plus §1.5
+   (scoping enforced in the API, never the client). Needs: `StaffProfile`
+   fields, a session-scoped `TeacherAssignment` table (this is also where
+   form-teacher ownership lives — see `class-structure.service.ts`), scoping on
+   every student endpoint, an allocation screen, and permission tests per
+   `TESTS.md` §6.2.
 1. **More arms.** Seeded with arm "A" per level. The school will have B and C
    in places — add through `POST /academic/levels/:id/arms`, no UI yet.
 2. **Confirm the admission number format with the school** before volume entry.
@@ -167,3 +200,9 @@ each — and §7 says never split on line count alone. Left deliberately.
 
 **Design exports unorganised.** Five `stitch_school_management_system_ui*`
 folders at the repo root; four screenshots are 28-byte placeholders.
+
+**Do not smoke-test registration against this database any more.** It holds
+real students now (`GVPS/2026/0001` was registered on 2026-09-18), and every
+test registration burns a real admission number. A test run on 2026-09-18
+consumed `0002`; the counter was reset to 1 afterwards so the register has no
+gap. Use a Neon branch or a separate database for anything that writes.

@@ -1,8 +1,9 @@
 import type { FormEvent } from "react";
+import { FormField } from "@/components/common/form-field";
+import { PasswordInput } from "@/components/common/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 /**
  * Presentational only (AGENTS.md §1) — every field is controlled by props,
@@ -35,29 +36,28 @@ export function LoginForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="login-email">Email</Label>
+      <FormField id="login-email" label="Email">
         <Input
           id="login-email"
           type="email"
           autoComplete="email"
           required
           value={email}
+          disabled={isSubmitting}
           onChange={(event) => onEmailChange(event.target.value)}
         />
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="login-password">Password</Label>
-        <Input
+      <FormField id="login-password" label="Password">
+        <PasswordInput
           id="login-password"
-          type="password"
           autoComplete="current-password"
           required
           value={password}
+          disabled={isSubmitting}
           onChange={(event) => onPasswordChange(event.target.value)}
         />
-      </div>
+      </FormField>
 
       {errorMessage ? (
         <Alert variant="destructive" role="alert">

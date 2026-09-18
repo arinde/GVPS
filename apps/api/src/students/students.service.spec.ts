@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { GuardianRelationship, Sex } from "@prisma/client";
-import { StudentsService } from "@/students/students.service";
+import { GuardianRelationship, Section, Sex, Stream } from "@prisma/client";
+import { resolveStream, StudentsService, withOnePrimary } from "@/students/students.service";
 import { CreateStudentSchema, type CreateStudentDto } from "@/students/schemas/create-student.schema";
 
 function dto(overrides: Partial<CreateStudentDto> = {}): CreateStudentDto {
@@ -11,6 +11,9 @@ function dto(overrides: Partial<CreateStudentDto> = {}): CreateStudentDto {
     sex: Sex.FEMALE,
     dateOfAdmission: "2026-09-01",
     classArmId: "arm-1",
+    guardians: [
+      { firstName: "Musa", lastName: "Ibrahim", phone: "08012345678", relationship: "FATHER", isPrimary: true },
+    ],
     ...overrides,
   });
 }
@@ -38,7 +41,8 @@ describe("StudentsService", () => {
           id: "arm-1",
           classLevelId: "level-1",
           name: "A",
-          classLevel: { name: "Primary 4" },
+          stream: null,
+          classLevel: { name: "Primary 4", section: "PRIMARY" },
         }),
       },
       academicSession: { findFirst: jest.fn().mockResolvedValue({ id: "session-1", name: "2026/2027" }) },
@@ -195,5 +199,90 @@ describe("CreateStudentSchema", () => {
         ],
       } as Partial<CreateStudentDto>),
     ).toThrow();
+  });
+});
+
+describe("CreateStudentSchema — school rules", () => {
+  it("requires at least one guardian", () => {
+    expect(() => dto({ guardians: [] })).toThrow(/at least one parent or guardian/i);
+  });
+
+  it("accepts a real state and one of its LGAs", () => {
+    expect(() => dto({ stateOfOrigin: "Kano", lga: "Fagge" })).not.toThrow();
+  });
+
+  it("rejects an LGA from a different state", () => {
+    expect(() => dto({ stateOfOrigin: "Lagos", lga: "Fagge" })).toThrow(/not in the chosen state/);
+  });
+
+  it("rejects an LGA with no state", () => {
+    expect(() => dto({ lga: "Ikeja" })).toThrow(/state first/);
+  });
+
+  it("rejects a state that is not on the list", () => {
+    expect(() => dto({ stateOfOrigin: "Kastina" })).toThrow(/from the list/);
+  });
+
+  it.each(["A+", "O-", "AB+"])("accepts blood group %s", (group) => {
+    expect(dto({ bloodGroup: group } as Partial<CreateStudentDto>).bloodGroup).toBe(group);
+  });
+
+  it("rejects a free-typed blood group", () => {
+    expect(() => dto({ bloodGroup: "O positive" } as unknown as Partial<CreateStudentDto>)).toThrow(
+      /blood group from the list/,
+    );
+  });
+});
+
+describe("resolveStream", () => {
+  const level = (section: Section) => ({ id: "l", name: "SSS 1", section, rank: 10 }) as never;
+  const arm = (section: Section, stream: Stream | null = null) =>
+    ({ id: "a", name: "A", stream, classLevel: level(section) }) as never;
+
+  it("requires a department for a senior student", () => {
+    expect(() => resolveStream(arm(Section.SENIOR))).toThrow();
+  });
+
+  it("records the chosen department for a senior student", () => {
+    expect(resolveStream(arm(Section.SENIOR), Stream.COMMERCIAL)).toBe(Stream.COMMERCIAL);
+  });
+
+  it("rejects a department for a junior student", () => {
+    expect(() => resolveStream(arm(Section.JUNIOR), Stream.SCIENCE)).toThrow();
+  });
+
+  it("records no department for a primary student", () => {
+    expect(resolveStream(arm(Section.PRIMARY))).toBeNull();
+  });
+
+  it("takes the department from a stream-tagged arm", () => {
+    expect(resolveStream(arm(Section.SENIOR, Stream.ARTS))).toBe(Stream.ARTS);
+  });
+
+  it("rejects a choice that contradicts the arm's stream", () => {
+    expect(() => resolveStream(arm(Section.SENIOR, Stream.ARTS), Stream.SCIENCE)).toThrow(BadRequestException);
+  });
+
+  it("reports the error against the department field", () => {
+    try {
+      resolveStream(arm(Section.SENIOR));
+    } catch (error) {
+      expect((error as { getResponse: () => { message: unknown } }).getResponse().message).toEqual([
+        { path: ["stream"], message: "Choose a department for a senior student" },
+      ]);
+    }
+  });
+});
+
+describe("withOnePrimary", () => {
+  const g = (isPrimary: boolean) =>
+    ({ firstName: "A", lastName: "B", phone: "+2348012345678", relationship: "FATHER", isPrimary }) as never;
+
+  it("makes the first guardian primary when none is marked", () => {
+    expect(withOnePrimary([g(false), g(false)]).map((x) => x.isPrimary)).toEqual([true, false]);
+  });
+
+  it("keeps an existing primary choice", () => {
+    expect(withOnePrimary([g(false), g(true)]).map((x) => x.isPrimary)).toEqual([false, true]);
   });
 });

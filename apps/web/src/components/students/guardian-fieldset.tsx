@@ -1,14 +1,17 @@
 import { Trash2 } from "lucide-react";
-import { FormField } from "@/components/common/form-field";
+import { controlProps, FormField } from "@/components/common/form-field";
+import { NativeSelect } from "@/components/common/native-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { GuardianInput } from "@/store/api/students-api";
 
-const RELATIONSHIPS: { value: GuardianInput["relationship"]; label: string }[] = [
+const RELATIONSHIPS = [
   { value: "FATHER", label: "Father" },
   { value: "MOTHER", label: "Mother" },
   { value: "GUARDIAN", label: "Guardian" },
 ];
+
+const PHONE_HINT = "e.g. 0801 234 5678";
 
 export type GuardianFieldsetProps = {
   index: number;
@@ -16,6 +19,10 @@ export type GuardianFieldsetProps = {
   onChange: (patch: Partial<GuardianInput>) => void;
   onRemove: () => void;
   onMakePrimary: () => void;
+  /** False for the last remaining guardian: at least one is required. */
+  canRemove: boolean;
+  /** This guardian's errors, keyed by field name ("phone"), not the full path. */
+  errors?: Record<string, string>;
   disabled?: boolean;
 };
 
@@ -25,83 +32,81 @@ export function GuardianFieldset({
   onChange,
   onRemove,
   onMakePrimary,
+  canRemove,
+  errors = {},
   disabled = false,
 }: GuardianFieldsetProps) {
-  const prefix = `guardian-${index}`;
+  const id = (field: string) => `guardian-${index}-${field}`;
 
   return (
     <fieldset className="border-border rounded-lg border p-4">
-      <legend className="px-1 text-sm font-semibold">Guardian {index + 1}</legend>
+      <legend className="px-1 text-sm font-semibold">Parent or guardian {index + 1}</legend>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField id={`${prefix}-first`} label="First name" required>
+        <FormField id={id("first")} label="First name" required error={errors.firstName}>
           <Input
-            id={`${prefix}-first`}
+            {...controlProps(id("first"), errors.firstName)}
             value={value.firstName}
             disabled={disabled}
             onChange={(event) => onChange({ firstName: event.target.value })}
           />
         </FormField>
 
-        <FormField id={`${prefix}-last`} label="Surname" required>
+        <FormField id={id("last")} label="Surname" required error={errors.lastName}>
           <Input
-            id={`${prefix}-last`}
+            {...controlProps(id("last"), errors.lastName)}
             value={value.lastName}
             disabled={disabled}
             onChange={(event) => onChange({ lastName: event.target.value })}
           />
         </FormField>
 
-        <FormField id={`${prefix}-phone`} label="Phone" required hint="e.g. 08012345678">
+        <FormField id={id("phone")} label="Phone" required hint={PHONE_HINT} error={errors.phone}>
           <Input
-            id={`${prefix}-phone`}
+            {...controlProps(id("phone"), errors.phone, PHONE_HINT)}
             type="tel"
             inputMode="tel"
+            autoComplete="off"
             value={value.phone}
             disabled={disabled}
             onChange={(event) => onChange({ phone: event.target.value })}
           />
         </FormField>
 
-        <FormField id={`${prefix}-alt`} label="Alternate phone">
+        <FormField id={id("alt")} label="Alternate phone" error={errors.altPhone}>
           <Input
-            id={`${prefix}-alt`}
+            {...controlProps(id("alt"), errors.altPhone)}
             type="tel"
             inputMode="tel"
+            autoComplete="off"
             value={value.altPhone ?? ""}
             disabled={disabled}
-            onChange={(event) => onChange({ altPhone: event.target.value })}
+            onChange={(event) => onChange({ altPhone: event.target.value || undefined })}
           />
         </FormField>
 
-        <FormField id={`${prefix}-relationship`} label="Relationship" required>
-          <select
-            id={`${prefix}-relationship`}
-            className="border-input bg-card h-9 rounded-md border px-3 text-sm"
+        <FormField id={id("relationship")} label="Relationship" required error={errors.relationship}>
+          <NativeSelect
+            {...controlProps(id("relationship"), errors.relationship)}
+            options={RELATIONSHIPS}
             value={value.relationship}
             disabled={disabled}
             onChange={(event) => onChange({ relationship: event.target.value as GuardianInput["relationship"] })}
-          >
-            {RELATIONSHIPS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
         </FormField>
 
-        <FormField id={`${prefix}-occupation`} label="Occupation">
+        <FormField id={id("occupation")} label="Occupation" error={errors.occupation}>
           <Input
-            id={`${prefix}-occupation`}
+            {...controlProps(id("occupation"), errors.occupation)}
             value={value.occupation ?? ""}
             disabled={disabled}
             onChange={(event) => onChange({ occupation: event.target.value })}
           />
         </FormField>
 
-        <FormField id={`${prefix}-email`} label="Email" className="sm:col-span-2">
+        <FormField id={id("email")} label="Email" className="sm:col-span-2" error={errors.email}>
           <Input
-            id={`${prefix}-email`}
+            {...controlProps(id("email"), errors.email)}
             type="email"
             value={value.email ?? ""}
             disabled={disabled}
@@ -124,10 +129,12 @@ export function GuardianFieldset({
           Primary contact
         </label>
 
-        <Button type="button" variant="ghost" size="sm" onClick={onRemove} disabled={disabled}>
-          <Trash2 aria-hidden="true" />
-          Remove
-        </Button>
+        {canRemove ? (
+          <Button type="button" variant="ghost" size="sm" onClick={onRemove} disabled={disabled}>
+            <Trash2 aria-hidden="true" />
+            Remove
+          </Button>
+        ) : null}
       </div>
     </fieldset>
   );

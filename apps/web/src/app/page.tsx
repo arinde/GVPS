@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ClipboardList, UserPlus, Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -45,11 +45,6 @@ export default function Home() {
           );
         })}
       </div>
-
-      <p className="text-muted-foreground mt-8 flex items-center gap-2 text-xs">
-        <ClipboardList className="size-4" aria-hidden="true" />
-        Signed-out visitors are sent to the sign-in page.
-      </p>
     </div>
   );
 }

@@ -3,85 +3,46 @@
 import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { StudentRegistrationForm } from "@/components/students/student-registration-form";
+import { useRegistrationDraft } from "@/components/students/use-registration-draft";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { extractErrorMessage } from "@/lib/extract-error-message";
+import { notify } from "@/lib/notify";
 import { useGetCurrentPeriodQuery, useListClassArmsQuery } from "@/store/api/academic-api";
-import { useRegisterStudentMutation, type GuardianInput, type RegisterStudentRequest } from "@/store/api/students-api";
-
-function emptyGuardian(isPrimary: boolean): GuardianInput {
-  return { firstName: "", lastName: "", phone: "", relationship: "FATHER", isPrimary };
-}
-
-function blankDraft(classArmId = ""): RegisterStudentRequest {
-  return {
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    sex: "FEMALE",
-    dateOfAdmission: new Date().toISOString().slice(0, 10),
-    classArmId,
-    guardians: [],
-  };
-}
+import { useGetBloodGroupsQuery, useGetStatesQuery } from "@/store/api/reference-api";
+import { useRegisterStudentMutation, type RegisterStudentRequest } from "@/store/api/students-api";
 
 /**
  * Wires the registration form to the API (AGENTS.md §1: only the container
- * knows where data comes from).
- *
- * After a save it keeps the chosen class and clears everything else, because
- * the office registers a class at a time — re-picking the class for each of
- * thirty students is the difference between this being used and abandoned
- * (PLAN.md §9).
+ * knows where data comes from). Draft editing rules live in
+ * useRegistrationDraft.
  */
 export function StudentRegistrationView() {
   const { data: arms = [], isLoading: armsLoading } = useListClassArmsQuery();
   const { data: current } = useGetCurrentPeriodQuery();
+  const { data: states = [] } = useGetStatesQuery();
+  const { data: bloodGroups = [] } = useGetBloodGroupsQuery();
   const [registerStudent, { isLoading: isSubmitting }] = useRegisterStudentMutation();
 
-  const [draft, setDraft] = useState<RegisterStudentRequest>(blankDraft());
+  const form = useRegistrationDraft();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [lastRegistered, setLastRegistered] = useState<{ admissionNo: string; name: string }>();
-
-  function patch(changes: Partial<RegisterStudentRequest>) {
-    setDraft((previous) => ({ ...previous, ...changes }));
-  }
-
-  function patchGuardian(index: number, changes: Partial<GuardianInput>) {
-    setDraft((previous) => ({
-      ...previous,
-      guardians: previous.guardians.map((guardian, i) => (i === index ? { ...guardian, ...changes } : guardian)),
-    }));
-  }
-
-  function addGuardian() {
-    setDraft((previous) => ({
-      ...previous,
-      guardians: [...previous.guardians, emptyGuardian(previous.guardians.length === 0)],
-    }));
-  }
-
-  function removeGuardian(index: number) {
-    setDraft((previous) => ({ ...previous, guardians: previous.guardians.filter((_, i) => i !== index) }));
-  }
-
-  function makeGuardianPrimary(index: number) {
-    setDraft((previous) => ({
-      ...previous,
-      guardians: previous.guardians.map((guardian, i) => ({ ...guardian, isPrimary: i === index })),
-    }));
-  }
 
   async function submit() {
     setErrorMessage(undefined);
     try {
-      const student = await registerStudent(cleaned(draft)).unwrap();
-      setLastRegistered({
-        admissionNo: student.admissionNo,
-        name: `${student.lastName}, ${student.firstName}`,
+      const student = await registerStudent(cleaned(form.draft)).unwrap();
+      const name = `${student.lastName}, ${student.firstName}`;
+      setLastRegistered({ admissionNo: student.admissionNo, name });
+      form.resetKeepingClass();
+      // Kept up longer than a normal success: the number has to be copied
+      // onto the student's file.
+      notify.success(`Registered ${name}`, {
+        description: `Admission number ${student.admissionNo}`,
+        durationMs: 12_000,
       });
-      setDraft(blankDraft(draft.classArmId));
     } catch (error) {
-      setErrorMessage(extractErrorMessage(error, "Could not register this student. Please try again."));
+      const parsed = notify.error(error, "Could not register this student. Please try again.");
+      form.setFieldErrors(parsed.fieldErrors);
+      setErrorMessage(parsed.message);
       setLastRegistered(undefined);
     }
   }
@@ -117,23 +78,26 @@ export function StudentRegistrationView() {
       ) : null}
 
       <StudentRegistrationForm
-        value={draft}
+        value={form.draft}
         arms={arms}
+        states={states}
+        bloodGroups={bloodGroups}
         isSubmitting={isSubmitting || armsLoading}
         errorMessage={errorMessage}
-        onChange={patch}
-        onGuardianChange={patchGuardian}
-        onAddGuardian={addGuardian}
-        onRemoveGuardian={removeGuardian}
-        onMakeGuardianPrimary={makeGuardianPrimary}
+        fieldErrors={form.fieldErrors}
+        onChange={form.patch}
+        onGuardianChange={form.patchGuardian}
+        onAddGuardian={form.addGuardian}
+        onRemoveGuardian={form.removeGuardian}
+        onMakeGuardianPrimary={form.makeGuardianPrimary}
         onSubmit={submit}
       />
     </div>
   );
 }
 
-/** Drops empty optional strings so the API's optional() fields stay absent. */
+/** Drops empty optional values so the API's optional() fields stay absent. */
 function cleaned(draft: RegisterStudentRequest): RegisterStudentRequest {
-  const entries = Object.entries(draft).filter(([, value]) => value !== "");
+  const entries = Object.entries(draft).filter(([, value]) => value !== "" && value !== undefined);
   return Object.fromEntries(entries) as RegisterStudentRequest;
 }

@@ -44,3 +44,14 @@ export function FormField({ id, label, required = false, hint, error, className,
     </div>
   );
 }
+
+/**
+ * The attributes a control needs so its error is announced and styled:
+ * aria-invalid turns shadcn inputs red, aria-describedby points a screen
+ * reader at the message FormField renders under it. Spread onto the control:
+ * `<Input {...controlProps("dob", errors.dateOfBirth)} />`.
+ */
+export function controlProps(id: string, error?: string, hint?: string) {
+  const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+  return { id, "aria-invalid": error ? true : undefined, "aria-describedby": describedBy };
+}

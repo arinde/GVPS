@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
-import { extractErrorMessage } from "@/lib/extract-error-message";
+import { notify } from "@/lib/notify";
 import { useLoginMutation } from "@/store/api/auth-api";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/auth-slice";
@@ -22,9 +22,17 @@ export function LoginView() {
     try {
       const result = await login({ email, password }).unwrap();
       dispatch(setCredentials(result));
-      router.push(result.mustChangePassword ? "/change-password" : "/");
+      if (result.mustChangePassword) {
+        notify.info("Set your own password to continue", {
+          description: "The one you signed in with was temporary.",
+        });
+        router.push("/change-password");
+      } else {
+        notify.success("Signed in");
+        router.push("/");
+      }
     } catch (error) {
-      setErrorMessage(extractErrorMessage(error, "Invalid email or password."));
+      setErrorMessage(notify.error(error, "Invalid email or password.").message);
     }
   }
 

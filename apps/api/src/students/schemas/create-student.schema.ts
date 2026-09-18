@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { GuardianRelationship, Sex } from "@prisma/client";
+import { GuardianRelationship, Sex, Stream } from "@prisma/client";
+import { isKnownState, isLgaOfState } from "@/reference/nigeria-states";
+
+// The eight ABO/Rh groups. Stored as text because "A+" is not a valid enum
+// identifier; this list is what keeps it from being free-typed.
+export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
 const Name = z.string().trim().min(1).max(80);
 const OptionalText = z
@@ -52,12 +57,13 @@ export const CreateStudentSchema = z
     // The arm the student joins now. Their level is derived from it, so the
     // two can never disagree.
     classArmId: z.string().min(1),
+    // Department, for senior (SSS) arms only. Whether it is required or
+    // forbidden depends on the arm, which only the service can look up.
+    stream: z.enum(Stream).optional(),
 
     address: OptionalText,
     bloodGroup: z
-      .string()
-      .trim()
-      .max(5)
+      .enum(BLOOD_GROUPS, "Choose a blood group from the list")
       .optional()
       .or(z.literal("").transform(() => undefined)),
     medicalNote: z
@@ -68,9 +74,10 @@ export const CreateStudentSchema = z
       .or(z.literal("").transform(() => undefined)),
     previousSchool: OptionalText,
 
-    // A student can be entered with no guardian and have one added later —
-    // FEATURES.md §3.5 is emphatic that nothing should block entry.
-    guardians: z.array(GuardianInputSchema).max(4).default([]),
+    // At least one guardian is required. This is the school's decision and
+    // tightens FEATURES.md §3.5, which leans towards never blocking entry: a
+    // student with no contact on file is a child the office cannot reach.
+    guardians: z.array(GuardianInputSchema).min(1, "Add at least one parent or guardian").max(4),
   })
   .refine((student) => new Date(student.dateOfBirth) < new Date(student.dateOfAdmission), {
     message: "A student cannot be admitted before they were born",
@@ -79,6 +86,20 @@ export const CreateStudentSchema = z
   .refine((student) => student.guardians.filter((g) => g.isPrimary).length <= 1, {
     message: "Only one guardian can be the primary contact",
     path: ["guardians"],
+  })
+  .refine((student) => !student.stateOfOrigin || isKnownState(student.stateOfOrigin), {
+    message: "Choose a state from the list",
+    path: ["stateOfOrigin"],
+  })
+  .refine((student) => !student.lga || Boolean(student.stateOfOrigin), {
+    message: "Choose the state first",
+    path: ["lga"],
+  })
+  // The LGA must belong to the chosen state. Without this, changing the state
+  // after picking an LGA would save a Kano student in a Lagos LGA.
+  .refine((student) => !student.lga || !student.stateOfOrigin || isLgaOfState(student.stateOfOrigin, student.lga), {
+    message: "That LGA is not in the chosen state",
+    path: ["lga"],
   });
 
 export type GuardianInputDto = z.infer<typeof GuardianInputSchema>;

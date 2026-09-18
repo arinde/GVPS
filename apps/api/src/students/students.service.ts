@@ -1,5 +1,13 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { EnrolmentStatus, type Prisma, type Student } from "@prisma/client";
+import {
+  EnrolmentStatus,
+  Section,
+  type ClassArm,
+  type ClassLevel,
+  type Prisma,
+  type Stream,
+  type Student,
+} from "@prisma/client";
 import { AuditService } from "@/audit/audit.service";
 import { PrismaService } from "@/prisma/prisma.service";
 import { AdmissionNumberService } from "@/students/admission-number.service";
@@ -36,6 +44,7 @@ export class StudentsService {
       include: { classLevel: true },
     });
     if (!arm) throw new NotFoundException("Class arm not found.");
+    const stream = resolveStream(arm, dto.stream);
 
     const session = await this.prisma.academicSession.findFirst({ where: { schoolId, isCurrent: true } });
     if (!session) {
@@ -71,7 +80,7 @@ export class StudentsService {
         },
       });
 
-      for (const guardian of dto.guardians) {
+      for (const guardian of withOnePrimary(dto.guardians)) {
         await this.linkGuardian(tx, schoolId, created.id, guardian);
       }
 
@@ -81,6 +90,7 @@ export class StudentsService {
           studentId: created.id,
           sessionId: session.id,
           classArmId: arm.id,
+          stream,
           status: EnrolmentStatus.ACTIVE,
         },
       });
@@ -98,6 +108,7 @@ export class StudentsService {
         admissionNo: student.admissionNo,
         name: `${student.lastName}, ${student.firstName}`,
         arm: `${arm.classLevel.name}${arm.name}`,
+        stream,
         session: session.name,
       },
     });
@@ -207,6 +218,21 @@ export class StudentsService {
     };
   }
 
+  /**
+   * Exact lookup by admission number — the identifier a student keeps from
+   * registration to graduation. Case-insensitive so "gvps/2026/0001" typed on
+   * a phone still finds them; exact rather than "contains", so 0001 never
+   * returns 0010 as well.
+   */
+  async findByAdmissionNo(schoolId: string, admissionNo: string) {
+    const student = await this.prisma.student.findFirst({
+      where: { schoolId, admissionNo: { equals: admissionNo.trim(), mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (!student) throw new NotFoundException(`No student with admission number ${admissionNo.trim()}.`);
+    return this.findOne(schoolId, student.id);
+  }
+
   async findOne(schoolId: string, studentId: string) {
     const student = await this.prisma.student.findFirst({
       where: { id: studentId, schoolId },
@@ -219,4 +245,38 @@ export class StudentsService {
     if (!student) throw new NotFoundException("Student not found.");
     return student;
   }
+}
+
+/**
+ * The department to record on the enrolment (see Enrolment.stream).
+ *
+ * Senior arms need one; everything else must not have one. If the arm itself
+ * is tagged with a stream, that decides it, and a conflicting choice is an
+ * error rather than silently overridden. Errors use the validation pipe's
+ * { path, message } shape so the form highlights the department field.
+ */
+export function resolveStream(arm: ClassArm & { classLevel: ClassLevel }, requested?: Stream): Stream | null {
+  const fieldError = (message: string) => new BadRequestException([{ path: ["stream"], message }]);
+
+  if (arm.classLevel.section !== Section.SENIOR) {
+    if (requested) throw fieldError(`${arm.classLevel.name} students do not have a department`);
+    return null;
+  }
+  if (arm.stream) {
+    if (requested && requested !== arm.stream) {
+      throw fieldError(`${arm.classLevel.name}${arm.name} is a ${arm.stream.toLowerCase()} class`);
+    }
+    return arm.stream;
+  }
+  if (!requested) throw fieldError("Choose a department for a senior student");
+  return requested;
+}
+
+/**
+ * Exactly one guardian is the primary contact. If none was marked, the first
+ * one is — the office always needs someone to ring first (FEATURES.md §3.3).
+ */
+export function withOnePrimary(guardians: GuardianInputDto[]): GuardianInputDto[] {
+  if (guardians.some((guardian) => guardian.isPrimary)) return guardians;
+  return guardians.map((guardian, index) => ({ ...guardian, isPrimary: index === 0 }));
 }
