@@ -1,3 +1,49 @@
+import { EnrolmentStatus, type Prisma } from "@prisma/client";
+
+/**
+ * What the profile page reads for one student: the admitted level, whether a
+ * photograph exists, guardians with their other children (for siblings), and
+ * the enrolment history.
+ */
+export function profileInclude(studentId: string) {
+  return {
+    admittedIntoLevel: true,
+    // Whether a photograph exists, and when it last changed; the image
+    // itself is fetched separately so this record stays small.
+    photo: { select: { updatedAt: true } },
+    guardians: {
+      orderBy: { isPrimary: "desc" },
+      include: {
+        guardian: {
+          include: {
+            students: {
+              where: { studentId: { not: studentId } },
+              include: {
+                student: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    enrolments: {
+                      where: { status: EnrolmentStatus.ACTIVE },
+                      take: 1,
+                      select: { classArm: { select: { name: true, classLevel: { select: { name: true } } } } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    enrolments: {
+      orderBy: { session: { startDate: "desc" } },
+      include: { classArm: { include: { classLevel: true } }, session: true },
+    },
+  } satisfies Prisma.StudentInclude;
+}
+
 type SiblingSource = {
   id: string;
   firstName: string;

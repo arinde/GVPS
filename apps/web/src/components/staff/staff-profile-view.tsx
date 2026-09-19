@@ -1,5 +1,7 @@
 "use client";
 
+import { Pencil } from "lucide-react";
+import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
 import { StaffProfileDetails } from "@/components/staff/staff-profile-details";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -35,7 +37,13 @@ export function StaffProfileView({ staffId }: { staffId: string }) {
     <PageContainer width="form">
       <StaffProfileDetails
         profile={profile}
-        footnote="Only the superadmin and this staff member can see this record. Classes are changed under Class allocation."
+        footnote="Only the superadmin and this staff member can see this record. Every change is recorded in the audit log. Classes are changed under Class allocation."
+        actions={
+          <AppLinkButton href={`/staff/${staffId}/edit`} variant="secondary">
+            <Pencil aria-hidden="true" />
+            Edit details
+          </AppLinkButton>
+        }
       />
     </PageContainer>
   );

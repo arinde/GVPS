@@ -74,6 +74,7 @@ export const baseApi = createApi({
     "Staff",
     "ClassAssignment",
     "Access",
+    "Dashboard",
   ],
   endpoints: () => ({}),
 });

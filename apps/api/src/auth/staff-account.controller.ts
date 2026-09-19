@@ -8,11 +8,18 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   UseGuards,
 } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { StaffAccountService } from "@/auth/staff-account.service";
-import { CreateStaffSchema, type CreateStaffDto } from "@/auth/schemas/create-staff.schema";
+import { StaffUpdateService } from "@/auth/staff-update.service";
+import {
+  CreateStaffSchema,
+  UpdateStaffSchema,
+  type CreateStaffDto,
+  type UpdateStaffDto,
+} from "@/auth/schemas/create-staff.schema";
 import { GrantRoleSchema, type GrantRoleDto } from "@/auth/schemas/grant-role.schema";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Roles } from "@/common/decorators/roles.decorator";
@@ -27,7 +34,10 @@ import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.SUPERADMIN)
 export class StaffAccountController {
-  constructor(private readonly staffAccounts: StaffAccountService) {}
+  constructor(
+    private readonly staffAccounts: StaffAccountService,
+    private readonly staffUpdates: StaffUpdateService,
+  ) {}
 
   @Post()
   createStaff(
@@ -45,6 +55,15 @@ export class StaffAccountController {
   @Get(":staffId")
   getProfile(@CurrentUser() actor: AuthenticatedStaff, @Param("staffId") staffId: string) {
     return this.staffAccounts.getProfile(actor.schoolId, staffId);
+  }
+
+  @Put(":staffId")
+  updateStaff(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("staffId") staffId: string,
+    @Body(new ZodValidationPipe(UpdateStaffSchema)) body: UpdateStaffDto,
+  ) {
+    return this.staffUpdates.updateStaff(actor, staffId, body);
   }
 
   @Post(":staffId/roles")

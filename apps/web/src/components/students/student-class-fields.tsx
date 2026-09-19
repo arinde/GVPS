@@ -11,10 +11,22 @@ export const DEPARTMENT_OPTIONS = [
   { value: "COMMERCIAL", label: "Commercial" },
 ];
 
-export type StudentClassFieldsProps = StudentFieldProps & { arms: ClassArmOption[] };
+export type StudentClassFieldsProps = StudentFieldProps<RegisterStudentRequest> & { arms: ClassArmOption[] };
+
+// Far enough back to enter a senior student admitted into Creche.
+const YEARS_BACK = 20;
+
+function admissionYearOptions(thisYear = new Date().getFullYear()) {
+  return Array.from({ length: YEARS_BACK + 1 }, (_, index) => {
+    const year = String(thisYear - index);
+    return { value: year, label: year };
+  });
+}
 
 /**
- * Where the student is placed: class, department and admission date.
+ * Where the student is placed: class, department and year of admission. The
+ * year sets the admission number's year (GVPS/PRY/2024/…), so a student who
+ * joined in 2024 and is only now being entered still gets a 2024 number.
  *
  * The department appears only for a senior (SSS) class, because only senior
  * students have one — showing it to a Primary 3 entry would invite a wrong
@@ -60,11 +72,38 @@ export function StudentClassFields({ value, onChange, errors, disabled, arms }: 
         )
       ) : null}
 
-      <FormField id="admission-date" label="Date of admission" required error={errors.dateOfAdmission}>
+      <FormField
+        id="admission-year"
+        label="Year of admission"
+        required
+        hint="The year they joined the school. It goes into the admission number."
+        error={errors.admissionYear}
+      >
+        <NativeSelect
+          {...controlProps(
+            "admission-year",
+            errors.admissionYear,
+            "The year they joined the school. It goes into the admission number.",
+          )}
+          options={admissionYearOptions()}
+          value={String(value.admissionYear)}
+          disabled={disabled}
+          onChange={(event) => onChange({ admissionYear: Number(event.target.value) })}
+        />
+      </FormField>
+
+      <FormField
+        id="admission-date"
+        label="Exact date of admission"
+        hint="Optional, if known"
+        error={errors.dateOfAdmission}
+      >
         <TextInput
-          {...controlProps("admission-date", errors.dateOfAdmission)}
+          {...controlProps("admission-date", errors.dateOfAdmission, "Optional, if known")}
           type="date"
-          value={value.dateOfAdmission}
+          min={`${value.admissionYear}-01-01`}
+          max={`${value.admissionYear}-12-31`}
+          value={value.dateOfAdmission ?? ""}
           disabled={disabled}
           onChange={(event) => onChange({ dateOfAdmission: event.target.value })}
         />

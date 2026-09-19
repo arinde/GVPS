@@ -5,8 +5,10 @@ import { SessionService } from "@/academic/session.service";
 import {
   CreateClassArmSchema,
   CreateClassLevelSchema,
+  UpdateClassArmSchema,
   type CreateClassArmDto,
   type CreateClassLevelDto,
+  type UpdateClassArmDto,
 } from "@/academic/schemas/class-structure.schema";
 import {
   CreateSessionSchema,
@@ -115,5 +117,15 @@ export class AcademicController {
     @Body(new ZodValidationPipe(CreateClassArmSchema)) body: CreateClassArmDto,
   ) {
     return this.structure.createArm(actor.id, actor.schoolId, levelId, body);
+  }
+
+  @Patch("arms/:armId")
+  @Roles(...STRUCTURE_WRITERS)
+  updateArm(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("armId") armId: string,
+    @Body(new ZodValidationPipe(UpdateClassArmSchema)) body: UpdateClassArmDto,
+  ) {
+    return this.structure.updateArm(actor.id, actor.schoolId, armId, body);
   }
 }

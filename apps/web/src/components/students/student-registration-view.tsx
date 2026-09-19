@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { PhotoPicker } from "@/components/common/photo-picker";
 import { StudentRegistrationForm } from "@/components/students/student-registration-form";
 import { useRegistrationDraft } from "@/components/students/use-registration-draft";
+import { useRegistrationPhoto } from "@/components/students/use-registration-photo";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { notify } from "@/lib/notify";
 import { useGetMyAccessQuery } from "@/store/api/access-api";
@@ -22,19 +24,22 @@ export function StudentRegistrationView() {
   const { data: current } = useGetCurrentPeriodQuery();
   const { data: states = [] } = useGetStatesQuery();
   const { data: bloodGroups = [] } = useGetBloodGroupsQuery();
-  const [registerStudent, { isLoading: isSubmitting }] = useRegisterStudentMutation();
+  const [registerStudent, { isLoading: isRegistering }] = useRegisterStudentMutation();
+  const photo = useRegistrationPhoto();
+  const isSubmitting = isRegistering || photo.isUploading;
 
   const form = useRegistrationDraft();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [lastRegistered, setLastRegistered] = useState<{ admissionNo: string; name: string }>();
-
   async function submit() {
     setErrorMessage(undefined);
     try {
       const student = await registerStudent(cleaned(form.draft)).unwrap();
       const name = `${student.lastName}, ${student.firstName}`;
+      await photo.upload(student.id, name);
       setLastRegistered({ admissionNo: student.admissionNo, name });
       form.resetKeepingClass();
+      photo.clear();
       // Kept up longer than a normal success: the number has to be copied
       // onto the student's file.
       notify.success(`Registered ${name}`, {
@@ -109,6 +114,17 @@ export function StudentRegistrationView() {
         onRemoveGuardian={form.removeGuardian}
         onMakeGuardianPrimary={form.makeGuardianPrimary}
         onSubmit={submit}
+        photo={
+          <PhotoPicker
+            photoUrl={photo.photo}
+            alt="Passport photograph of the student being registered"
+            onPick={photo.choose}
+            onRemove={photo.clear}
+            disabled={isSubmitting || photo.preparing}
+            busyLabel={photo.preparing ? "Preparing photo…" : photo.isUploading ? "Uploading photo…" : undefined}
+            error={photo.error}
+          />
+        }
       />
     </div>
   );

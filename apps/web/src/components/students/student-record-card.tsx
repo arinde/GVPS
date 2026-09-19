@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ContentCard } from "@/components/common/content-card";
 import { DetailList } from "@/components/common/detail-list";
@@ -10,15 +11,17 @@ const RELATIONSHIP = { FATHER: "Father", MOTHER: "Mother", GUARDIAN: "Guardian" 
  * The left column of the student profile (STITCH-SCREENS.md screen 5): photo
  * slot, the record's key facts, then guardians and siblings. Presentational.
  */
-export function StudentRecordCard({ student }: { student: StudentProfile }) {
+export type StudentRecordCardProps = {
+  student: StudentProfile;
+  /** The passport photo slot; the container decides whether it can be changed. */
+  photo: ReactNode;
+};
+
+export function StudentRecordCard({ student, photo }: StudentRecordCardProps) {
+  const admitted = student.dateOfAdmission ? formatMonthYear(student.dateOfAdmission) : String(student.admissionYear);
   return (
     <ContentCard className="flex flex-col gap-4">
-      {/* Photographs are a second pass (FEATURES.md §3.5); this slot waits for one. */}
-      <div className="border-input text-muted-foreground flex h-40 w-[120px] items-center justify-center self-center rounded-lg border text-center text-xs">
-        Passport
-        <br />
-        photograph
-      </div>
+      {photo}
 
       <DetailList
         items={[
@@ -28,7 +31,7 @@ export function StudentRecordCard({ student }: { student: StudentProfile }) {
           { label: "Sex", value: student.sex === "FEMALE" ? "Female" : "Male" },
           {
             label: "Admitted",
-            value: `${formatMonthYear(student.dateOfAdmission)} into ${student.admittedIntoLevel.name}`,
+            value: `${admitted} into ${student.admittedIntoLevel.name}`,
           },
           { label: "State of origin", value: student.stateOfOrigin },
           { label: "LGA", value: student.lga },

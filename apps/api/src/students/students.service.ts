@@ -13,7 +13,7 @@ import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
 import { AdmissionNumberService } from "@/students/admission-number.service";
 import { resolveStream, withOnePrimary } from "@/students/registration-rules";
-import { withSiblings } from "@/students/student-profile";
+import { profileInclude, withSiblings } from "@/students/student-profile";
 import type { CreateStudentDto, GuardianInputDto } from "@/students/schemas/create-student.schema";
 
 export type StudentSearch = {
@@ -71,8 +71,7 @@ export class StudentsService {
     await this.assertNotDuplicate(schoolId, dto);
 
     const student = await this.prisma.$transaction(async (tx) => {
-      const admittedOn = new Date(dto.dateOfAdmission);
-      const admissionNo = await this.admissionNumbers.allocate(tx, school, admittedOn);
+      const admissionNo = await this.admissionNumbers.allocate(tx, school, arm.classLevel.section, dto.admissionYear);
 
       const created = await tx.student.create({
         data: {
@@ -86,7 +85,8 @@ export class StudentsService {
           nationality: dto.nationality,
           stateOfOrigin: dto.stateOfOrigin,
           lga: dto.lga,
-          dateOfAdmission: admittedOn,
+          admissionYear: dto.admissionYear,
+          dateOfAdmission: dto.dateOfAdmission ? new Date(dto.dateOfAdmission) : null,
           admittedIntoLevelId: arm.classLevelId,
           address: dto.address,
           bloodGroup: dto.bloodGroup,
@@ -275,39 +275,7 @@ export class StudentsService {
     const scope = await this.access.studentScope(actor);
     const student = await this.prisma.student.findFirst({
       where: { id: studentId, schoolId: actor.schoolId, AND: [AccessScopeService.studentWhere(scope)] },
-      include: {
-        admittedIntoLevel: true,
-        guardians: {
-          orderBy: { isPrimary: "desc" },
-          include: {
-            guardian: {
-              include: {
-                students: {
-                  where: { studentId: { not: studentId } },
-                  include: {
-                    student: {
-                      select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        enrolments: {
-                          where: { status: EnrolmentStatus.ACTIVE },
-                          take: 1,
-                          select: { classArm: { select: { name: true, classLevel: { select: { name: true } } } } },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        enrolments: {
-          orderBy: { session: { startDate: "desc" } },
-          include: { classArm: { include: { classLevel: true } }, session: true },
-        },
-      },
+      include: profileInclude(studentId),
     });
     if (!student) throw new NotFoundException("Student not found.");
     return withSiblings(student, scope.kind === "school");

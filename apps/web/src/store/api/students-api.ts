@@ -21,7 +21,10 @@ export type RegisterStudentRequest = {
   nationality?: string;
   stateOfOrigin?: string;
   lga?: string;
-  dateOfAdmission: string;
+  /** Sets the admission number's year. */
+  admissionYear: number;
+  /** Optional: older records often have only the year. */
+  dateOfAdmission?: string;
   classArmId: string;
   /** Department — senior (SSS) students only. */
   stream?: "SCIENCE" | "ARTS" | "COMMERCIAL";
@@ -31,6 +34,28 @@ export type RegisterStudentRequest = {
   previousSchool?: string;
   guardians: GuardianInput[];
 };
+
+/** What a superadmin can correct on a registered student. */
+export type UpdateStudentRequest = Pick<
+  RegisterStudentRequest,
+  | "firstName"
+  | "lastName"
+  | "otherNames"
+  | "dateOfBirth"
+  | "sex"
+  | "stateOfOrigin"
+  | "lga"
+  | "address"
+  | "bloodGroup"
+  | "medicalNote"
+  | "previousSchool"
+  | "dateOfAdmission"
+>;
+
+export type UpdateGuardianRequest = Pick<
+  GuardianInput,
+  "firstName" | "lastName" | "phone" | "altPhone" | "email" | "occupation"
+>;
 
 export type RegisteredStudent = {
   id: string;
@@ -67,12 +92,15 @@ export type StudentProfile = {
   nationality: string;
   stateOfOrigin: string | null;
   lga: string | null;
-  dateOfAdmission: string;
+  admissionYear: number;
+  dateOfAdmission: string | null;
   address: string | null;
   bloodGroup: string | null;
   medicalNote: string | null;
   previousSchool: string | null;
   admittedIntoLevel: { name: string };
+  /** Present when a passport photograph exists; the image is fetched separately. */
+  photo: { updatedAt: string } | null;
   guardians: {
     relationship: "FATHER" | "MOTHER" | "GUARDIAN";
     isPrimary: boolean;
@@ -110,11 +138,43 @@ export const studentsApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, studentId) => [{ type: "Student", id: studentId }],
     }),
 
+    // Keyed on the photo's updatedAt as well, so a new photo is a new cache
+    // entry rather than a stale image.
+    getStudentPhoto: builder.query<{ dataUrl: string }, { studentId: string; version: string }>({
+      query: ({ studentId }) => ({ url: `/students/${studentId}/photo` }),
+    }),
+
+    setStudentPhoto: builder.mutation<unknown, { studentId: string; mimeType: string; base64: string }>({
+      query: ({ studentId, ...body }) => ({ url: `/students/${studentId}/photo`, method: "PUT", body }),
+      invalidatesTags: (_result, _error, { studentId }) => [{ type: "Student", id: studentId }, "Dashboard"],
+    }),
+
+    // Superadmin corrections. The profile refreshes, and the dashboard's
+    // activity feed with it.
+    updateStudent: builder.mutation<{ changed: boolean }, { studentId: string; details: UpdateStudentRequest }>({
+      query: ({ studentId, details }) => ({ url: `/students/${studentId}`, method: "PUT", body: details }),
+      invalidatesTags: (_result, _error, { studentId }) => [{ type: "Student", id: studentId }, "Student", "Dashboard"],
+    }),
+
+    // A guardian can be shared by siblings, so every student record refreshes.
+    updateGuardian: builder.mutation<{ changed: boolean }, { guardianId: string; details: UpdateGuardianRequest }>({
+      query: ({ guardianId, details }) => ({ url: `/students/guardians/${guardianId}`, method: "PUT", body: details }),
+      invalidatesTags: ["Student", "Dashboard"],
+    }),
+
     registerStudent: builder.mutation<RegisteredStudent, RegisterStudentRequest>({
       query: (body) => ({ url: "/students", method: "POST", body }),
-      invalidatesTags: ["Student", "Enrolment"],
+      invalidatesTags: ["Student", "Enrolment", "Dashboard"],
     }),
   }),
 });
 
-export const { useRegisterStudentMutation, useListStudentsQuery, useGetStudentQuery } = studentsApi;
+export const {
+  useRegisterStudentMutation,
+  useListStudentsQuery,
+  useGetStudentQuery,
+  useGetStudentPhotoQuery,
+  useSetStudentPhotoMutation,
+  useUpdateStudentMutation,
+  useUpdateGuardianMutation,
+} = studentsApi;

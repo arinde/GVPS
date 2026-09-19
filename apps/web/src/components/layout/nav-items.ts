@@ -1,4 +1,12 @@
-import { CircleUserRound, GraduationCap, LayoutDashboard, LayoutGrid, UserPlus, UsersRound } from "lucide-react";
+import {
+  CircleUserRound,
+  GraduationCap,
+  LayoutDashboard,
+  LayoutGrid,
+  School,
+  UserPlus,
+  UsersRound,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type NavItem = {
@@ -30,6 +38,8 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { href: "/staff", label: "Staff", icon: UsersRound, roles: ["SUPERADMIN"] },
   { href: "/staff/classes", label: "Class allocation", icon: LayoutGrid, roles: ["SUPERADMIN"] },
+  // Class structure is configuration: superadmin and principal (FEATURES.md §14).
+  { href: "/classes", label: "Classes", icon: School, roles: ["SUPERADMIN", "PRINCIPAL"] },
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },
 ];

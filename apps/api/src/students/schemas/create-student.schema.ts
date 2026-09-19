@@ -8,8 +8,8 @@ import { isKnownState, isLgaOfState } from "@/reference/nigeria-states";
 // identifier; this list is what keeps it from being free-typed.
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
-const Name = z.string().trim().min(1).max(80);
-const OptionalText = blankAsUndefined(z.string().trim().max(200));
+export const Name = z.string().trim().min(1).max(80);
+export const OptionalText = blankAsUndefined(z.string().trim().max(200));
 
 export const GuardianInputSchema = z.object({
   firstName: Name,
@@ -34,7 +34,10 @@ export const CreateStudentSchema = z
     stateOfOrigin: OptionalText,
     lga: OptionalText,
 
-    dateOfAdmission: z.iso.date(),
+    // The year sets the admission number's {YEAR}; the exact day is optional
+    // because older records often have only the year.
+    admissionYear: z.int("Choose the year of admission").min(1950, "Choose the year of admission"),
+    dateOfAdmission: blankAsUndefined(z.iso.date()),
     // The arm the student joins now. Their level is derived from it, so the
     // two can never disagree.
     classArmId: z.string().min(1),
@@ -52,10 +55,24 @@ export const CreateStudentSchema = z
     // student with no contact on file is a child the office cannot reach.
     guardians: z.array(GuardianInputSchema).min(1, "Add at least one parent or guardian").max(4),
   })
-  .refine((student) => new Date(student.dateOfBirth) < new Date(student.dateOfAdmission), {
-    message: "A student cannot be admitted before they were born",
-    path: ["dateOfBirth"],
+  .refine((student) => student.admissionYear <= new Date().getFullYear(), {
+    message: "The year of admission cannot be in the future",
+    path: ["admissionYear"],
   })
+  .refine(
+    (student) => !student.dateOfAdmission || Number(student.dateOfAdmission.slice(0, 4)) === student.admissionYear,
+    {
+      message: "The date must fall in the year of admission",
+      path: ["dateOfAdmission"],
+    },
+  )
+  .refine(
+    (student) =>
+      student.dateOfAdmission
+        ? new Date(student.dateOfBirth) < new Date(student.dateOfAdmission)
+        : Number(student.dateOfBirth.slice(0, 4)) <= student.admissionYear,
+    { message: "A student cannot be admitted before they were born", path: ["dateOfBirth"] },
+  )
   .refine((student) => student.guardians.filter((g) => g.isPrimary).length <= 1, {
     message: "Only one guardian can be the primary contact",
     path: ["guardians"],

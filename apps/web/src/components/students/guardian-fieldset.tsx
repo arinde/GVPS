@@ -2,7 +2,7 @@ import { Trash2 } from "lucide-react";
 import { controlProps, FormField } from "@/components/common/form-field";
 import { NativeSelect } from "@/components/common/native-select";
 import { AppButton } from "@/components/common/app-button";
-import { TextInput } from "@/components/common/text-input";
+import { GuardianContactFields } from "@/components/students/guardian-contact-fields";
 import type { GuardianInput } from "@/store/api/students-api";
 
 const RELATIONSHIPS = [
@@ -10,8 +10,6 @@ const RELATIONSHIPS = [
   { value: "MOTHER", label: "Mother" },
   { value: "GUARDIAN", label: "Guardian" },
 ];
-
-const PHONE_HINT = "e.g. 0801 234 5678";
 
 export type GuardianFieldsetProps = {
   index: number;
@@ -42,49 +40,13 @@ export function GuardianFieldset({
     <fieldset className="border-border rounded-lg border p-4">
       <legend className="px-1 text-sm font-semibold">Parent or guardian {index + 1}</legend>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormField id={id("first")} label="First name" required error={errors.firstName}>
-          <TextInput
-            {...controlProps(id("first"), errors.firstName)}
-            value={value.firstName}
-            disabled={disabled}
-            onChange={(event) => onChange({ firstName: event.target.value })}
-          />
-        </FormField>
-
-        <FormField id={id("last")} label="Surname" required error={errors.lastName}>
-          <TextInput
-            {...controlProps(id("last"), errors.lastName)}
-            value={value.lastName}
-            disabled={disabled}
-            onChange={(event) => onChange({ lastName: event.target.value })}
-          />
-        </FormField>
-
-        <FormField id={id("phone")} label="Phone" required hint={PHONE_HINT} error={errors.phone}>
-          <TextInput
-            {...controlProps(id("phone"), errors.phone, PHONE_HINT)}
-            type="tel"
-            inputMode="tel"
-            autoComplete="off"
-            value={value.phone}
-            disabled={disabled}
-            onChange={(event) => onChange({ phone: event.target.value })}
-          />
-        </FormField>
-
-        <FormField id={id("alt")} label="Alternate phone" error={errors.altPhone}>
-          <TextInput
-            {...controlProps(id("alt"), errors.altPhone)}
-            type="tel"
-            inputMode="tel"
-            autoComplete="off"
-            value={value.altPhone ?? ""}
-            disabled={disabled}
-            onChange={(event) => onChange({ altPhone: event.target.value || undefined })}
-          />
-        </FormField>
-
+      <GuardianContactFields
+        idPrefix={`guardian-${index}`}
+        value={value}
+        onChange={onChange}
+        errors={errors}
+        disabled={disabled}
+      >
         <FormField id={id("relationship")} label="Relationship" required error={errors.relationship}>
           <NativeSelect
             {...controlProps(id("relationship"), errors.relationship)}
@@ -94,26 +56,7 @@ export function GuardianFieldset({
             onChange={(event) => onChange({ relationship: event.target.value as GuardianInput["relationship"] })}
           />
         </FormField>
-
-        <FormField id={id("occupation")} label="Occupation" error={errors.occupation}>
-          <TextInput
-            {...controlProps(id("occupation"), errors.occupation)}
-            value={value.occupation ?? ""}
-            disabled={disabled}
-            onChange={(event) => onChange({ occupation: event.target.value })}
-          />
-        </FormField>
-
-        <FormField id={id("email")} label="Email" className="sm:col-span-2" error={errors.email}>
-          <TextInput
-            {...controlProps(id("email"), errors.email)}
-            type="email"
-            value={value.email ?? ""}
-            disabled={disabled}
-            onChange={(event) => onChange({ email: event.target.value })}
-          />
-        </FormField>
-      </div>
+      </GuardianContactFields>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         {/* Radio, not a checkbox: exactly one guardian is the school's first

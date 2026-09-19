@@ -6,6 +6,7 @@ import { AuthService } from "@/auth/auth.service";
 import { MeController } from "@/auth/me.controller";
 import { StaffAccountController } from "@/auth/staff-account.controller";
 import { StaffAccountService } from "@/auth/staff-account.service";
+import { StaffUpdateService } from "@/auth/staff-update.service";
 import { JwtStrategy } from "@/auth/strategies/jwt.strategy";
 
 @Module({
@@ -14,6 +15,6 @@ import { JwtStrategy } from "@/auth/strategies/jwt.strategy";
   // so JwtModule itself needs no default configuration.
   imports: [PassportModule.register({ defaultStrategy: "jwt" }), JwtModule.register({})],
   controllers: [AuthController, StaffAccountController, MeController],
-  providers: [AuthService, StaffAccountService, JwtStrategy],
+  providers: [AuthService, StaffAccountService, StaffUpdateService, JwtStrategy],
 })
 export class AuthModule {}

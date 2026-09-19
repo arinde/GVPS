@@ -1,11 +1,12 @@
 import { AdmissionNumberService, formatAdmissionNumber } from "@/students/admission-number.service";
-import type { School } from "@prisma/client";
+import { Section, type School } from "@prisma/client";
 
 const school = {
   id: "school-1",
   admissionNoFormat: "{PREFIX}/{YEAR}/{SEQ}",
   admissionNoPrefix: "GVPS",
   admissionNoPadding: 4,
+  admissionCodePrimary: "PRY",
 } as School;
 
 describe("formatAdmissionNumber", () => {
@@ -40,18 +41,18 @@ describe("AdmissionNumberService", () => {
   it("increments the counter for the admission year, not today's year", async () => {
     tx.admissionCounter.upsert.mockResolvedValue({ lastNumber: 1 });
 
-    const number = await service.allocate(tx as never, school, new Date("2024-03-05"));
+    const number = await service.allocate(tx as never, school, Section.PRIMARY, 2024);
 
     expect(number).toBe("GVPS/2024/0001");
     expect(tx.admissionCounter.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { schoolId_year: { schoolId: "school-1", year: 2024 } } }),
+      expect.objectContaining({ where: { schoolId_code_year: { schoolId: "school-1", code: "PRY", year: 2024 } } }),
     );
   });
 
   it("uses an atomic increment rather than reading then writing", async () => {
     tx.admissionCounter.upsert.mockResolvedValue({ lastNumber: 8 });
 
-    await service.allocate(tx as never, school, new Date("2026-09-01"));
+    await service.allocate(tx as never, school, Section.PRIMARY, 2026);
 
     // The increment must be expressed as an operation, not a computed value,
     // or two concurrent registrations can read the same "last" number.
@@ -63,8 +64,8 @@ describe("AdmissionNumberService", () => {
   it("allocates consecutive numbers as the counter advances", async () => {
     tx.admissionCounter.upsert.mockResolvedValueOnce({ lastNumber: 1 }).mockResolvedValueOnce({ lastNumber: 2 });
 
-    const first = await service.allocate(tx as never, school, new Date("2026-09-01"));
-    const second = await service.allocate(tx as never, school, new Date("2026-09-01"));
+    const first = await service.allocate(tx as never, school, Section.PRIMARY, 2026);
+    const second = await service.allocate(tx as never, school, Section.PRIMARY, 2026);
 
     expect([first, second]).toEqual(["GVPS/2026/0001", "GVPS/2026/0002"]);
   });

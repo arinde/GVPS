@@ -19,6 +19,9 @@ export type AddStaffFormProps = {
   errorMessage?: string;
   /** Keyed by the API's field path: "firstName", "accountNumber", "roles". */
   fieldErrors?: Record<string, string>;
+  /** The submit button's words, idle and saving; editing says "Save changes". */
+  submitLabel?: string;
+  submittingLabel?: string;
 };
 
 /** Presentational (AGENTS.md §1): the draft, the lists and callbacks in; nothing fetched. */
@@ -32,6 +35,8 @@ export function AddStaffForm({
   isSubmitting = false,
   errorMessage,
   fieldErrors = {},
+  submitLabel = "Create staff account",
+  submittingLabel = "Creating…",
 }: AddStaffFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,7 +79,7 @@ export function AddStaffForm({
 
       <div className="flex flex-col items-end gap-1">
         <AppButton type="submit" disabled={isSubmitting || value.roles.length === 0}>
-          {isSubmitting ? "Creating…" : "Create staff account"}
+          {isSubmitting ? submittingLabel : submitLabel}
         </AppButton>
         {/* A disabled button always says why (STITCH-GLOBAL.md §13). */}
         {value.roles.length === 0 ? (

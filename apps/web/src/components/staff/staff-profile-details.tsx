@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { primaryRoleLabel, ROLE_OPTIONS } from "@/components/auth/roles";
 import { ContentCard } from "@/components/common/content-card";
 import { DetailList } from "@/components/common/detail-list";
@@ -12,13 +13,15 @@ export type StaffProfileDetailsProps = {
   profile: StaffProfile;
   /** The line under the cards: who can change this record, and how. */
   footnote: string;
+  /** Header actions, e.g. the superadmin's "Edit details". */
+  actions?: ReactNode;
 };
 
 /**
  * A staff record, read-only. Used for "My profile" and for the superadmin
  * looking at a colleague, so both show exactly the same thing.
  */
-export function StaffProfileDetails({ profile, footnote }: StaffProfileDetailsProps) {
+export function StaffProfileDetails({ profile, footnote, actions }: StaffProfileDetailsProps) {
   const roles = profile.roles.map(({ role }) => role);
   const classes = profile.classAssignments.map(({ classArm }) => `${classArm.classLevel.name}${classArm.name}`);
   const hasAccount = Boolean(profile.accountNumber);
@@ -28,6 +31,7 @@ export function StaffProfileDetails({ profile, footnote }: StaffProfileDetailsPr
       <PageHeader
         title={staffName(profile)}
         subtitle={`${primaryRoleLabel(roles)} · on staff since ${formatMonthYear(profile.createdAt)}`}
+        actions={actions}
       />
 
       <div className="flex flex-col gap-5">

@@ -172,7 +172,70 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
-### 2026-09-19 (latest) — staff screens
+### 2026-09-20 (later) — superadmin editing, audited
+
+- **Staff**: "Edit details" on `/staff/[id]` → `/staff/[id]/edit` (the create
+  form, reused). `PUT /auth/staff/:id` replaces details, next of kin, salary
+  account and roles in one save (`staff-update.service.ts`). Guards: nobody
+  removes their own superadmin role, and the school always keeps one.
+- **Students**: "Edit details" on `/students/[id]` (superadmin only) →
+  `/students/[id]/edit`: the child's details plus one card per guardian, each
+  saved separately (a guardian may be shared by siblings).
+  `PUT /students/:id` and `PUT /students/guardians/:guardianId`. Not editable
+  on purpose: admission number and year, class (a transfer, later), links.
+- **Audit**: every save that changes something writes one row with only the
+  changed fields, before and after (`common/audit-diff.ts`); account numbers
+  masked; a save with no changes writes nothing. The dashboard feed names the
+  fields changed. There is no audit-log viewer screen yet.
+
+### 2026-09-20 — admission codes, early years, passport photos
+
+- **Admission numbers carry a category code**: `GVPS/NUR|PRY|SEC/{year}/{seq}`,
+  each code with its own count per year (`AdmissionCounter.code`). Codes live
+  on `School` (`admissionCodeNursery/Primary/Secondary`, defaults NUR, PRY,
+  SEC) — change them there before real volume; no settings UI yet. JSS and
+  SSS share SEC. The one number issued earlier (`GVPS/2026/0001`) keeps its
+  old shape: issued numbers are immutable by trigger.
+- **Year of admission** is a required dropdown on registration and sets the
+  number's year; the exact date is now optional (`Student.admissionYear`,
+  `dateOfAdmission` nullable). The year is kept between entries.
+- **Early years**: Section `NURSERY` with Creche, Nursery 1, Nursery 2, KG 1,
+  KG 2 (ranks 1–5, arm A each); every other level moved up five ranks.
+  Order follows the owner's list; swap ranks if the school runs KG first.
+- **Passport photos**: `student_photos` table (bytes, kept off `Student`),
+  `GET/PUT /students/:id/photo`, scoped like the record. The browser resizes
+  to a ≤360×460 JPEG first. Optional on registration (uploaded after the
+  student is created; a failed upload never undoes it) and on the profile,
+  where registering roles can add or change it.
+- Migrations were written by hand (`migrate dev` refuses a non-interactive
+  shell) and applied with `migrate deploy`; `migrate diff` confirmed the
+  database matches the schema.
+
+### 2026-09-19 — class setup
+
+- **Classes** (`/classes`, superadmin and principal): add an arm to any level
+  (choosing the level suggests its next letter; level and size are kept for
+  the next one) and set each class's size inline — Enter or leaving the field
+  saves it, empty clears it. New arms appear at once in registration, class
+  allocation and the dashboard.
+- API: `PATCH /academic/arms/:armId` (`{ capacity: number | null }`, audited as
+  `academic.arm.updated`). Arm names are now stored upper-case.
+- Arm names cannot be renamed or deleted from the UI on purpose: enrolments
+  point at them. Add that only with a rule for arms that have students.
+
+### 2026-09-19 — dashboard
+
+- `GET /dashboard` (superadmin, principal; `apps/api/src/dashboard/`): enrolled
+  per section, registered this week, staff and password-not-set counts,
+  classes without a teacher, per-class enrolment, last 8 audit entries turned
+  into plain lines by `describe-activity.ts`.
+- Home page picks by role: leadership get screen 1 (Waiting on you, four stat
+  cards, registration by class, recent activity); everyone else gets the quick
+  links. Fees and attendance cards wait for those modules rather than show
+  zeros. New common pieces: `StatCard`, `ProgressBar`. Registering, creating
+  staff and allocating classes refresh it via the "Dashboard" tag.
+
+### 2026-09-19 — staff screens
 
 - **Staff accounts** (`/staff`, screen 12): name (links to `/staff/[id]`, the
   full profile), email, phone, role, classes, and a status pill — "Active" or
@@ -228,14 +291,14 @@ two siblings, enrolment into the current session, search, and detail.
 
 ## 5. Next, in order
 
-1. **Superadmin dashboard (screen 1).** Stat cards and registration progress per
-   class ("Primary 3A: 28 of 34"), which `FEATURES.md` §3.5 lists for Phase 1.
-2. **More arms.** Seeded with arm "A" per level — add B/C through
-   `POST /academic/levels/:id/arms`; no UI yet.
-3. **Confirm the admission number format with the school** before volume entry.
-4. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
+1. **Look at the dashboard in a browser.** Built and type-clean but not yet
+   seen rendered (the dev servers were stopped mid-check). Class sizes
+   (`ClassArm.capacity`) are unset until entered on `/classes`, so progress
+   shows counts without bars until then. The class setup page is also unseen.
+2. **Confirm the admission number format with the school** before volume entry.
+3. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
    create-staff form (the Figma form has one).
-5. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is
+4. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is
    done; subject-teacher allocation comes with subjects.
 
 ---

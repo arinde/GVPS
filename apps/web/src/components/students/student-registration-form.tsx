@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { UserPlus } from "lucide-react";
 import { GuardianFieldset } from "@/components/students/guardian-fieldset";
 import { StudentBackgroundFields } from "@/components/students/student-background-fields";
@@ -32,6 +32,8 @@ export type StudentRegistrationFormProps = {
   errorMessage?: string;
   /** Keyed by the API's field path: "dateOfBirth", "guardians.0.phone". */
   fieldErrors?: Record<string, string>;
+  /** The passport photo picker, placed beside the student's details. */
+  photo?: ReactNode;
 };
 
 const MAX_GUARDIANS = 4;
@@ -50,6 +52,7 @@ export function StudentRegistrationForm({
   isSubmitting = false,
   errorMessage,
   fieldErrors = {},
+  photo,
 }: StudentRegistrationFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,7 +64,12 @@ export function StudentRegistrationForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
       <FormSection title="Student">
-        <StudentIdentityFields {...fields} />
+        <div className="flex flex-col gap-5 sm:flex-row-reverse sm:items-start">
+          {photo}
+          <div className="min-w-0 flex-1">
+            <StudentIdentityFields {...fields} />
+          </div>
+        </div>
       </FormSection>
 
       <FormSection title="Class">

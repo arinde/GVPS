@@ -50,6 +50,7 @@ const draft: RegisterStudentRequest = {
   lastName: "",
   dateOfBirth: "",
   sex: "FEMALE",
+  admissionYear: 2026,
   dateOfAdmission: "2026-09-01",
   classArmId: "",
   guardians: [guardian],

@@ -7,13 +7,18 @@ function emptyGuardian(isPrimary: boolean): GuardianInput {
 }
 
 /** A fresh form. Starts with one guardian block open, because one is required. */
-export function blankDraft(classArmId = "", stream?: RegisterStudentRequest["stream"]): RegisterStudentRequest {
+export function blankDraft(
+  classArmId = "",
+  stream?: RegisterStudentRequest["stream"],
+  admissionYear = new Date().getFullYear(),
+): RegisterStudentRequest {
   return {
     firstName: "",
     lastName: "",
     dateOfBirth: "",
     sex: "FEMALE",
-    dateOfAdmission: new Date().toISOString().slice(0, 10),
+    admissionYear,
+    dateOfAdmission: "",
     classArmId,
     stream,
     guardians: [emptyGuardian(true)],
@@ -40,7 +45,14 @@ export function useRegistrationDraft() {
       // so a department chosen for the old class never carries over — unless
       // this same change sets one explicitly, which then wins.
       const clearStream = classChanged && !("stream" in changes);
-      return { ...previous, ...changes, ...(clearStream ? { stream: undefined } : {}) };
+      // A date from another year would contradict the new year; drop it.
+      const yearChanged = changes.admissionYear !== undefined && changes.admissionYear !== previous.admissionYear;
+      return {
+        ...previous,
+        ...changes,
+        ...(clearStream ? { stream: undefined } : {}),
+        ...(yearChanged && !("dateOfAdmission" in changes) ? { dateOfAdmission: "" } : {}),
+      };
     });
     setFieldErrors((errors) => withoutFieldErrors(errors, Object.keys(changes)));
   }
@@ -80,9 +92,12 @@ export function useRegistrationDraft() {
     }));
   }
 
-  /** After a successful save: keep the class and department, clear the rest. */
+  /**
+   * After a successful save: keep the class, department and year — a batch
+   * of records usually shares all three — and clear the rest.
+   */
   function resetKeepingClass() {
-    setDraft((previous) => blankDraft(previous.classArmId, previous.stream));
+    setDraft((previous) => blankDraft(previous.classArmId, previous.stream, previous.admissionYear));
     setFieldErrors({});
   }
 

@@ -11,6 +11,7 @@ function dto(overrides: Partial<CreateStudentDto> = {}): CreateStudentDto {
     lastName: "Ibrahim",
     dateOfBirth: "2014-05-12",
     sex: Sex.FEMALE,
+    admissionYear: 2026,
     dateOfAdmission: "2026-09-01",
     classArmId: "arm-1",
     guardians: [
@@ -126,7 +127,7 @@ describe("StudentsService", () => {
       // Allocation outside the transaction would let two concurrent
       // registrations read the same counter value.
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-      expect(admissionNumbers.allocate).toHaveBeenCalledWith(prisma, { id: "school-1" }, new Date("2026-09-01"));
+      expect(admissionNumbers.allocate).toHaveBeenCalledWith(prisma, { id: "school-1" }, "PRIMARY", 2026);
     });
 
     it("reuses an existing guardian rather than cloning them", async () => {

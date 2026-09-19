@@ -1,13 +1,20 @@
 "use client";
 
 import { createColumnHelper, type ColumnDef, type StockFeatures } from "@tanstack/react-table";
+import { Pencil } from "lucide-react";
+import { AppLinkButton } from "@/components/common/app-button";
 import { ContentCard } from "@/components/common/content-card";
 import { DataTable } from "@/components/common/data-table";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
 import { StudentRecordCard } from "@/components/students/student-record-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { formatDate, formatMonthYear } from "@/lib/dates";
+import { decodeAccessToken } from "@/lib/decode-access-token";
+import { useGetMyAccessQuery } from "@/store/api/access-api";
+import { useAppSelector } from "@/store/hooks";
+import { selectAccessToken } from "@/store/slices/auth-slice";
 import { useGetStudentQuery, type StudentProfile } from "@/store/api/students-api";
 
 type Enrolment = StudentProfile["enrolments"][number];
@@ -37,6 +44,10 @@ const enrolmentColumns = [
  */
 export function StudentProfileView({ studentId }: { studentId: string }) {
   const { data: student, isLoading, isError } = useGetStudentQuery(studentId);
+  const { data: access } = useGetMyAccessQuery();
+  const accessToken = useAppSelector(selectAccessToken);
+  // Only the superadmin corrects records; the API enforces it regardless.
+  const canEdit = (accessToken ? decodeAccessToken(accessToken)?.roles : undefined)?.includes("SUPERADMIN") ?? false;
 
   if (isLoading) {
     return (
@@ -66,11 +77,31 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
     <PageContainer>
       <PageHeader
         title={name}
-        subtitle={`${currentClass} · ${student.admissionNo} · admitted ${formatMonthYear(student.dateOfAdmission)}`}
+        subtitle={`${currentClass} · ${student.admissionNo} · admitted ${
+          student.dateOfAdmission ? formatMonthYear(student.dateOfAdmission) : student.admissionYear
+        }`}
+        actions={
+          canEdit ? (
+            <AppLinkButton href={`/students/${student.id}/edit`} variant="secondary">
+              <Pencil aria-hidden="true" />
+              Edit details
+            </AppLinkButton>
+          ) : undefined
+        }
       />
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
-        <StudentRecordCard student={student} />
+        <StudentRecordCard
+          student={student}
+          photo={
+            <StudentProfilePhoto
+              studentId={student.id}
+              name={`${student.lastName}, ${student.firstName}`}
+              photo={student.photo}
+              canUpload={access?.canRegister ?? false}
+            />
+          }
+        />
 
         <ContentCard flush>
           <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>

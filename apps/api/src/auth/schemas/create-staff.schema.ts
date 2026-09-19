@@ -53,3 +53,8 @@ export const CreateStaffSchema = z
   });
 
 export type CreateStaffDto = z.infer<typeof CreateStaffSchema>;
+
+// Editing replaces the whole record with the same rules as creating it, so a
+// saved record is always one that could have been created.
+export const UpdateStaffSchema = CreateStaffSchema;
+export type UpdateStaffDto = CreateStaffDto;

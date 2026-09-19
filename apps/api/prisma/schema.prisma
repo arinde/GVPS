@@ -25,12 +25,17 @@ model School {
   createdAt DateTime @default(now())
 
   // FEATURES.md §3.2: admission number format is configurable. Tokens are
-  // {PREFIX}, {YEAR} and {SEQ}; {SEQ} is left-padded to `admissionNoPadding`.
+  // {PREFIX}, {CODE}, {YEAR} and {SEQ}; {SEQ} is left-padded to
+  // `admissionNoPadding`. {CODE} names the school the child was admitted into
+  // — primary or secondary — and each code keeps its own running count.
   // Agreeing this with the school before the first record is a PLAN.md §8
   // prerequisite, because it is baked into every student from then on.
-  admissionNoFormat  String @default("{PREFIX}/{YEAR}/{SEQ}")
-  admissionNoPrefix  String @default("GVPS")
-  admissionNoPadding Int    @default(4)
+  admissionNoFormat      String @default("{PREFIX}/{CODE}/{YEAR}/{SEQ}")
+  admissionNoPrefix      String @default("GVPS")
+  admissionNoPadding     Int    @default(4)
+  admissionCodeNursery   String @default("NUR")
+  admissionCodePrimary   String @default("PRY")
+  admissionCodeSecondary String @default("SEC")
 
   staff            Staff[]
   auditLogs        AuditLog[]
@@ -165,6 +170,8 @@ model AuditLog {
 // PLAN.md §4.7: section is first-class, not derived by branching on level
 // name. It drives grading scale, report card template and teaching model.
 enum Section {
+  // Early years: Creche, Nursery 1–2 and KG 1–2.
+  NURSERY
   PRIMARY
   JUNIOR
   SENIOR
@@ -309,8 +316,13 @@ model Student {
   // Deferred to a second pass: FEATURES.md §3.5 is explicit that photograph
   // capture must never block data entry.
   photoUrl String?
+  photo    StudentPhoto?
 
-  dateOfAdmission     DateTime
+  // The year is required and sets the admission number's {YEAR}. The exact
+  // day is optional: a child admitted years before the school went digital
+  // often has a known year and nothing more.
+  admissionYear       Int
+  dateOfAdmission     DateTime?
   admittedIntoLevelId String
 
   address        String?
@@ -406,18 +418,37 @@ model Enrolment {
   @@map("enrolments")
 }
 
+// The passport photograph, kept apart from Student so every list and search
+// does not drag image bytes along. Resized in the browser to a small JPEG
+// before upload, so a whole school fits comfortably in the database.
+model StudentPhoto {
+  id        String   @id @default(cuid())
+  schoolId  String
+  studentId String   @unique
+  mimeType  String
+  data      Bytes
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("student_photos")
+}
+
 // Admission numbers must be unique under concurrent creation (TESTS.md §7).
-// A counter row per school per year, incremented inside the same transaction
+// A counter row per school per category code per year, incremented inside the same transaction
 // that creates the student, so two secretaries saving at once cannot collide.
 // The unique index on students is the backstop if this is ever bypassed.
 model AdmissionCounter {
   id         String   @id @default(cuid())
   schoolId   String
+  // The {CODE} this count belongs to ("PRY", "SEC"); "" for numbers issued
+  // before codes existed.
+  code       String   @default("")
   year       Int
   lastNumber Int      @default(0)
   updatedAt  DateTime @updatedAt
 
-  @@unique([schoolId, year])
+  @@unique([schoolId, code, year])
   @@map("admission_counters")
 }
 

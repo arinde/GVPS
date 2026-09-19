@@ -2,7 +2,7 @@ import "dotenv/config";
 import { PrismaClient, Section } from "@prisma/client";
 
 /**
- * Seeds the academic structure so registration can begin: the twelve class
+ * Seeds the academic structure so registration can begin: the seventeen class
  * levels, one arm each, and the current session and term.
  *
  * Safe to re-run — every step is keyed on a natural unique constraint, so it
@@ -11,10 +11,13 @@ import { PrismaClient, Section } from "@prisma/client";
  */
 const prisma = new PrismaClient();
 
+const EARLY_YEARS = ["Creche", "Nursery 1", "Nursery 2", "KG 1", "KG 2"];
+
 const LEVELS: { name: string; section: Section; rank: number }[] = [
-  ...[1, 2, 3, 4, 5, 6].map((n) => ({ name: `Primary ${n}`, section: Section.PRIMARY, rank: n })),
-  ...[1, 2, 3].map((n) => ({ name: `JSS ${n}`, section: Section.JUNIOR, rank: 6 + n })),
-  ...[1, 2, 3].map((n) => ({ name: `SSS ${n}`, section: Section.SENIOR, rank: 9 + n })),
+  ...EARLY_YEARS.map((name, index) => ({ name, section: Section.NURSERY, rank: index + 1 })),
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({ name: `Primary ${n}`, section: Section.PRIMARY, rank: 5 + n })),
+  ...[1, 2, 3].map((n) => ({ name: `JSS ${n}`, section: Section.JUNIOR, rank: 11 + n })),
+  ...[1, 2, 3].map((n) => ({ name: `SSS ${n}`, section: Section.SENIOR, rank: 14 + n })),
 ];
 
 const SESSION = {

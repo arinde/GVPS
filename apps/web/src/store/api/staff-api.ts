@@ -85,7 +85,13 @@ export const staffApi = baseApi.injectEndpoints({
 
     createStaff: builder.mutation<CreateStaffResponse, CreateStaffRequest>({
       query: (body) => ({ url: "/auth/staff", method: "POST", body }),
-      invalidatesTags: ["Staff"],
+      invalidatesTags: ["Staff", "Dashboard"],
+    }),
+
+    // Superadmin correction of a staff record, roles included; audited by the API.
+    updateStaff: builder.mutation<{ changed: boolean }, { staffId: string; details: CreateStaffRequest }>({
+      query: ({ staffId, details }) => ({ url: `/auth/staff/${staffId}`, method: "PUT", body: details }),
+      invalidatesTags: ["Staff", "Access", "Dashboard"],
     }),
 
     getClassAllocation: builder.query<ClassAllocation, void>({
@@ -101,7 +107,7 @@ export const staffApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { staffId },
       }),
-      invalidatesTags: ["ClassAssignment", "Staff", "Access"],
+      invalidatesTags: ["ClassAssignment", "Staff", "Access", "Dashboard"],
     }),
   }),
 });
@@ -111,6 +117,7 @@ export const {
   useGetStaffProfileQuery,
   useListStaffQuery,
   useCreateStaffMutation,
+  useUpdateStaffMutation,
   useGetClassAllocationQuery,
   useSetClassTeacherMutation,
 } = staffApi;

@@ -2,7 +2,11 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Section, type ClassArm, type ClassLevel } from "@prisma/client";
 import { AuditService } from "@/audit/audit.service";
 import { PrismaService } from "@/prisma/prisma.service";
-import type { CreateClassArmDto, CreateClassLevelDto } from "@/academic/schemas/class-structure.schema";
+import type {
+  CreateClassArmDto,
+  CreateClassLevelDto,
+  UpdateClassArmDto,
+} from "@/academic/schemas/class-structure.schema";
 
 /**
  * Class levels and arms (FEATURES.md §2.2).
@@ -98,6 +102,27 @@ export class ClassStructureService {
     });
 
     return arm;
+  }
+
+  /** Sets or clears a class's size, which the dashboard measures registration against. */
+  async updateArm(actorStaffId: string, schoolId: string, armId: string, dto: UpdateClassArmDto): Promise<ClassArm> {
+    const arm = await this.prisma.classArm.findFirst({ where: { id: armId, schoolId }, include: { classLevel: true } });
+    if (!arm) throw new NotFoundException("Class not found.");
+    if (arm.capacity === dto.capacity) return arm;
+
+    const updated = await this.prisma.classArm.update({ where: { id: armId }, data: { capacity: dto.capacity } });
+
+    await this.audit.record({
+      schoolId,
+      actorStaffId,
+      action: "academic.arm.updated",
+      entityType: "ClassArm",
+      entityId: armId,
+      before: { capacity: arm.capacity },
+      after: { class: `${arm.classLevel.name}${arm.name}`, capacity: dto.capacity },
+    });
+
+    return updated;
   }
 
   listArms(schoolId: string) {
