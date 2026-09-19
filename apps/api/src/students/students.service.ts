@@ -1,16 +1,18 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import {
-  EnrolmentStatus,
-  Section,
-  type ClassArm,
-  type ClassLevel,
-  type Prisma,
-  type Stream,
-  type Student,
-} from "@prisma/client";
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { EnrolmentStatus, type Prisma, type Student } from "@prisma/client";
+import { mayRegisterInto } from "@/access/access-scope";
+import { AccessScopeService } from "@/access/access-scope.service";
 import { AuditService } from "@/audit/audit.service";
+import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
 import { AdmissionNumberService } from "@/students/admission-number.service";
+import { resolveStream, withOnePrimary } from "@/students/registration-rules";
 import type { CreateStudentDto, GuardianInputDto } from "@/students/schemas/create-student.schema";
 
 export type StudentSearch = {
@@ -34,9 +36,11 @@ export class StudentsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly admissionNumbers: AdmissionNumberService,
+    private readonly access: AccessScopeService,
   ) {}
 
-  async register(actorStaffId: string, schoolId: string, dto: CreateStudentDto): Promise<Student> {
+  async register(actor: AuthenticatedStaff, dto: CreateStudentDto): Promise<Student> {
+    const { id: actorStaffId, schoolId } = actor;
     const school = await this.prisma.school.findUniqueOrThrow({ where: { id: schoolId } });
 
     const arm = await this.prisma.classArm.findFirst({
@@ -44,6 +48,16 @@ export class StudentsService {
       include: { classLevel: true },
     });
     if (!arm) throw new NotFoundException("Class arm not found.");
+
+    // Checked before the transaction, so a refused registration never
+    // allocates — and so never wastes — an admission number.
+    const { armIds } = await this.access.allocatedArms(actor);
+    if (!mayRegisterInto(actor.roles, armIds, arm.id)) {
+      throw new ForbiddenException([
+        { path: ["classArmId"], message: "You can only register students into a class allocated to you" },
+      ]);
+    }
+
     const stream = resolveStream(arm, dto.stream);
 
     const session = await this.prisma.academicSession.findFirst({ where: { schoolId, isCurrent: true } });
@@ -179,12 +193,21 @@ export class StudentsService {
   }
 
   /** Registry list. Paginated by cursor — TESTS.md §12 forbids unbounded lists. */
-  async search(schoolId: string, params: StudentSearch) {
+  async search(actor: AuthenticatedStaff, params: StudentSearch) {
+    const schoolId = actor.schoolId;
     const query = params.query?.trim();
+    const scope = await this.access.studentScope(actor);
+
+    // Asking for a specific class outside your scope is refused outright
+    // (TESTS.md §6.2), not silently answered with an empty list.
+    if (params.classArmId && scope.kind === "arms" && !scope.armIds.includes(params.classArmId)) {
+      throw new ForbiddenException("That class is not allocated to you.");
+    }
 
     const students = await this.prisma.student.findMany({
       where: {
         schoolId,
+        AND: [AccessScopeService.studentWhere(scope)],
         ...(params.classArmId
           ? { enrolments: { some: { classArmId: params.classArmId, status: EnrolmentStatus.ACTIVE } } }
           : {}),
@@ -224,18 +247,28 @@ export class StudentsService {
    * a phone still finds them; exact rather than "contains", so 0001 never
    * returns 0010 as well.
    */
-  async findByAdmissionNo(schoolId: string, admissionNo: string) {
+  async findByAdmissionNo(actor: AuthenticatedStaff, admissionNo: string) {
+    const scope = await this.access.studentScope(actor);
     const student = await this.prisma.student.findFirst({
-      where: { schoolId, admissionNo: { equals: admissionNo.trim(), mode: "insensitive" } },
+      where: {
+        schoolId: actor.schoolId,
+        admissionNo: { equals: admissionNo.trim(), mode: "insensitive" },
+        AND: [AccessScopeService.studentWhere(scope)],
+      },
       select: { id: true },
     });
     if (!student) throw new NotFoundException(`No student with admission number ${admissionNo.trim()}.`);
-    return this.findOne(schoolId, student.id);
+    return this.findOne(actor, student.id);
   }
 
-  async findOne(schoolId: string, studentId: string) {
+  /**
+   * One student. Out of scope reads as not found rather than forbidden, so a
+   * teacher cannot probe ids to learn which students exist in other classes.
+   */
+  async findOne(actor: AuthenticatedStaff, studentId: string) {
+    const scope = await this.access.studentScope(actor);
     const student = await this.prisma.student.findFirst({
-      where: { id: studentId, schoolId },
+      where: { id: studentId, schoolId: actor.schoolId, AND: [AccessScopeService.studentWhere(scope)] },
       include: {
         admittedIntoLevel: true,
         guardians: { include: { guardian: true } },
@@ -245,38 +278,4 @@ export class StudentsService {
     if (!student) throw new NotFoundException("Student not found.");
     return student;
   }
-}
-
-/**
- * The department to record on the enrolment (see Enrolment.stream).
- *
- * Senior arms need one; everything else must not have one. If the arm itself
- * is tagged with a stream, that decides it, and a conflicting choice is an
- * error rather than silently overridden. Errors use the validation pipe's
- * { path, message } shape so the form highlights the department field.
- */
-export function resolveStream(arm: ClassArm & { classLevel: ClassLevel }, requested?: Stream): Stream | null {
-  const fieldError = (message: string) => new BadRequestException([{ path: ["stream"], message }]);
-
-  if (arm.classLevel.section !== Section.SENIOR) {
-    if (requested) throw fieldError(`${arm.classLevel.name} students do not have a department`);
-    return null;
-  }
-  if (arm.stream) {
-    if (requested && requested !== arm.stream) {
-      throw fieldError(`${arm.classLevel.name}${arm.name} is a ${arm.stream.toLowerCase()} class`);
-    }
-    return arm.stream;
-  }
-  if (!requested) throw fieldError("Choose a department for a senior student");
-  return requested;
-}
-
-/**
- * Exactly one guardian is the primary contact. If none was marked, the first
- * one is — the office always needs someone to ring first (FEATURES.md §3.3).
- */
-export function withOnePrimary(guardians: GuardianInputDto[]): GuardianInputDto[] {
-  if (guardians.some((guardian) => guardian.isPrimary)) return guardians;
-  return guardians.map((guardian, index) => ({ ...guardian, isPrimary: index === 0 }));
 }

@@ -27,12 +27,37 @@ describe("StaffAccountService", () => {
   });
 
   describe("createStaff", () => {
+    it("stores the staff member's basic details, not just an email", async () => {
+      prisma.staff.findUnique.mockResolvedValue(null);
+      prisma.staff.create.mockResolvedValue({ id: "new-staff" });
+
+      await service.createStaff("admin-1", "school-1", {
+        firstName: "Ngozi",
+        lastName: "Okafor",
+        phone: "+2348012345678",
+        email: "ngozi@school.test",
+        roles: ["FORM_TEACHER"],
+      } as never);
+
+      expect(prisma.staff.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ firstName: "Ngozi", lastName: "Okafor", phone: "+2348012345678" }),
+        }),
+      );
+    });
+
     it("rejects a duplicate email within the same school", async () => {
       prisma.staff.findUnique.mockResolvedValue({ id: "existing" });
 
-      await expect(service.createStaff("admin-1", "school-1", "taken@example.com", ["FORM_TEACHER"])).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.createStaff("admin-1", "school-1", {
+          firstName: "Ngozi",
+          lastName: "Okafor",
+          phone: "+2348012345678",
+          email: "taken@example.com",
+          roles: ["FORM_TEACHER"],
+        } as never),
+      ).rejects.toThrow(ConflictException);
       expect(prisma.staff.create).not.toHaveBeenCalled();
     });
 
@@ -40,7 +65,13 @@ describe("StaffAccountService", () => {
       prisma.staff.findUnique.mockResolvedValue(null);
       prisma.staff.create.mockResolvedValue({ id: "new-staff" });
 
-      const result = await service.createStaff("admin-1", "school-1", "new@example.com", ["FORM_TEACHER"]);
+      const result = await service.createStaff("admin-1", "school-1", {
+        firstName: "Ngozi",
+        lastName: "Okafor",
+        phone: "+2348012345678",
+        email: "new@example.com",
+        roles: ["FORM_TEACHER"],
+      } as never);
 
       expect(result.staffId).toBe("new-staff");
       expect(typeof result.temporaryPassword).toBe("string");

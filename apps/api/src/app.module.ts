@@ -3,6 +3,8 @@ import { ConfigModule } from "@nestjs/config";
 import { AppController } from "@/app.controller";
 import { AppService } from "@/app.service";
 import { AcademicModule } from "@/academic/academic.module";
+import { AccessModule } from "@/access/access.module";
+import { ClassAssignmentsModule } from "@/class-assignments/class-assignments.module";
 import { ReferenceModule } from "@/reference/reference.module";
 import { StudentsModule } from "@/students/students.module";
 import { AuditModule } from "@/audit/audit.module";
@@ -14,10 +16,12 @@ import { PrismaModule } from "@/prisma/prisma.module";
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuditModule,
+    AccessModule,
     AuthModule,
     AcademicModule,
     StudentsModule,
     ReferenceModule,
+    ClassAssignmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

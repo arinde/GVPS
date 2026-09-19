@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import type { Role } from "@prisma/client";
+import type { CreateStaffDto } from "@/auth/schemas/create-staff.schema";
 import { AuditService } from "@/audit/audit.service";
 import { PrismaService } from "@/prisma/prisma.service";
 
@@ -21,12 +22,8 @@ export class StaffAccountService {
     private readonly audit: AuditService,
   ) {}
 
-  async createStaff(
-    actorStaffId: string,
-    schoolId: string,
-    email: string,
-    roles: Role[],
-  ): Promise<StaffAccountCreated> {
+  async createStaff(actorStaffId: string, schoolId: string, dto: CreateStaffDto): Promise<StaffAccountCreated> {
+    const { email, roles } = dto;
     const existing = await this.prisma.staff.findUnique({ where: { schoolId_email: { schoolId, email } } });
     if (existing) throw new ConflictException("A staff account with this email already exists.");
 
@@ -38,6 +35,10 @@ export class StaffAccountService {
         schoolId,
         email,
         passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        otherNames: dto.otherNames,
+        phone: dto.phone,
         roles: { create: roles.map((role) => ({ role })) },
       },
     });
@@ -48,10 +49,43 @@ export class StaffAccountService {
       action: "staff.create",
       entityType: "Staff",
       entityId: staff.id,
-      after: { email, roles },
+      after: { email, roles, name: `${dto.lastName}, ${dto.firstName}` },
     });
 
     return { staffId: staff.id, temporaryPassword };
+  }
+
+  /**
+   * Every staff member in the school, with roles and this session's class
+   * allocations — what the staff list and the allocation screen both need.
+   * Never returns password hashes or lockout internals.
+   */
+  async listStaff(schoolId: string) {
+    const session = await this.prisma.academicSession.findFirst({
+      where: { schoolId, isCurrent: true },
+      select: { id: true },
+    });
+
+    return this.prisma.staff.findMany({
+      where: { schoolId },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }, { email: "asc" }],
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        otherNames: true,
+        phone: true,
+        mustChangePassword: true,
+        createdAt: true,
+        roles: { select: { role: true } },
+        classAssignments: {
+          // No current session means no current allocations to show.
+          where: { sessionId: session?.id ?? "__no_current_session__" },
+          select: { id: true, classArm: { select: { id: true, name: true, classLevel: { select: { name: true } } } } },
+        },
+      },
+    });
   }
 
   async grantRole(actorStaffId: string, schoolId: string, staffId: string, role: Role): Promise<void> {

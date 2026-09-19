@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -33,7 +34,12 @@ export class StaffAccountController {
     @CurrentUser() actor: AuthenticatedStaff,
     @Body(new ZodValidationPipe(CreateStaffSchema)) body: CreateStaffDto,
   ) {
-    return this.staffAccounts.createStaff(actor.id, actor.schoolId, body.email, body.roles);
+    return this.staffAccounts.createStaff(actor.id, actor.schoolId, body);
+  }
+
+  @Get()
+  listStaff(@CurrentUser() actor: AuthenticatedStaff) {
+    return this.staffAccounts.listStaff(actor.schoolId);
   }
 
   @Post(":staffId/roles")

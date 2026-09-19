@@ -1,6 +1,8 @@
-import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { GuardianRelationship, Section, Sex, Stream } from "@prisma/client";
-import { resolveStream, StudentsService, withOnePrimary } from "@/students/students.service";
+import { BadRequestException, ForbiddenException, NotFoundException } from "@nestjs/common";
+import { GuardianRelationship, Role, Section, Sex, Stream } from "@prisma/client";
+import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
+import { resolveStream, withOnePrimary } from "@/students/registration-rules";
+import { StudentsService } from "@/students/students.service";
 import { CreateStudentSchema, type CreateStudentDto } from "@/students/schemas/create-student.schema";
 
 function dto(overrides: Partial<CreateStudentDto> = {}): CreateStudentDto {
@@ -18,6 +20,16 @@ function dto(overrides: Partial<CreateStudentDto> = {}): CreateStudentDto {
   });
 }
 
+const staff = (roles: Role[]): AuthenticatedStaff => ({
+  id: "staff-1",
+  schoolId: "school-1",
+  email: "someone@school.test",
+  roles,
+  mustChangePassword: false,
+});
+const SECRETARY = staff([Role.ADMIN_SECRETARY]);
+const TEACHER = staff([Role.FORM_TEACHER]);
+
 describe("StudentsService", () => {
   let prisma: {
     school: { findUniqueOrThrow: jest.Mock };
@@ -31,6 +43,7 @@ describe("StudentsService", () => {
   };
   let audit: { record: jest.Mock };
   let admissionNumbers: { allocate: jest.Mock };
+  let access: { allocatedArms: jest.Mock; studentScope: jest.Mock };
   let service: StudentsService;
 
   beforeEach(() => {
@@ -58,12 +71,16 @@ describe("StudentsService", () => {
     };
     audit = { record: jest.fn() };
     admissionNumbers = { allocate: jest.fn().mockResolvedValue("GVPS/2026/0001") };
-    service = new StudentsService(prisma as never, audit as never, admissionNumbers as never);
+    access = {
+      allocatedArms: jest.fn().mockResolvedValue({ sessionId: "session-1", armIds: [] }),
+      studentScope: jest.fn().mockResolvedValue({ kind: "school" }),
+    };
+    service = new StudentsService(prisma as never, audit as never, admissionNumbers as never, access as never);
   });
 
   describe("register", () => {
     it("creates the student and an enrolment in the current session", async () => {
-      const student = await service.register("staff-1", "school-1", dto());
+      const student = await service.register(SECRETARY, dto());
 
       expect(student.admissionNo).toBe("GVPS/2026/0001");
       expect(prisma.enrolment.create).toHaveBeenCalledWith(
@@ -78,12 +95,12 @@ describe("StudentsService", () => {
       // filters by the current session, so this must fail loudly.
       prisma.academicSession.findFirst.mockResolvedValue(null);
 
-      await expect(service.register("staff-1", "school-1", dto())).rejects.toThrow(BadRequestException);
+      await expect(service.register(SECRETARY, dto())).rejects.toThrow(BadRequestException);
       expect(prisma.student.create).not.toHaveBeenCalled();
     });
 
     it("derives the admitted level from the arm so the two cannot disagree", async () => {
-      await service.register("staff-1", "school-1", dto());
+      await service.register(SECRETARY, dto());
 
       expect(prisma.student.create).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.objectContaining({ admittedIntoLevelId: "level-1" }) }),
@@ -93,18 +110,18 @@ describe("StudentsService", () => {
     it("rejects a duplicate on name plus date of birth", async () => {
       prisma.student.findFirst.mockResolvedValue({ id: "existing", admissionNo: "GVPS/2025/0007" });
 
-      await expect(service.register("staff-1", "school-1", dto())).rejects.toThrow(/GVPS\/2025\/0007/);
+      await expect(service.register(SECRETARY, dto())).rejects.toThrow(/GVPS\/2025\/0007/);
       expect(prisma.student.create).not.toHaveBeenCalled();
     });
 
     it("rejects an arm from another school", async () => {
       prisma.classArm.findFirst.mockResolvedValue(null);
 
-      await expect(service.register("staff-1", "school-1", dto())).rejects.toThrow(NotFoundException);
+      await expect(service.register(SECRETARY, dto())).rejects.toThrow(NotFoundException);
     });
 
     it("allocates the admission number inside the transaction", async () => {
-      await service.register("staff-1", "school-1", dto());
+      await service.register(SECRETARY, dto());
 
       // Allocation outside the transaction would let two concurrent
       // registrations read the same counter value.
@@ -114,8 +131,7 @@ describe("StudentsService", () => {
 
     it("reuses an existing guardian rather than cloning them", async () => {
       await service.register(
-        "staff-1",
-        "school-1",
+        SECRETARY,
         dto({
           guardians: [
             {
@@ -140,7 +156,7 @@ describe("StudentsService", () => {
     });
 
     it("writes an audit entry naming the admission number and arm", async () => {
-      await service.register("staff-1", "school-1", dto());
+      await service.register(SECRETARY, dto());
 
       expect(audit.record).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -153,7 +169,7 @@ describe("StudentsService", () => {
 
   describe("search", () => {
     it("asks for one more row than the limit to detect a next page", async () => {
-      await service.search("school-1", { limit: 50 });
+      await service.search(SECRETARY, { limit: 50 });
 
       expect(prisma.student.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51 }));
     });
@@ -161,10 +177,70 @@ describe("StudentsService", () => {
     it("returns a cursor only when there are more rows", async () => {
       prisma.student.findMany.mockResolvedValue([{ id: "a" }, { id: "b" }]);
 
-      const page = await service.search("school-1", { limit: 2 });
+      const page = await service.search(SECRETARY, { limit: 2 });
 
       expect(page.nextCursor).toBeNull();
       expect(page.students).toHaveLength(2);
+    });
+  });
+
+  describe("access scoping", () => {
+    it("lets a teacher register into their own allocated class", async () => {
+      access.allocatedArms.mockResolvedValue({ sessionId: "session-1", armIds: ["arm-1"] });
+
+      await expect(service.register(TEACHER, dto())).resolves.toMatchObject({ admissionNo: "GVPS/2026/0001" });
+    });
+
+    it("refuses a teacher registering into another class, without burning a number", async () => {
+      access.allocatedArms.mockResolvedValue({ sessionId: "session-1", armIds: ["arm-9"] });
+
+      await expect(service.register(TEACHER, dto())).rejects.toThrow(ForbiddenException);
+      // The refusal comes before the transaction, so no admission number is taken.
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+      expect(admissionNumbers.allocate).not.toHaveBeenCalled();
+    });
+
+    it("refuses a teacher with no class allocated at all", async () => {
+      access.allocatedArms.mockResolvedValue({ sessionId: "session-1", armIds: [] });
+
+      await expect(service.register(TEACHER, dto())).rejects.toThrow(ForbiddenException);
+    });
+
+    it("lets the secretary register into any class", async () => {
+      access.allocatedArms.mockResolvedValue({ sessionId: "session-1", armIds: [] });
+
+      await expect(service.register(SECRETARY, dto())).resolves.toBeDefined();
+    });
+
+    it("limits a teacher's list to active enrolments in their classes this session", async () => {
+      access.studentScope.mockResolvedValue({ kind: "arms", sessionId: "session-1", armIds: ["arm-1"] });
+
+      await service.search(TEACHER, { limit: 50 });
+
+      const where = prisma.student.findMany.mock.calls[0][0].where;
+      expect(where.AND).toEqual([
+        { enrolments: { some: { classArmId: { in: ["arm-1"] }, sessionId: "session-1", status: "ACTIVE" } } },
+      ]);
+    });
+
+    it("refuses a teacher asking for a class that is not theirs", async () => {
+      access.studentScope.mockResolvedValue({ kind: "arms", sessionId: "session-1", armIds: ["arm-1"] });
+
+      await expect(service.search(TEACHER, { limit: 50, classArmId: "arm-2" })).rejects.toThrow(ForbiddenException);
+      expect(prisma.student.findMany).not.toHaveBeenCalled();
+    });
+
+    it("gives a school-wide reader an unrestricted list", async () => {
+      await service.search(SECRETARY, { limit: 50 });
+
+      expect(prisma.student.findMany.mock.calls[0][0].where.AND).toEqual([{}]);
+    });
+
+    it("reports a student outside the teacher's classes as not found, not forbidden", async () => {
+      access.studentScope.mockResolvedValue({ kind: "arms", sessionId: "session-1", armIds: ["arm-1"] });
+      prisma.student.findFirst.mockResolvedValue(null);
+
+      await expect(service.findOne(TEACHER, "student-in-another-class")).rejects.toThrow(NotFoundException);
     });
   });
 });

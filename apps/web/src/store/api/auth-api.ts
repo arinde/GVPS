@@ -3,8 +3,6 @@ import { baseApi } from "@/store/api/base-api";
 export type LoginRequest = { email: string; password: string };
 export type TokenResponse = { accessToken: string; mustChangePassword: boolean };
 export type ChangePasswordRequest = { currentPassword: string; newPassword: string };
-export type CreateStaffRequest = { email: string; roles: string[] };
-export type CreateStaffResponse = { staffId: string; temporaryPassword: string };
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -27,18 +25,7 @@ export const authApi = baseApi.injectEndpoints({
     changePassword: builder.mutation<void, ChangePasswordRequest>({
       query: (body) => ({ url: "/auth/change-password", method: "POST", body }),
     }),
-
-    createStaff: builder.mutation<CreateStaffResponse, CreateStaffRequest>({
-      query: (body) => ({ url: "/auth/staff", method: "POST", body }),
-      invalidatesTags: ["Staff"],
-    }),
   }),
 });
 
-export const {
-  useLoginMutation,
-  useRefreshSessionQuery,
-  useLogoutMutation,
-  useChangePasswordMutation,
-  useCreateStaffMutation,
-} = authApi;
+export const { useLoginMutation, useRefreshSessionQuery, useLogoutMutation, useChangePasswordMutation } = authApi;

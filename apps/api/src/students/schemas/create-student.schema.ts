@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { GuardianRelationship, Sex, Stream } from "@prisma/client";
+import { PhoneSchema } from "@/common/schemas/phone.schema";
 import { isKnownState, isLgaOfState } from "@/reference/nigeria-states";
 
 // The eight ABO/Rh groups. Stored as text because "A+" is not a valid enum
@@ -13,19 +14,6 @@ const OptionalText = z
   .max(200)
   .optional()
   .or(z.literal("").transform(() => undefined));
-
-// Nigerian numbers, entered however the parent writes them: 08012345678,
-// +2348012345678, or with spaces. Normalised to +234XXXXXXXXXX so the same
-// parent is recognised as the same person across their children
-// (PLAN.md §4.6 — guardians are shared entities, not per-student fields).
-export const PhoneSchema = z
-  .string()
-  .trim()
-  .transform((value) => value.replace(/[\s()-]/g, ""))
-  .refine((value) => /^(\+?234|0)\d{10}$/.test(value), "Enter a valid Nigerian phone number")
-  .transform((value) =>
-    value.startsWith("0") ? `+234${value.slice(1)}` : value.startsWith("+") ? value : `+${value}`,
-  );
 
 export const GuardianInputSchema = z.object({
   firstName: Name,

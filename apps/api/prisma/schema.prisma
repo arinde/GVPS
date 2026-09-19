@@ -68,12 +68,22 @@ model Staff {
   mustChangePassword  Boolean   @default(true)
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
 
-  school        School         @relation(fields: [schoolId], references: [id])
-  roles         StaffRole[]
-  refreshTokens RefreshToken[]
+  // Basic details, so the office knows who an account belongs to rather than
+  // just an email address. Nullable only because the bootstrap superadmin was
+  // created before these existed; new accounts must supply them.
+  firstName  String?
+  lastName   String?
+  otherNames String?
+  phone      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school           School            @relation(fields: [schoolId], references: [id])
+  roles            StaffRole[]
+  refreshTokens    RefreshToken[]
+  classAssignments ClassAssignment[]
 
   // Email is unique per school, not globally — PLAN.md §4.1 keeps every
   // school's data independent even while there's only one school today.
@@ -166,9 +176,10 @@ model AcademicSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school     School      @relation(fields: [schoolId], references: [id])
-  terms      Term[]
-  enrolments Enrolment[]
+  school           School            @relation(fields: [schoolId], references: [id])
+  terms            Term[]
+  enrolments       Enrolment[]
+  classAssignments ClassAssignment[]
 
   @@unique([schoolId, name])
   @@map("academic_sessions")
@@ -228,9 +239,10 @@ model ClassArm {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  school     School      @relation(fields: [schoolId], references: [id])
-  classLevel ClassLevel  @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
-  enrolments Enrolment[]
+  school      School            @relation(fields: [schoolId], references: [id])
+  classLevel  ClassLevel        @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  enrolments  Enrolment[]
+  assignments ClassAssignment[]
 
   @@unique([classLevelId, name])
   @@map("class_arms")
@@ -393,4 +405,33 @@ model AdmissionCounter {
 
   @@unique([schoolId, year])
   @@map("admission_counters")
+}
+
+// ---------------------------------------------------------------------------
+// Class allocation (FEATURES.md §2.4) — and the basis of access scoping
+// (§1.5). A teacher's rights come from these rows, not from their role alone.
+// ---------------------------------------------------------------------------
+
+// A teacher placed in charge of a class for one session. Session-scoped for
+// the same reason enrolment is (PLAN.md §4.2): next year's reallocation must
+// not erase who taught Primary 4A this year. This is also where form-teacher
+// ownership lives, deliberately not a column on ClassArm.
+model ClassAssignment {
+  id         String   @id @default(cuid())
+  schoolId   String
+  sessionId  String
+  classArmId String
+  staffId    String
+  createdAt  DateTime @default(now())
+
+  session  AcademicSession @relation(fields: [sessionId], references: [id])
+  classArm ClassArm        @relation(fields: [classArmId], references: [id], onDelete: Cascade)
+  staff    Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  // FEATURES.md §2.2: each arm has one form teacher. The per-teacher limit
+  // (one or two classes) is a school policy that may change, so it lives in
+  // the service, not here.
+  @@unique([sessionId, classArmId])
+  @@index([schoolId, sessionId, staffId])
+  @@map("class_assignments")
 }
