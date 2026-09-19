@@ -183,6 +183,10 @@ sub-component — never by line count alone.
 
 ## 9. Tests
 
+**Paused 2026-09-19 at the owner's request, to save tokens:** do not write new
+tests until this line is removed. Existing tests stay and must keep passing.
+The rest of this section describes how tests are written when resumed.
+
 Written in the same commit as the code, never afterwards.
 
 **Needs a test**

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { CircleUserRound, LogOut } from "lucide-react";
 import { cn } from "cn";
 import type { NavItem } from "@/components/layout/nav-items";
 
@@ -14,6 +14,15 @@ export function MobileTopBar({ title, onSignOut, isSigningOut = false }: MobileT
   return (
     <header className="border-border sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-white px-4 lg:hidden">
       <p className="text-foreground truncate text-base font-semibold">{title}</p>
+      {/* §12 allows an avatar or action icon here. Profile lives here on a
+          phone because the tab bar only fits four items. */}
+      <Link
+        href="/profile"
+        aria-label="My profile"
+        className="text-foreground hover:bg-zebra ml-auto flex size-10 items-center justify-center rounded-lg"
+      >
+        <CircleUserRound className="size-5" aria-hidden="true" />
+      </Link>
       <button
         type="button"
         onClick={onSignOut}

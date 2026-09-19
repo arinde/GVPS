@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createColumnHelper, type ColumnDef, type StockFeatures } from "@tanstack/react-table";
 import type { StudentListRow } from "@/store/api/students-api";
 
@@ -18,9 +19,9 @@ export const studentColumns = [
       const student = context.row.original;
       return (
         <span>
-          <span className="font-medium">
+          <Link href={`/students/${student.id}`} className="text-foreground font-medium hover:underline">
             {student.lastName}, {student.firstName}
-          </span>
+          </Link>
           {student.otherNames ? <span className="text-muted-foreground"> {student.otherNames}</span> : null}
         </span>
       );

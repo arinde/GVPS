@@ -52,7 +52,7 @@ export function AddStaffForm({
 
       <FormSection
         title="Salary account"
-        description="Optional now — add it later if it is not to hand. Only the superadmin can see these details."
+        description="Optional now — add it later if it is not to hand. Only the superadmin and the staff member can see it."
       >
         <StaffSalaryAccountFields {...fields} banks={banks} />
       </FormSection>

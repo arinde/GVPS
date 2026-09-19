@@ -109,6 +109,11 @@ export class StaffAccountService {
    * at the controller; the list above deliberately leaves the account out.
    */
   async getProfile(schoolId: string, staffId: string) {
+    const session = await this.prisma.academicSession.findFirst({
+      where: { schoolId, isCurrent: true },
+      select: { id: true },
+    });
+
     const staff = await this.prisma.staff.findFirst({
       where: { id: staffId, schoolId },
       select: {
@@ -128,6 +133,10 @@ export class StaffAccountService {
         mustChangePassword: true,
         createdAt: true,
         roles: { select: { role: true } },
+        classAssignments: {
+          where: { sessionId: session?.id ?? "__no_current_session__" },
+          select: { id: true, classArm: { select: { id: true, name: true, classLevel: { select: { name: true } } } } },
+        },
       },
     });
     if (!staff) throw new NotFoundException("Staff member not found.");

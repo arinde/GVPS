@@ -3,6 +3,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { AuthController } from "@/auth/auth.controller";
 import { AuthService } from "@/auth/auth.service";
+import { MeController } from "@/auth/me.controller";
 import { StaffAccountController } from "@/auth/staff-account.controller";
 import { StaffAccountService } from "@/auth/staff-account.service";
 import { JwtStrategy } from "@/auth/strategies/jwt.strategy";
@@ -12,7 +13,7 @@ import { JwtStrategy } from "@/auth/strategies/jwt.strategy";
   // (staff vs. a future parent-token type may need different lifetimes),
   // so JwtModule itself needs no default configuration.
   imports: [PassportModule.register({ defaultStrategy: "jwt" }), JwtModule.register({})],
-  controllers: [AuthController, StaffAccountController],
+  controllers: [AuthController, StaffAccountController, MeController],
   providers: [AuthService, StaffAccountService, JwtStrategy],
 })
 export class AuthModule {}

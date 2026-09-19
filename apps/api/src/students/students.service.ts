@@ -13,6 +13,7 @@ import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
 import { AdmissionNumberService } from "@/students/admission-number.service";
 import { resolveStream, withOnePrimary } from "@/students/registration-rules";
+import { withSiblings } from "@/students/student-profile";
 import type { CreateStudentDto, GuardianInputDto } from "@/students/schemas/create-student.schema";
 
 export type StudentSearch = {
@@ -262,8 +263,13 @@ export class StudentsService {
   }
 
   /**
-   * One student. Out of scope reads as not found rather than forbidden, so a
-   * teacher cannot probe ids to learn which students exist in other classes.
+   * One student's full record for the profile page. Out of scope reads as
+   * not found rather than forbidden, so a teacher cannot probe ids to learn
+   * which students exist in other classes.
+   *
+   * Siblings — other children of the same guardians — are listed only for
+   * school-wide readers. For a teacher they would reveal names and classes
+   * outside the teacher's own scope.
    */
   async findOne(actor: AuthenticatedStaff, studentId: string) {
     const scope = await this.access.studentScope(actor);
@@ -271,11 +277,39 @@ export class StudentsService {
       where: { id: studentId, schoolId: actor.schoolId, AND: [AccessScopeService.studentWhere(scope)] },
       include: {
         admittedIntoLevel: true,
-        guardians: { include: { guardian: true } },
-        enrolments: { include: { classArm: { include: { classLevel: true } }, session: true } },
+        guardians: {
+          orderBy: { isPrimary: "desc" },
+          include: {
+            guardian: {
+              include: {
+                students: {
+                  where: { studentId: { not: studentId } },
+                  include: {
+                    student: {
+                      select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        enrolments: {
+                          where: { status: EnrolmentStatus.ACTIVE },
+                          take: 1,
+                          select: { classArm: { select: { name: true, classLevel: { select: { name: true } } } } },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        enrolments: {
+          orderBy: { session: { startDate: "desc" } },
+          include: { classArm: { include: { classLevel: true } }, session: true },
+        },
       },
     });
     if (!student) throw new NotFoundException("Student not found.");
-    return student;
+    return withSiblings(student, scope.kind === "school");
   }
 }

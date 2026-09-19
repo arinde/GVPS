@@ -17,6 +17,19 @@ export type StaffMember = {
   classAssignments: { id: string; classArm: ArmSummary }[];
 };
 
+/** A full staff record: the superadmin's view of anyone, or a person's own. */
+export type StaffProfile = Omit<StaffMember, "classAssignments"> & {
+  address: string | null;
+  nextOfKinName: string | null;
+  nextOfKinRelationship: string | null;
+  nextOfKinPhone: string | null;
+  bankName: string | null;
+  accountNumber: string | null;
+  accountName: string | null;
+  createdAt: string;
+  classAssignments: { id: string; classArm: ArmSummary }[];
+};
+
 export type CreateStaffRequest = {
   firstName: string;
   lastName: string;
@@ -48,6 +61,14 @@ export type ClassAllocation = {
 
 export const staffApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // The signed-in person's own record. Read-only by design: changes to
+    // your own details, above all your salary account, go through the
+    // superadmin.
+    getMyProfile: builder.query<StaffProfile, void>({
+      query: () => ({ url: "/me/profile" }),
+      providesTags: ["Staff"],
+    }),
+
     listStaff: builder.query<StaffMember[], void>({
       query: () => ({ url: "/auth/staff" }),
       providesTags: ["Staff"],
@@ -76,5 +97,10 @@ export const staffApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useListStaffQuery, useCreateStaffMutation, useGetClassAllocationQuery, useSetClassTeacherMutation } =
-  staffApi;
+export const {
+  useGetMyProfileQuery,
+  useListStaffQuery,
+  useCreateStaffMutation,
+  useGetClassAllocationQuery,
+  useSetClassTeacherMutation,
+} = staffApi;

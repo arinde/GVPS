@@ -172,6 +172,18 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
+### 2026-09-19 (later) — profiles
+
+- **My profile** (`/profile`, `GET /me/profile`): every staff member sees their
+  own details, next of kin, salary account, roles and classes. Read-only on
+  purpose — edits go through the superadmin so a compromised login cannot
+  redirect pay.
+- **Student profile** (`/students/[studentId]`): the record card and enrolment
+  history (STITCH-SCREENS.md screen 5). Results, fees and attendance tabs are
+  added when those modules exist. Siblings are shown to school-wide staff only.
+- **Tests paused** by the owner to save tokens — see AGENTS.md §9. Existing
+  suites still run: 171 API, 155 web.
+
 ### 2026-09-19 — access rules, allocation, redesign, staff details
 
 - **Access rules.** `apps/api/src/access/` decides what each person sees:

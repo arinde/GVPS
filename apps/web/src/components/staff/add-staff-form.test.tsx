@@ -58,7 +58,7 @@ describe("AddStaffForm", () => {
   it("says the salary account is optional and who can see it", () => {
     renderForm();
 
-    expect(screen.getByText(/only the superadmin can see these details/i)).toBeInTheDocument();
+    expect(screen.getByText(/only the superadmin and the staff member can see it/i)).toBeInTheDocument();
   });
 
   it("keeps only digits in the account number, as pasted", async () => {

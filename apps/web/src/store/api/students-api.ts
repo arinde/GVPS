@@ -53,11 +53,61 @@ export type StudentListRow = {
 export type StudentPage = { students: StudentListRow[]; nextCursor: string | null };
 export type StudentSearchArgs = { q?: string; armId?: string; cursor?: string };
 
+type ArmWithLevel = { name: string; classLevel: { name: string } };
+
+/** One student's full record, as the profile page shows it. */
+export type StudentProfile = {
+  id: string;
+  admissionNo: string;
+  firstName: string;
+  lastName: string;
+  otherNames: string | null;
+  dateOfBirth: string;
+  sex: "MALE" | "FEMALE";
+  nationality: string;
+  stateOfOrigin: string | null;
+  lga: string | null;
+  dateOfAdmission: string;
+  address: string | null;
+  bloodGroup: string | null;
+  medicalNote: string | null;
+  previousSchool: string | null;
+  admittedIntoLevel: { name: string };
+  guardians: {
+    relationship: "FATHER" | "MOTHER" | "GUARDIAN";
+    isPrimary: boolean;
+    guardian: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      phone: string;
+      altPhone: string | null;
+      email: string | null;
+      occupation: string | null;
+    };
+  }[];
+  enrolments: {
+    id: string;
+    status: string;
+    stream: "SCIENCE" | "ARTS" | "COMMERCIAL" | null;
+    enrolledOn: string;
+    session: { name: string };
+    classArm: ArmWithLevel;
+  }[];
+  /** Other children of the same guardians — empty for readers limited to their own classes. */
+  siblings: { id: string; firstName: string; lastName: string; className: string | null }[];
+};
+
 export const studentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     listStudents: builder.query<StudentPage, StudentSearchArgs>({
       query: (args) => ({ url: "/students", params: args }),
       providesTags: ["Student"],
+    }),
+
+    getStudent: builder.query<StudentProfile, string>({
+      query: (studentId) => ({ url: `/students/${studentId}` }),
+      providesTags: (_result, _error, studentId) => [{ type: "Student", id: studentId }],
     }),
 
     registerStudent: builder.mutation<RegisteredStudent, RegisterStudentRequest>({
@@ -67,4 +117,4 @@ export const studentsApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useRegisterStudentMutation, useListStudentsQuery } = studentsApi;
+export const { useRegisterStudentMutation, useListStudentsQuery, useGetStudentQuery } = studentsApi;

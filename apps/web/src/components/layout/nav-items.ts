@@ -1,4 +1,4 @@
-import { GraduationCap, LayoutDashboard, UserPlus, UsersRound } from "lucide-react";
+import { CircleUserRound, GraduationCap, LayoutDashboard, UserPlus, UsersRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type NavItem = {
@@ -29,6 +29,8 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SUPERADMIN", "ADMIN_SECRETARY", "PRINCIPAL", "FORM_TEACHER"],
   },
   { href: "/staff/new", label: "Add staff", icon: UsersRound, roles: ["SUPERADMIN"] },
+  // Every staff member can see their own record.
+  { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },
 ];
 
 export function visibleNavItems(roles: string[]): NavItem[] {
