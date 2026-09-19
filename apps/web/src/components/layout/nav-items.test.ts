@@ -9,8 +9,8 @@ describe("visibleNavItems", () => {
   });
 
   it("hides staff administration from anyone but a superadmin", () => {
-    expect(labels(["FORM_TEACHER"])).not.toContain("Add staff");
-    expect(labels(["SUPERADMIN"])).toContain("Add staff");
+    expect(labels(["FORM_TEACHER"])).not.toContain("Staff");
+    expect(labels(["SUPERADMIN"])).toContain("Staff");
   });
 
   it("shows registration to a form teacher, who registers into their own class", () => {

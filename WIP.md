@@ -172,6 +172,19 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
+### 2026-09-19 (latest) — staff screens
+
+- **Staff accounts** (`/staff`, screen 12): name (links to `/staff/[id]`, the
+  full profile), email, phone, role, classes, and a status pill — "Active" or
+  "Password not set". The spec's Last sign-in and Suspended need data the app
+  does not record yet.
+- **Class allocation** (`/staff/classes`): every class with a form-teacher
+  dropdown that saves on change and toasts the result. Teachers already at the
+  limit are left out of other classes' lists. If there are no form teachers,
+  the page links to creating one.
+- Nav: "Add staff" became "Staff" and "Class allocation" (superadmin only).
+  `StatusPill` in `components/common/` covers every status badge from now on.
+
 ### 2026-09-19 (later) — profiles
 
 - **My profile** (`/profile`, `GET /me/profile`): every staff member sees their
@@ -200,7 +213,8 @@ two siblings, enrolment into the current session, search, and detail.
   salary account (bank from a list, 10-digit NUBAN, account name; all three or
   none). Account numbers never appear in the staff list, only in the
   superadmin's single-profile read, and are masked (`******6789`) in the audit
-  log.
+  log. Format check only, no bank lookup: the owner confirms accounts with the
+  bank themselves (decided 2026-09-19), so don't build name-enquiry.
 - **Redesign to STITCH-GLOBAL.md.** Kumbh Sans, navy sidebar + top bar on
   desktop, top bar + bottom tabs on a phone, spec colours and radii. Controls
   come from `components/common/` wrappers; ESLint blocks the raw shadcn ones.
@@ -214,21 +228,14 @@ two siblings, enrolment into the current session, search, and detail.
 
 ## 5. Next, in order
 
-1. **Staff screens (STITCH-SCREENS.md screen 12 / M9).** The API is done —
-   `GET /auth/staff`, `GET /auth/staff/:id`, `GET /class-assignments`,
-   `PUT /class-assignments/:armId` — and the web data layer is written
-   (`store/api/staff-api.ts`). Still to build: the staff accounts table
-   (names, roles, classes; Status and Last sign-in need data the app does not
-   yet record), and the **class allocation page** — every class with a teacher
-   dropdown that saves on change. Then swap the "Add staff" nav item for
-   "Staff". Optional class on the create form (the Figma form has one).
-2. **Superadmin dashboard (screen 1).** Stat cards and registration progress per
+1. **Superadmin dashboard (screen 1).** Stat cards and registration progress per
    class ("Primary 3A: 28 of 34"), which `FEATURES.md` §3.5 lists for Phase 1.
-3. **More arms.** Seeded with arm "A" per level — add B/C through
+2. **More arms.** Seeded with arm "A" per level — add B/C through
    `POST /academic/levels/:id/arms`; no UI yet.
-4. **Confirm the admission number format with the school** before volume entry.
-5. **Bulk entry grid** (`FEATURES.md` §3.5).
-6. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is
+3. **Confirm the admission number format with the school** before volume entry.
+4. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
+   create-staff form (the Figma form has one).
+5. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is
    done; subject-teacher allocation comes with subjects.
 
 ---
@@ -236,8 +243,8 @@ two siblings, enrolment into the current session, search, and detail.
 ## 6. Known gaps
 
 **Phone tab bar contrast.** STITCH-GLOBAL.md §12 sets inactive tab labels to
-`#B9C5CE` on white, which fails WCAG contrast (about 1.9:1). Built to spec;
-waiting on a decision about whether to darken it.
+`#B9C5CE` on white, which fails WCAG contrast (about 1.9:1). The owner chose to
+keep it as specified (2026-09-19), so don't change it unprompted.
 
 **Figma frames not yet seen.** The Starter plan's call limit stopped after
 three frames (dashboard, teachers, add teacher). Student registration and the

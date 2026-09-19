@@ -50,13 +50,15 @@ export type CreateStaffResponse = { staffId: string; temporaryPassword: string }
 
 type TeacherSummary = { id: string; firstName: string | null; lastName: string | null; email: string };
 
+export type AllocatedClass = ArmSummary & {
+  classLevel: { name: string; section: string; rank: number };
+  teacher: TeacherSummary | null;
+};
+
 export type ClassAllocation = {
   session: { id: string; name: string };
   maxClassesPerTeacher: number;
-  classes: (ArmSummary & {
-    classLevel: { name: string; section: string; rank: number };
-    teacher: TeacherSummary | null;
-  })[];
+  classes: AllocatedClass[];
 };
 
 export const staffApi = baseApi.injectEndpoints({
@@ -66,6 +68,13 @@ export const staffApi = baseApi.injectEndpoints({
     // superadmin.
     getMyProfile: builder.query<StaffProfile, void>({
       query: () => ({ url: "/me/profile" }),
+      providesTags: ["Staff"],
+    }),
+
+    // Anyone's full record, salary account included. Superadmin only (the API
+    // refuses everyone else).
+    getStaffProfile: builder.query<StaffProfile, string>({
+      query: (staffId) => ({ url: `/auth/staff/${staffId}` }),
       providesTags: ["Staff"],
     }),
 
@@ -99,6 +108,7 @@ export const staffApi = baseApi.injectEndpoints({
 
 export const {
   useGetMyProfileQuery,
+  useGetStaffProfileQuery,
   useListStaffQuery,
   useCreateStaffMutation,
   useGetClassAllocationQuery,
