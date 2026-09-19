@@ -187,3 +187,19 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Landing page: a slow drift for the decorative rings. Used with
+   motion-safe:, so it never runs for visitors who reduce motion. */
+@theme {
+  --animate-float: float 14s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(18px, -22px);
+    }
+  }
+}

@@ -48,6 +48,14 @@ export function describeActivity({ action, after }: ActivityRow): ActivityText {
       return { title: "Portal login issued", detail: parentDetail(after) };
     case "parent.password.reset":
       return { title: "Portal password reset", detail: parentDetail(after) };
+    case "enquiry.updated":
+      return { title: "Enquiry followed up", detail: joined(field(after, "name"), field(after, "status")) };
+    case "subject.created":
+      return { title: "Subject added", detail: field(after, "name") ?? "" };
+    case "subject.offered":
+      return { title: "Subject offered", detail: field(after, "subject") ?? "" };
+    case "subject.teacher.assigned":
+      return { title: "Subject teacher assigned", detail: field(after, "subject") ?? "" };
     case "student.photo.set":
       return { title: "Photograph added", detail: field(after, "admissionNo") ?? "" };
     case "staff.create":

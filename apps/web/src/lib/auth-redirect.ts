@@ -1,7 +1,7 @@
 /** Where an area's sign-in, password-change and home pages live. */
 export type AuthRoutes = { login: string; changePassword: string; home: string };
 
-export const STAFF_ROUTES: AuthRoutes = { login: "/login", changePassword: "/change-password", home: "/" };
+export const STAFF_ROUTES: AuthRoutes = { login: "/login", changePassword: "/change-password", home: "/dashboard" };
 export const PORTAL_ROUTES: AuthRoutes = {
   login: "/portal/login",
   changePassword: "/portal/change-password",

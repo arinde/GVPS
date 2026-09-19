@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createColumnHelper, type ColumnDef, type StockFeatures } from "@tanstack/react-table";
+import { Pencil } from "lucide-react";
 import { primaryRoleLabel } from "@/components/auth/roles";
+import { AppLinkButton } from "@/components/common/app-button";
 import { StatusPill } from "@/components/common/status-pill";
 import { staffName } from "@/lib/staff-name";
 import type { StaffMember } from "@/store/api/staff-api";
@@ -50,5 +52,21 @@ export const staffColumns = [
           Active
         </StatusPill>
       ),
+  }),
+  // The list is superadmin-only, and only the superadmin edits staff records.
+  helper.display({
+    id: "actions",
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => (
+      <AppLinkButton
+        href={`/staff/${row.original.id}/edit`}
+        variant="secondary"
+        size="small"
+        aria-label={`Edit ${staffName(row.original)}`}
+      >
+        <Pencil aria-hidden="true" />
+        Edit
+      </AppLinkButton>
+    ),
   }),
 ] as ColumnDef<StockFeatures, StaffMember, unknown>[];

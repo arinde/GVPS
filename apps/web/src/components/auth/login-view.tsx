@@ -29,7 +29,7 @@ export function LoginView() {
         router.push("/change-password");
       } else {
         notify.success("Signed in");
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (error) {
       setErrorMessage(notify.error(error, "Invalid email or password.").message);

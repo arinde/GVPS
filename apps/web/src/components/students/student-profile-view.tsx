@@ -7,6 +7,7 @@ import { ContentCard } from "@/components/common/content-card";
 import { DataTable } from "@/components/common/data-table";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { PortalAccessRow } from "@/components/students/portal-access-row";
 import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
 import { StudentRecordCard } from "@/components/students/student-record-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,6 +21,7 @@ import { useGetStudentQuery, type StudentProfile } from "@/store/api/students-ap
 type Enrolment = StudentProfile["enrolments"][number];
 
 const DEPARTMENT = { SCIENCE: "Science", ARTS: "Arts", COMMERCIAL: "Commercial" } as const;
+const RELATIONSHIP_LABEL = { FATHER: "Father", MOTHER: "Mother", GUARDIAN: "Guardian" } as const;
 const helper = createColumnHelper<StockFeatures, Enrolment>();
 
 // Small enough to sit beside the view; move to a columns.tsx when it grows.
@@ -103,10 +105,32 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           }
         />
 
-        <ContentCard flush>
-          <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>
-          <DataTable columns={enrolmentColumns} data={student.enrolments} emptyTitle="No enrolments recorded" />
-        </ContentCard>
+        <div className="flex flex-col gap-5">
+          <ContentCard flush>
+            <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>
+            <DataTable columns={enrolmentColumns} data={student.enrolments} emptyTitle="No enrolments recorded" />
+          </ContentCard>
+
+          {/* Portal logins open children's records, so only the superadmin issues them (the API agrees). */}
+          {canEdit ? (
+            <ContentCard>
+              <h2 className="text-base">Family portal</h2>
+              <p className="text-muted-foreground mb-1 text-xs">
+                One login per phone number shows the parent every child linked to it.
+              </p>
+              <ul>
+                {student.guardians.map(({ guardian, relationship }) => (
+                  <PortalAccessRow
+                    key={guardian.id}
+                    name={`${guardian.firstName} ${guardian.lastName}`}
+                    relationship={RELATIONSHIP_LABEL[relationship]}
+                    phone={guardian.phone}
+                  />
+                ))}
+              </ul>
+            </ContentCard>
+          ) : null}
+        </div>
       </div>
     </PageContainer>
   );

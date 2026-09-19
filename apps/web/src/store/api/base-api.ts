@@ -75,6 +75,9 @@ export const baseApi = createApi({
     "ClassAssignment",
     "Access",
     "Dashboard",
+    "ParentAccount",
+    "Enquiry",
+    "SubjectAssignment",
   ],
   endpoints: () => ({}),
 });

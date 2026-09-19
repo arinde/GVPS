@@ -100,10 +100,11 @@ model Staff {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school           School            @relation(fields: [schoolId], references: [id])
-  roles            StaffRole[]
-  refreshTokens    RefreshToken[]
-  classAssignments ClassAssignment[]
+  school             School              @relation(fields: [schoolId], references: [id])
+  roles              StaffRole[]
+  refreshTokens      RefreshToken[]
+  classAssignments   ClassAssignment[]
+  subjectAssignments SubjectAssignment[]
 
   // Email is unique per school, not globally — PLAN.md §4.1 keeps every
   // school's data independent even while there's only one school today.
@@ -198,10 +199,11 @@ model AcademicSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school           School            @relation(fields: [schoolId], references: [id])
-  terms            Term[]
-  enrolments       Enrolment[]
-  classAssignments ClassAssignment[]
+  school             School              @relation(fields: [schoolId], references: [id])
+  terms              Term[]
+  enrolments         Enrolment[]
+  classAssignments   ClassAssignment[]
+  subjectAssignments SubjectAssignment[]
 
   @@unique([schoolId, name])
   @@map("academic_sessions")
@@ -240,9 +242,10 @@ model ClassLevel {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school   School     @relation(fields: [schoolId], references: [id])
-  arms     ClassArm[]
-  students Student[]
+  school    School            @relation(fields: [schoolId], references: [id])
+  arms      ClassArm[]
+  offerings SubjectOffering[]
+  students  Student[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, rank])
@@ -261,10 +264,11 @@ model ClassArm {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  school      School            @relation(fields: [schoolId], references: [id])
-  classLevel  ClassLevel        @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
-  enrolments  Enrolment[]
-  assignments ClassAssignment[]
+  school             School              @relation(fields: [schoolId], references: [id])
+  classLevel         ClassLevel          @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  enrolments         Enrolment[]
+  assignments        ClassAssignment[]
+  subjectAssignments SubjectAssignment[]
 
   @@unique([classLevelId, name])
   @@map("class_arms")
@@ -520,4 +524,101 @@ model ParentRefreshToken {
   parentAccount ParentAccount @relation(fields: [parentAccountId], references: [id], onDelete: Cascade)
 
   @@map("parent_refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Subjects (FEATURES.md §2.3–2.4). A subject is not "in the school"; it is
+// offered to a class level, and for senior levels to a department. Who
+// teaches it is per session and per class arm, separate from the form
+// teacher (ClassAssignment).
+// ---------------------------------------------------------------------------
+model Subject {
+  id        String   @id @default(cuid())
+  schoolId  String
+  name      String
+  // Short code for reports and broadsheets, e.g. "MTH", "ENG".
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  offerings   SubjectOffering[]
+  assignments SubjectAssignment[]
+
+  @@unique([schoolId, name])
+  @@unique([schoolId, code])
+  @@map("subjects")
+}
+
+model SubjectOffering {
+  id           String   @id @default(cuid())
+  schoolId     String
+  subjectId    String
+  classLevelId String
+  // Senior levels only: the department this offering is for. Null means every
+  // student at the level takes it (and is the only value below senior).
+  stream       Stream?
+  isCore       Boolean  @default(true)
+  // FEATURES.md §2.3: a per-subject pass mark where the school wants one.
+  passMark     Int?
+  createdAt    DateTime @default(now())
+
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+
+  // Unique per subject × level × stream, with null streams treated as equal —
+  // enforced by a NULLS NOT DISTINCT index in the migration, which Prisma
+  // cannot express.
+  @@index([schoolId, classLevelId])
+  @@map("subject_offerings")
+}
+
+model SubjectAssignment {
+  id         String   @id @default(cuid())
+  schoolId   String
+  sessionId  String
+  subjectId  String
+  classArmId String
+  staffId    String
+  createdAt  DateTime @default(now())
+
+  session  AcademicSession @relation(fields: [sessionId], references: [id])
+  subject  Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  classArm ClassArm        @relation(fields: [classArmId], references: [id], onDelete: Cascade)
+  staff    Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  // One teacher per subject per class per session.
+  @@unique([sessionId, subjectId, classArmId])
+  @@index([schoolId, sessionId, staffId])
+  @@map("subject_assignments")
+}
+
+// ---------------------------------------------------------------------------
+// Admission enquiries from the public landing page. Anyone can submit one;
+// only the office reads them. Status moves NEW -> CONTACTED -> CLOSED.
+// ---------------------------------------------------------------------------
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+model Enquiry {
+  id          String        @id @default(cuid())
+  schoolId    String
+  parentName  String
+  phone       String
+  email       String?
+  childName   String?
+  // One of the options the API lists (a stage of the school, or the tutorial centre).
+  interest    String
+  message     String?
+  status      EnquiryStatus @default(NEW)
+  // The office's own note, e.g. "Called, visiting Monday".
+  officeNote  String?
+  handledById String?
+  handledAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@index([schoolId, status, createdAt])
+  @@map("enquiries")
 }

@@ -64,6 +64,15 @@ teacher; a principal may teach).
 
 ### 1.3 Parent accounts — passwordless `P4`
 
+> **Built differently for now (owner's decision, 2026-09-20).** One family
+> portal for parents and students, used by the parent. Sign-in is the phone
+> number on the guardian record plus a password the school issues on a slip
+> (changed at first sign-in, reset by the superadmin), not a one-time code —
+> chosen to avoid per-message SMS/WhatsApp costs. One login per phone number
+> reaches every child linked to it. The whitelist-plus-proof principle below
+> still holds: the slip password is the proof. Moving to one-time codes later
+> needs only a messaging provider; the accounts and scoping stay.
+
 Parents get real, persistent accounts. No passwords anywhere in the parent
 flow, which removes the reset burden that would otherwise land on the school
 office for 600+ people.

@@ -31,9 +31,23 @@ export class AccessScopeService {
     return { sessionId: session.id, armIds: assignments.map((assignment) => assignment.classArmId) };
   }
 
+  /**
+   * Who a staff member may read: their form classes plus every class they
+   * teach a subject in (FEATURES.md §1.5 — a subject teacher's scope is their
+   * subject × arm assignments). Registration still uses allocatedArms alone:
+   * teaching a subject in a class does not make it yours to register into.
+   */
   async studentScope(actor: AuthenticatedStaff): Promise<StudentScope> {
     const { sessionId, armIds } = await this.allocatedArms(actor);
-    return scopeFor(actor.roles, sessionId, armIds);
+    const taught = sessionId
+      ? await this.prisma.subjectAssignment.findMany({
+          where: { schoolId: actor.schoolId, sessionId, staffId: actor.id },
+          select: { classArmId: true },
+          distinct: ["classArmId"],
+        })
+      : [];
+    const readable = [...new Set([...armIds, ...taught.map((row) => row.classArmId)])];
+    return scopeFor(actor.roles, sessionId, readable);
   }
 
   /**

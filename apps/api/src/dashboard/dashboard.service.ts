@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EnrolmentStatus, Section } from "@prisma/client";
 import { describeActivity } from "@/dashboard/describe-activity";
+import { EnquiriesService } from "@/enquiries/enquiries.service";
 import { PrismaService } from "@/prisma/prisma.service";
 
 const RECENT_ACTIVITY = 8;
@@ -13,13 +14,16 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
  */
 @Injectable()
 export class DashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly enquiries: EnquiriesService,
+  ) {}
 
   async overview(schoolId: string) {
     const session = await this.prisma.academicSession.findFirst({ where: { schoolId, isCurrent: true } });
     const sessionId = session?.id ?? "";
 
-    const [arms, staffTotal, passwordNotSet, registeredThisWeek, audit] = await Promise.all([
+    const [arms, staffTotal, passwordNotSet, registeredThisWeek, audit, newEnquiries] = await Promise.all([
       this.prisma.classArm.findMany({
         where: { schoolId },
         orderBy: [{ classLevel: { rank: "asc" } }, { name: "asc" }],
@@ -41,6 +45,7 @@ export class DashboardService {
         take: RECENT_ACTIVITY,
         select: { id: true, action: true, after: true, createdAt: true },
       }),
+      this.enquiries.countNew(schoolId),
     ]);
 
     const bySection = { [Section.NURSERY]: 0, [Section.PRIMARY]: 0, [Section.JUNIOR]: 0, [Section.SENIOR]: 0 };
@@ -54,6 +59,7 @@ export class DashboardService {
         registeredThisWeek,
       },
       staff: { total: staffTotal, passwordNotSet },
+      enquiries: { new: newEnquiries },
       classes: {
         total: arms.length,
         withoutTeacher: arms.filter((arm) => arm.assignments.length === 0).length,

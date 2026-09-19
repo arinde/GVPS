@@ -2,16 +2,24 @@ import { ContentCard } from "@/components/common/content-card";
 import { formatWhen } from "@/lib/dates";
 import type { DashboardOverview } from "@/store/api/dashboard-api";
 
-export type RecentActivityProps = { entries: DashboardOverview["activity"] };
+export type RecentActivityProps = {
+  entries: DashboardOverview["activity"];
+  title?: string;
+  emptyText?: string;
+};
 
 /** STITCH-SCREENS.md screen 1, region 3 right: the latest audit entries, newest first. */
-export function RecentActivity({ entries }: RecentActivityProps) {
+export function RecentActivity({
+  entries,
+  title = "Recent activity",
+  emptyText = "Nothing recorded yet.",
+}: RecentActivityProps) {
   return (
     <ContentCard flush>
-      <h2 className="border-border border-b px-5 py-3 text-base">Recent activity</h2>
+      <h2 className="border-border border-b px-5 py-3 text-base">{title}</h2>
 
       {entries.length === 0 ? (
-        <p className="text-muted-foreground px-5 py-4 text-sm">Nothing recorded yet.</p>
+        <p className="text-muted-foreground px-5 py-4 text-sm">{emptyText}</p>
       ) : (
         <ul>
           {entries.map((entry) => (

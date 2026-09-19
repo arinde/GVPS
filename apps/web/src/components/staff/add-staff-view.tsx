@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AppLinkButton } from "@/components/common/app-button";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { cleanedStaff, EMPTY_STAFF, useStaffDraft } from "@/components/staff/use-staff-draft";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,7 +12,7 @@ import { useGetBanksQuery, useGetNextOfKinRelationshipsQuery } from "@/store/api
 import { useCreateStaffMutation } from "@/store/api/staff-api";
 import { selectAccessToken, selectMustChangePassword } from "@/store/slices/auth-slice";
 
-type CreatedAccount = { name: string; email: string; temporaryPassword: string };
+type CreatedAccount = { staffId: string; name: string; email: string; temporaryPassword: string; teaches: boolean };
 
 /**
  * PLAN.md §4.12: staff accounts are superadmin-only. The role check here is
@@ -36,7 +37,14 @@ export function AddStaffView() {
     try {
       const result = await createStaff(cleanedStaff(draft)).unwrap();
       const name = `${draft.firstName} ${draft.lastName}`;
-      setCreatedAccount({ name, email: draft.email, temporaryPassword: result.temporaryPassword });
+      const teaches = draft.roles.some((role) => role === "SUBJECT_TEACHER" || role === "FORM_TEACHER");
+      setCreatedAccount({
+        staffId: result.staffId,
+        name,
+        email: draft.email,
+        temporaryPassword: result.temporaryPassword,
+        teaches,
+      });
       setDraft(EMPTY_STAFF);
       setFieldErrors({});
       notify.success("Staff account created", { description: `Give ${name} their temporary password.` });
@@ -69,6 +77,11 @@ export function AddStaffView() {
             <strong className="font-mono">{createdAccount.temporaryPassword}</strong>
             <br />
             Shown once — copy it now and hand it to them. They will be asked to change it at first sign-in.
+            {createdAccount.teaches ? (
+              <AppLinkButton href={`/staff/${createdAccount.staffId}`} size="small" className="mt-3">
+                Next: assign their subjects and classes
+              </AppLinkButton>
+            ) : null}
           </AlertDescription>
         </Alert>
       ) : null}

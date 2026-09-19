@@ -172,6 +172,46 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
+### 2026-09-20 (latest) — public landing page
+
+- `/` is now the school's public front page (Great Vision Private School):
+  hero, the four stages Creche → SSS 3, the family portal, admissions and
+  contact, footer links to both sign-ins. No session; `ShellSwitch` skips
+  both shells on public paths. **The staff dashboard moved to `/dashboard`**
+  (nav, redirects and sign-in updated).
+- All wording lives in `lib/school-profile.ts`: address (10/12 Alfia Tayo
+  Street, Ayetoro, Itele, Ogun State), proprietress Mrs Arinde Abosede, phone
+  0808 795 9017 (tap-to-call). Unconfirmed fields (email, hours) stay off.
+- Sections: hero, four stages, facilities (computer lab, science lab,
+  tutorial centre), WAEC & JAMB tutorial centre band, school-life gallery,
+  family portal, admissions/contact. Scroll-in and hover animations
+  (`Reveal`, `animate-float`), all `motion-safe:`.
+- **Photos**: drop files into `apps/web/public/images/` (jpg/png/webp) —
+  `hero`, `computer-lab`, `science-lab`, `tutorial-centre`, `gallery-1` …
+  `gallery-9`. `lib/public-image.ts` finds them; missing ones show a drawn
+  panel, and the gallery stays hidden until one exists. A production build
+  needs rebuilding to pick up new photos.
+
+### 2026-09-20 — family portal, staff dashboard
+
+- **Family portal** at `/portal` (own shell, own session): parents sign in
+  with phone number + slip password, change it at first sign-in, and see
+  every child linked to that number — class, form teacher, details,
+  guardians, class history, photo. Read-only. See FEATURES.md §1.3 note.
+  - API `apps/api/src/portal/`: `parent_accounts` + `parent_refresh_tokens`
+    (90-day sessions, cookie `parentRefreshToken` on `/portal/auth`), lockout
+    after 5 failures, same message for unknown number and wrong password.
+  - **Staff and parent tokens carry different audiences** (`common/secrets.ts`)
+    and each guard refuses the other's. Staff access tokens issued before this
+    change fail once and refresh silently.
+  - Superadmin issues or resets a login from the student profile's "Family
+    portal" card; the temporary password shows once, as a slip. Audited
+    (`parent.access.issued`, `parent.password.reset`).
+- **Staff dashboard** (`GET /dashboard/me`): teachers, bursar and secretary get
+  their classes, student count by sex, registered this week, students without
+  a photo, recent registrations, and a to-do list — scoped exactly like the
+  registry. Leadership keep the school overview.
+
 ### 2026-09-20 — decisions confirmed by the owner
 
 - Codes NUR / PRY / SEC are right; early-years order Creche → Nursery 1 →

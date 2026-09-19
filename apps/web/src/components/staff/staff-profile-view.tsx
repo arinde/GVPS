@@ -4,6 +4,8 @@ import { Pencil } from "lucide-react";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
 import { StaffProfileDetails } from "@/components/staff/staff-profile-details";
+import { SubjectTeachingCard } from "@/components/staff/subject-teaching-card";
+import { staffName } from "@/lib/staff-name";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetStaffProfileQuery } from "@/store/api/staff-api";
 
@@ -33,6 +35,8 @@ export function StaffProfileView({ staffId }: { staffId: string }) {
     );
   }
 
+  const teaches = profile.roles.some(({ role }) => role === "SUBJECT_TEACHER" || role === "FORM_TEACHER");
+
   return (
     <PageContainer width="form">
       <StaffProfileDetails
@@ -45,6 +49,12 @@ export function StaffProfileView({ staffId }: { staffId: string }) {
           </AppLinkButton>
         }
       />
+      {/* Only teachers are given subjects; the API refuses anyone else. */}
+      {teaches ? (
+        <div className="mt-5">
+          <SubjectTeachingCard staffId={profile.id} name={staffName(profile)} />
+        </div>
+      ) : null}
     </PageContainer>
   );
 }

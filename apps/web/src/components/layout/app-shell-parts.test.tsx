@@ -18,7 +18,7 @@ describe("crestInitials", () => {
 
 describe("AppSidebar", () => {
   it("shows the school's name", () => {
-    render(<AppSidebar items={NAV_ITEMS} activeHref="/" schoolName="GVPS" />);
+    render(<AppSidebar items={NAV_ITEMS} activeHref="/dashboard" schoolName="GVPS" />);
 
     expect(screen.getByText("GVPS", { selector: "p" })).toBeInTheDocument();
   });

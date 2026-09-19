@@ -8,10 +8,22 @@ export type DashboardOverview = {
     registeredThisWeek: number;
   };
   staff: { total: number; passwordNotSet: number };
+  enquiries: { new: number };
   classes: { total: number; withoutTeacher: number };
   /** Every class this session: how many are enrolled against its capacity, if set. */
   progress: { id: string; label: string; enrolled: number; capacity: number | null }[];
   activity: { id: string; at: string; title: string; detail: string }[];
+};
+
+/** Any staff member's own home page, limited to the classes they can see. */
+export type MyDashboard = {
+  session: { name: string } | null;
+  /** "arms" for a teacher limited to their classes; "school" for school-wide roles. */
+  scope: "school" | "arms";
+  canRegister: boolean;
+  students: { total: number; registeredThisWeek: number; withoutPhoto: number };
+  classes: { id: string; label: string; enrolled: number; capacity: number | null; girls: number; boys: number }[];
+  recent: { id: string; name: string; admissionNo: string; className: string | null; registeredAt: string }[];
 };
 
 /**
@@ -24,7 +36,12 @@ export const dashboardApi = baseApi.injectEndpoints({
       query: () => ({ url: "/dashboard" }),
       providesTags: ["Dashboard"],
     }),
+
+    getMyDashboard: builder.query<MyDashboard, void>({
+      query: () => ({ url: "/dashboard/me" }),
+      providesTags: ["Dashboard"],
+    }),
   }),
 });
 
-export const { useGetDashboardQuery } = dashboardApi;
+export const { useGetDashboardQuery, useGetMyDashboardQuery } = dashboardApi;

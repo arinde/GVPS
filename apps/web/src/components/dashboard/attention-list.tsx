@@ -8,18 +8,27 @@ export type AttentionItem = {
   pill: Omit<StatusPillProps, "children"> & { text: string };
   title: string;
   detail: string;
-  action: { href: string; label: string };
+  /** The screen that clears it; left out when the fix is outside the app ("ask the superadmin"). */
+  action?: { href: string; label: string };
 };
 
-export type AttentionListProps = { items: AttentionItem[] };
+export type AttentionListProps = {
+  items: AttentionItem[];
+  title?: string;
+  caption?: string;
+};
 
-/** STITCH-SCREENS.md screen 1, region 1: what only the superadmin can clear. */
-export function AttentionList({ items }: AttentionListProps) {
+/** STITCH-SCREENS.md screen 1, region 1: what needs the reader's action, each row linking to where it is done. */
+export function AttentionList({
+  items,
+  title = "Waiting on you",
+  caption = "Only you can action these",
+}: AttentionListProps) {
   return (
     <ContentCard flush>
       <div className="border-border flex flex-wrap items-baseline gap-x-2.5 border-b px-5 py-3">
-        <h2 className="text-base">Waiting on you</h2>
-        <p className="text-muted-foreground text-xs">Only you can action these</p>
+        <h2 className="text-base">{title}</h2>
+        <p className="text-muted-foreground text-xs">{caption}</p>
       </div>
 
       {items.length === 0 ? (
@@ -41,9 +50,11 @@ export function AttentionList({ items }: AttentionListProps) {
                 <p className="text-foreground text-sm font-medium">{item.title}</p>
                 <p className="text-muted-foreground text-xs">{item.detail}</p>
               </div>
-              <AppLinkButton href={item.action.href} variant="secondary" size="small">
-                {item.action.label}
-              </AppLinkButton>
+              {item.action ? (
+                <AppLinkButton href={item.action.href} variant="secondary" size="small">
+                  {item.action.label}
+                </AppLinkButton>
+              ) : null}
             </li>
           ))}
         </ul>

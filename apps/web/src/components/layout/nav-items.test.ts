@@ -37,7 +37,7 @@ describe("activeNavItem", () => {
   });
 
   it("treats the dashboard as current only on the root path", () => {
-    expect(activeNavItem(NAV_ITEMS, "/")?.label).toBe("Dashboard");
+    expect(activeNavItem(NAV_ITEMS, "/dashboard")?.label).toBe("Dashboard");
     expect(activeNavItem(NAV_ITEMS, "/students")?.label).not.toBe("Dashboard");
   });
 

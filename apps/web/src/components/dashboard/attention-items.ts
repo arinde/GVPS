@@ -32,6 +32,17 @@ export function attentionItems(overview: DashboardOverview): AttentionItem[] {
     });
   }
 
+  const fresh = overview.enquiries.new;
+  if (fresh > 0) {
+    items.push({
+      id: "new-enquiries",
+      pill: { tone: "warning", shape: "diamond", text: plural(fresh, "enquiry", "enquiries") },
+      title: "New enquiries from the website",
+      detail: "Parents waiting to hear from the school office.",
+      action: { href: "/enquiries", label: "Review" },
+    });
+  }
+
   const { passwordNotSet } = overview.staff;
   if (passwordNotSet > 0) {
     items.push({

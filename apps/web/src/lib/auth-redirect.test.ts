@@ -41,7 +41,7 @@ describe("authRedirect", () => {
   });
 
   it("moves a signed-in user off the login page", () => {
-    expect(authRedirect(input({ pathname: "/login", isSignedIn: true }))).toBe("/");
+    expect(authRedirect(input({ pathname: "/login", isSignedIn: true }))).toBe("/dashboard");
   });
 
   it("leaves a signed-in user on a normal page alone", () => {

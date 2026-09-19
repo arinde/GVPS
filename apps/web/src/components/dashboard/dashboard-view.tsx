@@ -1,7 +1,7 @@
 "use client";
 
 import { AdminDashboardView } from "@/components/dashboard/admin-dashboard-view";
-import { QuickLinksDashboard } from "@/components/dashboard/quick-links-dashboard";
+import { StaffDashboardView } from "@/components/dashboard/staff-dashboard-view";
 import { greeting } from "@/lib/dates";
 import { decodeAccessToken } from "@/lib/decode-access-token";
 import { useGetMyAccessQuery } from "@/store/api/access-api";
@@ -24,10 +24,5 @@ export function DashboardView() {
 
   if (roles.some((role) => LEADERSHIP.includes(role))) return <AdminDashboardView firstName={firstName} />;
 
-  return (
-    <QuickLinksDashboard
-      greeting={`${greeting()}${firstName ? `, ${firstName}` : ""}`}
-      canRegister={me?.canRegister ?? false}
-    />
-  );
+  return <StaffDashboardView greeting={`${greeting()}${firstName ? `, ${firstName}` : ""}`} />;
 }
