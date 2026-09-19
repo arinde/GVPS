@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
 import { cn } from "cn";
+import { FIELD_CLASSES } from "@/components/common/field-styles";
 
 export type SelectOption = { value: string; label: string };
 
@@ -15,20 +16,16 @@ export type NativeSelectProps = Omit<ComponentProps<"select">, "children"> & {
  * Native on purpose, not a custom popover: on a phone it opens the operating
  * system's own picker, and on a keyboard typing "K" jumps to Kano. For a
  * secretary entering a whole class, both matter more than a custom look.
- * Matches shadcn's Input so fields line up, including the red border that
- * aria-invalid produces.
+ * Shares FIELD_CLASSES with TextInput, so selects and text fields match
+ * exactly, including focus and the red border aria-invalid produces.
  */
 export function NativeSelect({ options, placeholder, className, ...props }: NativeSelectProps) {
   return (
     <select
       {...props}
-      className={cn(
-        "border-input bg-card h-9 w-full min-w-0 rounded-md border px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-3",
-        "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
+      // The browser draws its own arrow; pr-8 leaves room for it inside the
+      // shared field styling.
+      className={cn(FIELD_CLASSES, "w-full min-w-0 pr-8", className)}
     >
       {placeholder !== undefined ? <option value="">{placeholder}</option> : null}
       {options.map((option) => (

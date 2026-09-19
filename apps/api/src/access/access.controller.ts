@@ -26,6 +26,16 @@ export class AccessController {
     const scope = await this.access.studentScope(actor);
     const { armIds } = await this.access.allocatedArms(actor);
 
+    // Who is signed in and where, for the app shell: the sidebar shows the
+    // school's name and the top bar shows the person's (STITCH-GLOBAL.md §6–7).
+    const [school, staff] = await Promise.all([
+      this.prisma.school.findUniqueOrThrow({ where: { id: actor.schoolId }, select: { name: true } }),
+      this.prisma.staff.findUniqueOrThrow({
+        where: { id: actor.id },
+        select: { firstName: true, lastName: true, email: true },
+      }),
+    ]);
+
     const allocatedArms = await this.prisma.classArm.findMany({
       where: { id: { in: armIds }, schoolId: actor.schoolId },
       include: { classLevel: true },
@@ -33,6 +43,8 @@ export class AccessController {
     });
 
     return {
+      school,
+      staff,
       scope: scope.kind,
       allocatedArms,
       canRegister: mayRegisterAtAll(actor.roles),

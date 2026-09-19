@@ -1,7 +1,7 @@
 import { controlProps, FormField } from "@/components/common/form-field";
 import { NativeSelect } from "@/components/common/native-select";
 import type { StudentFieldProps } from "@/components/students/student-field-props";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/common/text-input";
 import type { NigerianState } from "@/store/api/reference-api";
 
 export type StudentBackgroundFieldsProps = StudentFieldProps & {
@@ -54,7 +54,7 @@ export function StudentBackgroundFields({
       </FormField>
 
       <FormField id="address" label="Home address" hint={ADDRESS_HINT} className="sm:col-span-2" error={errors.address}>
-        <Input
+        <TextInput
           {...controlProps("address", errors.address, ADDRESS_HINT)}
           autoComplete="street-address"
           value={value.address ?? ""}
@@ -75,7 +75,7 @@ export function StudentBackgroundFields({
       </FormField>
 
       <FormField id="medical-note" label="Standing medical note" error={errors.medicalNote}>
-        <Input
+        <TextInput
           {...controlProps("medical-note", errors.medicalNote)}
           placeholder="e.g. asthma, allergies"
           value={value.medicalNote ?? ""}

@@ -18,7 +18,18 @@ export const referenceApi = baseApi.injectEndpoints({
       query: () => ({ url: "/reference/blood-groups" }),
       keepUnusedDataFor: FOR_THE_VISIT,
     }),
+
+    getBanks: builder.query<string[], void>({
+      query: () => ({ url: "/reference/banks" }),
+      keepUnusedDataFor: FOR_THE_VISIT,
+    }),
+
+    getNextOfKinRelationships: builder.query<string[], void>({
+      query: () => ({ url: "/reference/next-of-kin-relationships" }),
+      keepUnusedDataFor: FOR_THE_VISIT,
+    }),
   }),
 });
 
-export const { useGetStatesQuery, useGetBloodGroupsQuery } = referenceApi;
+export const { useGetStatesQuery, useGetBloodGroupsQuery, useGetBanksQuery, useGetNextOfKinRelationshipsQuery } =
+  referenceApi;

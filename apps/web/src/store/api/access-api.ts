@@ -2,6 +2,8 @@ import type { ClassArmOption } from "@/store/api/academic-api";
 import { baseApi } from "@/store/api/base-api";
 
 export type MyAccess = {
+  school: { name: string };
+  staff: { firstName: string | null; lastName: string | null; email: string };
   /** "school" sees every student; "arms" sees only allocated classes. */
   scope: "school" | "arms";
   allocatedArms: ClassArmOption[];

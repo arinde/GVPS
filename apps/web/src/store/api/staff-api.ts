@@ -23,6 +23,14 @@ export type CreateStaffRequest = {
   otherNames?: string;
   phone: string;
   email: string;
+  address: string;
+  nextOfKinName: string;
+  nextOfKinRelationship: string;
+  nextOfKinPhone: string;
+  /** Salary account: optional, but all three or none. */
+  bankName?: string;
+  accountNumber?: string;
+  accountName?: string;
   roles: StaffRole[];
 };
 export type CreateStaffResponse = { staffId: string; temporaryPassword: string };

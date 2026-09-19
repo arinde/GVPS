@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { GuardianRelationship, Sex, Stream } from "@prisma/client";
+import { blankAsUndefined } from "@/common/schemas/blank-as-undefined";
 import { PhoneSchema } from "@/common/schemas/phone.schema";
 import { isKnownState, isLgaOfState } from "@/reference/nigeria-states";
 
@@ -8,22 +9,14 @@ import { isKnownState, isLgaOfState } from "@/reference/nigeria-states";
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
 const Name = z.string().trim().min(1).max(80);
-const OptionalText = z
-  .string()
-  .trim()
-  .max(200)
-  .optional()
-  .or(z.literal("").transform(() => undefined));
+const OptionalText = blankAsUndefined(z.string().trim().max(200));
 
 export const GuardianInputSchema = z.object({
   firstName: Name,
   lastName: Name,
   phone: PhoneSchema,
   altPhone: PhoneSchema.optional(),
-  email: z
-    .email()
-    .optional()
-    .or(z.literal("").transform(() => undefined)),
+  email: blankAsUndefined(z.email()),
   address: OptionalText,
   occupation: OptionalText,
   relationship: z.enum(GuardianRelationship),
@@ -50,16 +43,8 @@ export const CreateStudentSchema = z
     stream: z.enum(Stream).optional(),
 
     address: OptionalText,
-    bloodGroup: z
-      .enum(BLOOD_GROUPS, "Choose a blood group from the list")
-      .optional()
-      .or(z.literal("").transform(() => undefined)),
-    medicalNote: z
-      .string()
-      .trim()
-      .max(500)
-      .optional()
-      .or(z.literal("").transform(() => undefined)),
+    bloodGroup: blankAsUndefined(z.enum(BLOOD_GROUPS, "Choose a blood group from the list")),
+    medicalNote: blankAsUndefined(z.string().trim().max(500)),
     previousSchool: OptionalText,
 
     // At least one guardian is required. This is the school's decision and

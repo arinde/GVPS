@@ -1,8 +1,8 @@
 import { Trash2 } from "lucide-react";
 import { controlProps, FormField } from "@/components/common/form-field";
 import { NativeSelect } from "@/components/common/native-select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AppButton } from "@/components/common/app-button";
+import { TextInput } from "@/components/common/text-input";
 import type { GuardianInput } from "@/store/api/students-api";
 
 const RELATIONSHIPS = [
@@ -44,7 +44,7 @@ export function GuardianFieldset({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField id={id("first")} label="First name" required error={errors.firstName}>
-          <Input
+          <TextInput
             {...controlProps(id("first"), errors.firstName)}
             value={value.firstName}
             disabled={disabled}
@@ -53,7 +53,7 @@ export function GuardianFieldset({
         </FormField>
 
         <FormField id={id("last")} label="Surname" required error={errors.lastName}>
-          <Input
+          <TextInput
             {...controlProps(id("last"), errors.lastName)}
             value={value.lastName}
             disabled={disabled}
@@ -62,7 +62,7 @@ export function GuardianFieldset({
         </FormField>
 
         <FormField id={id("phone")} label="Phone" required hint={PHONE_HINT} error={errors.phone}>
-          <Input
+          <TextInput
             {...controlProps(id("phone"), errors.phone, PHONE_HINT)}
             type="tel"
             inputMode="tel"
@@ -74,7 +74,7 @@ export function GuardianFieldset({
         </FormField>
 
         <FormField id={id("alt")} label="Alternate phone" error={errors.altPhone}>
-          <Input
+          <TextInput
             {...controlProps(id("alt"), errors.altPhone)}
             type="tel"
             inputMode="tel"
@@ -96,7 +96,7 @@ export function GuardianFieldset({
         </FormField>
 
         <FormField id={id("occupation")} label="Occupation" error={errors.occupation}>
-          <Input
+          <TextInput
             {...controlProps(id("occupation"), errors.occupation)}
             value={value.occupation ?? ""}
             disabled={disabled}
@@ -105,7 +105,7 @@ export function GuardianFieldset({
         </FormField>
 
         <FormField id={id("email")} label="Email" className="sm:col-span-2" error={errors.email}>
-          <Input
+          <TextInput
             {...controlProps(id("email"), errors.email)}
             type="email"
             value={value.email ?? ""}
@@ -130,10 +130,10 @@ export function GuardianFieldset({
         </label>
 
         {canRemove ? (
-          <Button type="button" variant="ghost" size="sm" onClick={onRemove} disabled={disabled}>
+          <AppButton type="button" variant="ghost" size="small" onClick={onRemove} disabled={disabled}>
             <Trash2 aria-hidden="true" />
             Remove
-          </Button>
+          </AppButton>
         ) : null}
       </div>
     </fieldset>

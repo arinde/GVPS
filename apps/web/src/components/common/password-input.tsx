@@ -3,14 +3,13 @@
 import { useState, type ComponentProps } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "cn";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/common/text-input";
 
-export type PasswordInputProps = Omit<ComponentProps<typeof Input>, "type">;
+export type PasswordInputProps = Omit<ComponentProps<typeof TextInput>, "type">;
 
 /**
- * A password field with a show/hide toggle. Wraps shadcn's Input rather than
- * editing it (AGENTS.md §6), so every password field in the app gets the same
- * behaviour by using this one component.
+ * A password field with a show/hide toggle, built on TextInput so it matches
+ * every other field. Every password field in the app uses this one component.
  *
  * Revealing matters more here than in most apps: staff type temporary
  * passwords read off a printed slip or a colleague's screen, often on a phone,
@@ -25,7 +24,12 @@ export function PasswordInput({ className, disabled, ...props }: PasswordInputPr
 
   return (
     <div className="relative">
-      <Input {...props} type={visible ? "text" : "password"} disabled={disabled} className={cn("pr-10", className)} />
+      <TextInput
+        {...props}
+        type={visible ? "text" : "password"}
+        disabled={disabled}
+        className={cn("pr-10", className)}
+      />
       <button
         type="button"
         onClick={() => setVisible((current) => !current)}

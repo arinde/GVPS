@@ -23,7 +23,8 @@ export type FormFieldProps = {
 export function FormField({ id, label, required = false, hint, error, className, children }: FormFieldProps) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <Label htmlFor={id}>
+      {/* STITCH-GLOBAL.md §10: labels SemiBold 13px #282828, 6px above the field. */}
+      <Label htmlFor={id} className="text-foreground text-[13px] font-semibold">
         {label}
         {required ? (
           <span className="text-destructive" aria-hidden="true">

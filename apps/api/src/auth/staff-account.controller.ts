@@ -42,6 +42,11 @@ export class StaffAccountController {
     return this.staffAccounts.listStaff(actor.schoolId);
   }
 
+  @Get(":staffId")
+  getProfile(@CurrentUser() actor: AuthenticatedStaff, @Param("staffId") staffId: string) {
+    return this.staffAccounts.getProfile(actor.schoolId, staffId);
+  }
+
   @Post(":staffId/roles")
   @HttpCode(HttpStatus.NO_CONTENT)
   grantRole(

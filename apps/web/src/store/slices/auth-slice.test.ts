@@ -17,4 +17,41 @@ describe("authReducer", () => {
     const state = authReducer(loggedIn, clearCredentials());
     expect(state).toEqual({ accessToken: null, mustChangePassword: false });
   });
+
+  it("signs the user in from the session-restore response itself, in one step", () => {
+    // The shape RTK Query dispatches when refreshSession succeeds. Storing the
+    // token in this same action is what stops a signed-in user being sent to
+    // /login on page reload (see auth-slice.ts).
+    const fulfilled = {
+      type: "api/executeQuery/fulfilled",
+      payload: { accessToken: "restored", mustChangePassword: false },
+      meta: {
+        arg: { type: "query", endpointName: "refreshSession", originalArgs: undefined, queryCacheKey: "x" },
+        requestId: "r1",
+        requestStatus: "fulfilled",
+        fulfilledTimeStamp: 1,
+        baseQueryMeta: {},
+      },
+    };
+
+    const state = authReducer(undefined, fulfilled);
+
+    expect(state.accessToken).toBe("restored");
+  });
+
+  it("ignores other endpoints' responses", () => {
+    const otherEndpoint = {
+      type: "api/executeQuery/fulfilled",
+      payload: { accessToken: "not-a-session", mustChangePassword: false },
+      meta: {
+        arg: { type: "query", endpointName: "listStudents", originalArgs: undefined, queryCacheKey: "y" },
+        requestId: "r2",
+        requestStatus: "fulfilled",
+        fulfilledTimeStamp: 1,
+        baseQueryMeta: {},
+      },
+    };
+
+    expect(authReducer(undefined, otherEndpoint).accessToken).toBeNull();
+  });
 });

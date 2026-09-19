@@ -3,7 +3,7 @@
 Working state, so a session can be picked up cold. Update it at the end of a
 work block, not continuously.
 
-**Last updated:** 2026-09-17
+**Last updated:** 2026-09-19
 
 ---
 
@@ -27,7 +27,7 @@ Phase 1 of `PLAN.md` §5, item by item:
 | School profile and branding                      | Not started                |
 | Backup and restore                               | Not started                |
 
-Tests: **230 passing** — 100 API (Jest, 10 suites), 130 web (Vitest, 16 files).
+Tests: **321 passing** — 166 API (Jest, 18 suites), 155 web (Vitest, 20 files).
 
 Database: Neon Postgres, three migrations applied. Seeded with school "GVPS",
 one superadmin, 12 class levels each with arm A, session 2026/2027 and its
@@ -111,6 +111,25 @@ the latter — Postgres forbids subqueries in CHECK.
 
 ---
 
+**Stopping the API means stopping the watcher.** Killing the process on port
+3001 is not enough: `nest start --watch` respawns it and it keeps the Prisma
+engine locked (`prisma generate` fails with EPERM). Stop the node processes
+whose command line mentions `nest` or `dist/main`.
+
+**A JSON file beside a same-named module shadows it in Jest**, which resolves
+`js, json, ts` in that order — hence `nigeria-states.data.json`, not
+`nigeria-states.json`.
+
+**Optional list fields use `blankAsUndefined`**, never
+`.optional().or(z.literal(""))`: the union form loses the field's message.
+
+**Checking signed-in screens in a browser** without anyone's password: create a
+short-lived refresh-token row for the superadmin (sha256 of a random value),
+give headless Edge the raw value as the `refreshToken` cookie (domain
+`localhost`, path `/auth`), then revoke only the rows created since the check
+began. Done with `playwright-core` installed outside the repo; the helper
+script is deleted after each use rather than kept around.
+
 ## 4. Done in the last block
 
 - Design tokens wired: Libre Baskerville / IBM Plex via `next/font`, the
@@ -153,33 +172,64 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
+### 2026-09-19 — access rules, allocation, redesign, staff details
+
+- **Access rules.** `apps/api/src/access/` decides what each person sees:
+  superadmin, principal, bursar and secretary see the whole school; a teacher
+  sees only students in classes allocated to them this session, and registers
+  only into those. Enforced in every student endpoint, not the client.
+  Allocations are read per request, so a change takes effect immediately.
+  Deliberate widening of `FEATURES.md` §14: form teachers can register into
+  their own class, because the school asked for it.
+- **Class allocation.** `ClassAssignment` (session × class × teacher), one
+  teacher per class, `MAX_CLASSES_PER_TEACHER = 2` in
+  `class-assignments.service.ts` (a policy constant, change it there).
+- **Staff details.** Names, phone, home address, next of kin, and an optional
+  salary account (bank from a list, 10-digit NUBAN, account name; all three or
+  none). Account numbers never appear in the staff list, only in the
+  superadmin's single-profile read, and are masked (`******6789`) in the audit
+  log.
+- **Redesign to STITCH-GLOBAL.md.** Kumbh Sans, navy sidebar + top bar on
+  desktop, top bar + bottom tabs on a phone, spec colours and radii. Controls
+  come from `components/common/` wrappers; ESLint blocks the raw shadcn ones.
+- **Bug fixed:** reloading any page while signed in bounced to the dashboard.
+  The session restore now signs in within the same Redux action that ends the
+  request (`auth-slice.ts`), so there is no in-between render.
+- **Bug fixed:** link-styled buttons were announced as buttons to screen
+  readers. `AppLinkButton` renders a real link.
+- **Bug fixed:** optional list fields ("bank", "blood group") reported a bare
+  "Invalid input". `common/schemas/blank-as-undefined.ts` fixes the pattern.
+
 ## 5. Next, in order
 
-0. **Staff profiles and teacher class allocation** — asked for, next module.
-   Staff accounts collect basic details (names, phone, etc., not just email).
-   The superadmin allocates one or two classes to a teacher, per session. A
-   teacher then sees only students in their classes, and can register students
-   only into them. This is `FEATURES.md` §2.4 (teacher assignments) plus §1.5
-   (scoping enforced in the API, never the client). Needs: `StaffProfile`
-   fields, a session-scoped `TeacherAssignment` table (this is also where
-   form-teacher ownership lives — see `class-structure.service.ts`), scoping on
-   every student endpoint, an allocation screen, and permission tests per
-   `TESTS.md` §6.2.
-1. **More arms.** Seeded with arm "A" per level. The school will have B and C
-   in places — add through `POST /academic/levels/:id/arms`, no UI yet.
-2. **Confirm the admission number format with the school** before volume entry.
-   It is `GVPS/2026/0001` today, configurable on the `School` row
-   (`admissionNoFormat`, `admissionNoPrefix`, `admissionNoPadding`). Changing it
-   after 200 students means two formats in one register.
-3. **Bulk entry grid** (`FEATURES.md` §3.5). The form is one-at-a-time; the grid
-   is what makes a form teacher's own class viable.
-4. **Subjects, offerings, teacher assignments** (§2.3–2.4). Form-teacher
-   ownership belongs here, session-scoped — see the note in
-   `class-structure.service.ts` for why it is not a column on `ClassArm`.
+1. **Staff screens (STITCH-SCREENS.md screen 12 / M9).** The API is done —
+   `GET /auth/staff`, `GET /auth/staff/:id`, `GET /class-assignments`,
+   `PUT /class-assignments/:armId` — and the web data layer is written
+   (`store/api/staff-api.ts`). Still to build: the staff accounts table
+   (names, roles, classes; Status and Last sign-in need data the app does not
+   yet record), and the **class allocation page** — every class with a teacher
+   dropdown that saves on change. Then swap the "Add staff" nav item for
+   "Staff". Optional class on the create form (the Figma form has one).
+2. **Superadmin dashboard (screen 1).** Stat cards and registration progress per
+   class ("Primary 3A: 28 of 34"), which `FEATURES.md` §3.5 lists for Phase 1.
+3. **More arms.** Seeded with arm "A" per level — add B/C through
+   `POST /academic/levels/:id/arms`; no UI yet.
+4. **Confirm the admission number format with the school** before volume entry.
+5. **Bulk entry grid** (`FEATURES.md` §3.5).
+6. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is
+   done; subject-teacher allocation comes with subjects.
 
 ---
 
 ## 6. Known gaps
+
+**Phone tab bar contrast.** STITCH-GLOBAL.md §12 sets inactive tab labels to
+`#B9C5CE` on white, which fails WCAG contrast (about 1.9:1). Built to spec;
+waiting on a decision about whether to darken it.
+
+**Figma frames not yet seen.** The Starter plan's call limit stopped after
+three frames (dashboard, teachers, add teacher). Student registration and the
+other 31 frames were not compared.
 
 **No integration tests.** `TESTS.md` §2 requires suites against a real Postgres;
 every API test today mocks Prisma. The database-level rules (partial unique

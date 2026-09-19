@@ -2,24 +2,32 @@
 
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AppNav } from "@/components/layout/app-nav";
-import { visibleNavItems } from "@/components/layout/nav-items";
+import { primaryRoleLabel } from "@/components/auth/roles";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AppTopBar } from "@/components/layout/app-top-bar";
+import { MobileTabBar, MobileTopBar } from "@/components/layout/mobile-nav";
+import { activeNavItem, visibleNavItems } from "@/components/layout/nav-items";
 import { authRedirect } from "@/lib/auth-redirect";
-import { notify } from "@/lib/notify";
 import { decodeAccessToken } from "@/lib/decode-access-token";
+import { notify } from "@/lib/notify";
+import { staffName } from "@/lib/staff-name";
+import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useGetCurrentPeriodQuery } from "@/store/api/academic-api";
 import { useLogoutMutation, useRefreshSessionQuery } from "@/store/api/auth-api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearCredentials, selectAccessToken, selectMustChangePassword } from "@/store/slices/auth-slice";
 
-// Pages that render without the navigation: you are either signing in, or
+// Pages that render without the app chrome: you are either signing in, or
 // being made to replace a temporary password first (FEATURES.md §1.2).
 const BARE_ROUTES = ["/login", "/change-password"];
 
+// Four tab-bar items fit a phone's width (STITCH-GLOBAL.md §12).
+const MOBILE_TABS = 4;
+
 /**
- * Wraps every page in the app chrome and sends visitors where they belong —
- * signed out to /login, temporary passwords to /change-password. Hands plain
- * props to AppNav (AGENTS.md §1).
+ * Wraps every page in the app chrome — sidebar and top bar on desktop, top
+ * bar and bottom tabs on a phone — and sends visitors where they belong:
+ * signed out to /login, temporary passwords to /change-password.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -28,11 +36,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const accessToken = useAppSelector(selectAccessToken);
   const mustChangePassword = useAppSelector(selectMustChangePassword);
 
-  // Same query AuthBootstrap runs; RTK Query dedupes it, so this only reads
-  // whether the cookie-based restore has finished.
+  // Restores the session from the httpOnly refresh cookie on each page load.
+  // The auth slice stores the token in the same action that ends the request
+  // (auth-slice.ts), so "finished" and "signed in" can never disagree here.
   const { isLoading: isRestoringSession } = useRefreshSessionQuery();
   const [logout, { isLoading: isSigningOut }] = useLogoutMutation();
   const { data: period } = useGetCurrentPeriodQuery(undefined, { skip: !accessToken });
+  const { data: me } = useGetMyAccessQuery(undefined, { skip: !accessToken });
 
   const claims = accessToken ? decodeAccessToken(accessToken) : null;
   const redirectTo = authRedirect({
@@ -74,21 +84,32 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }
 
-  const periodLabel = period?.session
+  const items = visibleNavItems(claims.roles);
+  const active = activeNavItem(items, pathname);
+  const schoolName = me?.school.name ?? "";
+  const person = me ? staffName(me.staff) : claims.email;
+  const context = period?.session
     ? `${period.session.name}${period.term ? ` · ${period.term.name}` : ""}`
-    : undefined;
+    : "No current session is set";
 
   return (
-    <>
-      <AppNav
-        items={visibleNavItems(claims.roles)}
-        currentPath={pathname}
-        email={claims.email}
-        periodLabel={periodLabel}
-        onSignOut={signOut}
-        isSigningOut={isSigningOut}
-      />
-      <main className="flex flex-1 flex-col">{children}</main>
-    </>
+    <div className="flex min-h-full flex-1">
+      <AppSidebar items={items} activeHref={active?.href ?? null} schoolName={schoolName} />
+
+      <div className="flex min-h-full min-w-0 flex-1 flex-col lg:pl-[241px]">
+        <AppTopBar
+          context={context}
+          signedInAs={`${person} · ${primaryRoleLabel(claims.roles)}`}
+          onSignOut={signOut}
+          isSigningOut={isSigningOut}
+        />
+        <MobileTopBar title={active?.label ?? schoolName} onSignOut={signOut} isSigningOut={isSigningOut} />
+
+        {/* Bottom padding on phones keeps content clear of the tab bar. */}
+        <main className="flex flex-1 flex-col pb-[60px] lg:pb-0">{children}</main>
+      </div>
+
+      <MobileTabBar items={items.slice(0, MOBILE_TABS)} activeHref={active?.href ?? null} />
+    </div>
   );
 }

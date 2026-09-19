@@ -6,6 +6,7 @@ import { StudentRegistrationForm } from "@/components/students/student-registrat
 import { useRegistrationDraft } from "@/components/students/use-registration-draft";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { notify } from "@/lib/notify";
+import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useGetCurrentPeriodQuery, useListClassArmsQuery } from "@/store/api/academic-api";
 import { useGetBloodGroupsQuery, useGetStatesQuery } from "@/store/api/reference-api";
 import { useRegisterStudentMutation, type RegisterStudentRequest } from "@/store/api/students-api";
@@ -16,7 +17,8 @@ import { useRegisterStudentMutation, type RegisterStudentRequest } from "@/store
  * useRegistrationDraft.
  */
 export function StudentRegistrationView() {
-  const { data: arms = [], isLoading: armsLoading } = useListClassArmsQuery();
+  const { data: allArms = [], isLoading: armsLoading } = useListClassArmsQuery();
+  const { data: access } = useGetMyAccessQuery();
   const { data: current } = useGetCurrentPeriodQuery();
   const { data: states = [] } = useGetStatesQuery();
   const { data: bloodGroups = [] } = useGetBloodGroupsQuery();
@@ -45,6 +47,22 @@ export function StudentRegistrationView() {
       setErrorMessage(parsed.message);
       setLastRegistered(undefined);
     }
+  }
+
+  // A teacher registers only into classes allocated to them, so the dropdown
+  // offers exactly those. The API enforces the same rule regardless.
+  const arms = access?.registersAnywhere ? allArms : (access?.allocatedArms ?? []);
+
+  if (access && !access.registersAnywhere && access.allocatedArms.length === 0) {
+    return (
+      <Alert role="alert">
+        <AlertTitle>No class is allocated to you yet</AlertTitle>
+        <AlertDescription>
+          Teachers register students into their own classes. Ask the superadmin to allocate your class, then come back
+          here.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   if (!current?.session) {

@@ -1,5 +1,9 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "@/store";
+import { authApi } from "@/store/api/auth-api";
+import { clearCredentials, setCredentials, type Credentials } from "@/store/slices/auth-actions";
+
+export { clearCredentials, setCredentials };
 
 /**
  * Cross-cutting session state (AGENTS.md §3) — the access token and whether
@@ -15,22 +19,30 @@ type AuthState = {
 
 const initialState: AuthState = { accessToken: null, mustChangePassword: false };
 
+function store(state: AuthState, credentials: Credentials) {
+  state.accessToken = credentials.accessToken;
+  state.mustChangePassword = credentials.mustChangePassword;
+}
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    setCredentials: (state, action: PayloadAction<{ accessToken: string; mustChangePassword: boolean }>) => {
-      state.accessToken = action.payload.accessToken;
-      state.mustChangePassword = action.payload.mustChangePassword;
-    },
-    clearCredentials: (state) => {
-      state.accessToken = null;
-      state.mustChangePassword = false;
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(setCredentials, (state, action) => store(state, action.payload))
+      .addCase(clearCredentials, (state) => {
+        state.accessToken = null;
+        state.mustChangePassword = false;
+      })
+      // The boot-time session restore stores its token in the same action
+      // that marks the request finished. Copying it across in a later effect
+      // left one render where the restore was "done" but nobody was signed
+      // in, and the app redirected a signed-in user to /login.
+      .addMatcher(authApi.endpoints.refreshSession.matchFulfilled, (state, action) => store(state, action.payload));
   },
 });
 
-export const { setCredentials, clearCredentials } = authSlice.actions;
 export const authReducer = authSlice.reducer;
 
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;

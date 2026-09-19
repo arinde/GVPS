@@ -2,8 +2,8 @@ import type { FormEvent } from "react";
 import { FormField } from "@/components/common/form-field";
 import { PasswordInput } from "@/components/common/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AppButton } from "@/components/common/app-button";
+import { TextInput } from "@/components/common/text-input";
 
 /**
  * Presentational only (AGENTS.md §1) — every field is controlled by props,
@@ -37,7 +37,7 @@ export function LoginForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <FormField id="login-email" label="Email">
-        <Input
+        <TextInput
           id="login-email"
           type="email"
           autoComplete="email"
@@ -65,9 +65,9 @@ export function LoginForm({
         </Alert>
       ) : null}
 
-      <Button type="submit" disabled={isSubmitting}>
+      <AppButton type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Signing in…" : "Sign in"}
-      </Button>
+      </AppButton>
     </form>
   );
 }

@@ -2,7 +2,7 @@ import type { FormEvent } from "react";
 import { controlProps, FormField } from "@/components/common/form-field";
 import { PasswordInput } from "@/components/common/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { AppButton } from "@/components/common/app-button";
 
 export const MIN_PASSWORD_LENGTH = 10;
 
@@ -85,9 +85,9 @@ export function ChangePasswordForm({
         </Alert>
       ) : null}
 
-      <Button type="submit" disabled={isSubmitting}>
+      <AppButton type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Updating…" : "Update password"}
-      </Button>
+      </AppButton>
     </form>
   );
 }

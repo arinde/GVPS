@@ -6,7 +6,7 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "@/store";
-import { clearCredentials, setCredentials } from "@/store/slices/auth-slice";
+import { clearCredentials, setCredentials } from "@/store/slices/auth-actions";
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL ?? "/api",

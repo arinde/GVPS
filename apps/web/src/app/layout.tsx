@@ -1,24 +1,17 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, Libre_Baskerville } from "next/font/google";
+import { IBM_Plex_Mono, Kumbh_Sans } from "next/font/google";
 import { AppShell } from "@/components/layout/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { StoreProvider } from "@/store/store-provider";
 import "./globals.css";
 
-// The three families the design system pairs strictly: Libre Baskerville for
-// headings and large figures, IBM Plex Sans for interface and data, IBM Plex
-// Mono for timestamps and reference codes. Mapped to Tailwind in globals.css.
-const libreBaskerville = Libre_Baskerville({
-  variable: "--font-libre",
+// STITCH-GLOBAL.md §3: Kumbh Sans for all text, in the four weights the
+// design uses. IBM Plex Mono only for codes such as admission numbers and
+// timestamps. Mapped to Tailwind in globals.css.
+const kumbhSans = Kumbh_Sans({
+  variable: "--font-kumbh",
   subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-});
-
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -36,10 +29,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${libreBaskerville.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${kumbhSans.variable} ${plexMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         {/* Client boundary starts here so pages below stay server components (AGENTS.md §3). */}
         <StoreProvider>

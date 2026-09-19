@@ -4,23 +4,49 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Design tokens from STITCH-GLOBAL.md, itself extracted from the school's
+ * Figma file. That document is the visual source of truth: every colour here
+ * is one of its hex values, and section numbers below refer to it. A colour
+ * not listed there is not allowed (§2).
+ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-plex-sans);
-  --font-mono: var(--font-plex-mono);
-  --font-heading: var(--font-libre);
 
-  /* Status colours. The design system double-encodes status as shape + word
-     so it survives photocopying and poor lighting, which means these pairs
-     are always used together with a label — never colour alone. */
+  /* §3: Kumbh Sans for everything. IBM Plex Mono only for admission numbers,
+     timestamps and similar codes. No serif. */
+  --font-sans: var(--font-kumbh);
+  --font-heading: var(--font-kumbh);
+  --font-mono: var(--font-plex-mono);
+
+  /* §2 surfaces and text beyond shadcn's standard set. */
+  --color-body: var(--text-body);
+  --color-placeholder: var(--placeholder);
+  --color-canvas: var(--canvas);
+  --color-zebra: var(--zebra);
+  --color-topbar: var(--topbar);
+  --color-navy: var(--navy);
+  --color-primary-hover: var(--primary-hover);
+  --color-input-focus: var(--input-focus);
+  --color-stat-lavender: var(--stat-lavender);
+  --color-stat-yellow: var(--stat-yellow);
+
+  /* §2 status sets: text, background and border always travel together, and
+     §11 pairs them with a shape and a word — never colour alone. */
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-border: var(--success-border);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-warning-border: var(--warning-border);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-border: var(--danger-border);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
-  --color-brand: var(--brand);
+  --color-info-border: var(--info-border);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -50,143 +76,113 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+
+  /* §4: buttons and inputs 8px (rounded-lg), cards 12px (rounded-xl), pills
+     20px. shadcn derives its scale from --radius; xl is pinned to exactly
+     12px rather than left at --radius × 1.4. */
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.5rem;
 }
 
-/* "Administrative Authority" tokens, from the Stitch design system export.
-   Hex rather than oklch so the values stay greppable against DESIGN.md. */
 :root {
-  --background: #eef3f7; /* Page background */
-  --foreground: #17242f; /* Primary text / dark UI */
-  --card: #ffffff; /* Surface */
-  --card-foreground: #17242f;
+  /* §2 page and content */
+  --background: #ffffff; /* Main content area */
+  --canvas: #eef3f7; /* Behind cards; table header; progress track */
+  --zebra: #f7fafc; /* Alternate table rows; row hover */
+  --topbar: #fcfafa; /* Top bar, off-white */
+  --card: #ffffff;
+  --card-foreground: #282828;
   --popover: #ffffff;
-  --popover-foreground: #17242f;
+  --popover-foreground: #282828;
 
-  /* Buttons are primary solid; the brand accent is deliberately never used
-     on them — it is reserved for the nav underline and crest mark. */
-  --primary: #17242f;
+  /* §2 text */
+  --foreground: #282828; /* Headings, titles, labels */
+  --text-body: #4f4f4f; /* Body text, table cells */
+  --muted-foreground: #424242; /* Subtitles, captions */
+  --placeholder: #b9c5ce;
+
+  /* §13 buttons: primary blue, darker on hover; secondary white, bordered. */
+  --primary: #509cdb;
+  --primary-hover: #2d88d4;
   --primary-foreground: #ffffff;
   --secondary: #ffffff;
-  --secondary-foreground: #17242f;
+  --secondary-foreground: #282828;
 
-  --muted: #e9eef2;
-  --muted-foreground: #7c8b97; /* Muted text */
-  --accent: #e5edf4;
-  --accent-foreground: #3c5a78;
+  --muted: #eef3f7;
+  --accent: #f7fafc;
+  --accent-foreground: #282828;
 
-  --destructive: #9b2226; /* Danger state */
+  /* §2 borders. Inputs sit on #B9C5CE and focus to the sidebar navy (§10). */
   --border: #dee6ec;
-  --input: #b9c5ce; /* Strong borders — inputs need a visible outline */
-  --ring: #17242f;
+  --input: #b9c5ce;
+  --ring: #152259;
+  --input-focus: #f0f5ff; /* §10 focused input fill */
+  --navy: #152259;
 
+  /* §2 status sets */
   --success: #e4f0ea;
   --success-foreground: #1f6b45;
+  --success-border: #a9cdbb;
   --warning: #f7eedc;
   --warning-foreground: #8a6316;
+  --warning-border: #dcc392;
+  --danger: #f7e4e4;
+  --danger-foreground: #9b2226;
+  --danger-border: #dca9a9;
   --info: #e5edf4;
   --info-foreground: #3c5a78;
-  --brand: #6e1d22; /* Sparing: nav underline, crest mark. Never a button. */
+  --info-border: #aec3d6;
+  --destructive: #9b2226;
 
-  --chart-1: #17242f;
-  --chart-2: #4a5a67;
-  --chart-3: #7c8b97;
-  --chart-4: #b9c5ce;
-  --chart-5: #6e1d22;
+  /* §2 the only two card washes allowed, dashboard stat cards only (§8). */
+  --stat-lavender: #e8e8ff;
+  --stat-yellow: #fff3c4;
 
-  /* Design system: card radius 7px, button radius 5px. shadcn derives its
-     smaller radii from --radius, and 0.4375rem lands buttons at ~5px. */
-  --radius: 0.4375rem;
+  --chart-1: #509cdb;
+  --chart-2: #152259;
+  --chart-3: #b9c5ce;
+  --chart-4: #e8e8ff;
+  --chart-5: #fff3c4;
 
-  --sidebar: #17242f;
-  --sidebar-foreground: #eef3f7;
-  --sidebar-primary: #ffffff;
-  --sidebar-primary-foreground: #17242f;
-  --sidebar-accent: #4a5a67;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #4a5a67;
-  --sidebar-ring: #b9c5ce;
+  --radius: 0.5rem;
+
+  /* §6 sidebar */
+  --sidebar: #152259;
+  --sidebar-foreground: #fcfafa;
+  --sidebar-primary: #509cdb; /* Active item */
+  --sidebar-primary-foreground: #fcfafa;
+  --sidebar-accent: rgb(252 250 250 / 0.08); /* Hover on inactive items */
+  --sidebar-accent-foreground: #fcfafa;
+  --sidebar-border: rgb(252 250 250 / 0.15); /* §6 divider under the crest */
+  --sidebar-ring: #509cdb;
 }
 
-/* The design system specifies no dark variant — this is derived from the same
-   hues so a dark toggle degrades gracefully rather than falling back to
-   shadcn's neutral greys. Treat it as provisional: if the school ever asks
-   for dark mode, it needs designing, not inferring. */
-.dark {
-  --background: #101a22;
-  --foreground: #eef3f7;
-  --card: #17242f;
-  --card-foreground: #eef3f7;
-  --popover: #17242f;
-  --popover-foreground: #eef3f7;
-
-  --primary: #eef3f7;
-  --primary-foreground: #17242f;
-  --secondary: #223341;
-  --secondary-foreground: #eef3f7;
-
-  --muted: #223341;
-  --muted-foreground: #9aa8b3;
-  --accent: #223341;
-  --accent-foreground: #cfe0f0;
-
-  --destructive: #e26b6f;
-  --border: #2c3e4d;
-  --input: #3c5061;
-  --ring: #b9c5ce;
-
-  --success: #16301f;
-  --success-foreground: #7fd0a5;
-  --warning: #2f2716;
-  --warning-foreground: #dcb87a;
-  --info: #1a2835;
-  --info-foreground: #9dc0e0;
-  --brand: #c4666b;
-
-  --chart-1: #eef3f7;
-  --chart-2: #b9c5ce;
-  --chart-3: #7c8b97;
-  --chart-4: #4a5a67;
-  --chart-5: #c4666b;
-
-  --sidebar: #0b1218;
-  --sidebar-foreground: #eef3f7;
-  --sidebar-primary: #eef3f7;
-  --sidebar-primary-foreground: #17242f;
-  --sidebar-accent: #223341;
-  --sidebar-accent-foreground: #eef3f7;
-  --sidebar-border: #2c3e4d;
-  --sidebar-ring: #3c5061;
-}
+/* No .dark palette: the design system specifies a single light look. */
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-body;
   }
   html {
     @apply font-sans;
   }
-  /* Every heading is Libre Baskerville in the design system, so this is the
-     default rather than a class each screen has to remember. */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    @apply font-heading font-bold;
+    @apply text-foreground font-semibold;
   }
-  /* Money and any other figure compared down a column needs tabular figures,
-     or the digits do not line up between rows. */
+  /* §3: every number uses tabular figures, so columns line up. */
   .tabular {
     font-variant-numeric: tabular-nums;
   }

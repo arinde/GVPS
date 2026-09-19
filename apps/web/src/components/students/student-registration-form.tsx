@@ -1,11 +1,12 @@
-import type { FormEvent, ReactNode } from "react";
+import type { FormEvent } from "react";
 import { UserPlus } from "lucide-react";
 import { GuardianFieldset } from "@/components/students/guardian-fieldset";
 import { StudentBackgroundFields } from "@/components/students/student-background-fields";
 import { StudentClassFields } from "@/components/students/student-class-fields";
 import { StudentIdentityFields } from "@/components/students/student-identity-fields";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { AppButton } from "@/components/common/app-button";
+import { FormSection } from "@/components/common/form-section";
 import { scopedErrors } from "@/lib/api-error";
 import type { ClassArmOption } from "@/store/api/academic-api";
 import type { NigerianState } from "@/store/api/reference-api";
@@ -35,18 +36,6 @@ export type StudentRegistrationFormProps = {
 
 const MAX_GUARDIANS = 4;
 
-function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-4">
-      <div className="border-border flex items-center justify-between border-b pb-2">
-        <h2 className="text-base">{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 export function StudentRegistrationForm({
   value,
   arms,
@@ -71,28 +60,28 @@ export function StudentRegistrationForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
-      <Section title="Student">
+      <FormSection title="Student">
         <StudentIdentityFields {...fields} />
-      </Section>
+      </FormSection>
 
-      <Section title="Class">
+      <FormSection title="Class">
         <StudentClassFields {...fields} arms={arms} />
-      </Section>
+      </FormSection>
 
-      <Section title="Home and health">
+      <FormSection title="Home and health">
         <StudentBackgroundFields {...fields} states={states} bloodGroups={bloodGroups} />
         {/* FEATURES.md §3.5: photographs are a second pass and must never
             block entry, so there is deliberately no upload here. */}
-      </Section>
+      </FormSection>
 
-      <Section
+      <FormSection
         title="Parents and guardians"
         action={
           value.guardians.length < MAX_GUARDIANS ? (
-            <Button type="button" variant="outline" size="sm" onClick={onAddGuardian} disabled={isSubmitting}>
+            <AppButton type="button" variant="secondary" size="small" onClick={onAddGuardian} disabled={isSubmitting}>
               <UserPlus aria-hidden="true" />
               Add another
-            </Button>
+            </AppButton>
           ) : null
         }
       >
@@ -115,7 +104,7 @@ export function StudentRegistrationForm({
             onMakePrimary={() => onMakeGuardianPrimary(index)}
           />
         ))}
-      </Section>
+      </FormSection>
 
       {errorMessage ? (
         <Alert variant="destructive" role="alert">
@@ -124,9 +113,9 @@ export function StudentRegistrationForm({
       ) : null}
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
+        <AppButton type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Registering…" : "Register student"}
-        </Button>
+        </AppButton>
       </div>
     </form>
   );

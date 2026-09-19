@@ -40,6 +40,18 @@ const typeScriptRules = {
   ],
 };
 
+// Import restrictions for apps/web, shared by the blocks below.
+const climbPattern = {
+  group: ["../../**"],
+  message: "Use the @/ alias instead of climbing directories (AGENTS.md §8).",
+};
+const sonnerPath = { name: "sonner", message: "Use notify from @/lib/notify instead of importing sonner directly." };
+const primitivePaths = [
+  { name: "@/components/ui/button", message: "Use AppButton from @/components/common/app-button (AGENTS.md §12)." },
+  { name: "@/components/ui/input", message: "Use TextInput from @/components/common/text-input (AGENTS.md §12)." },
+  { name: "@/components/ui/card", message: "Use ContentCard from @/components/common/content-card (AGENTS.md §12)." },
+];
+
 const eslintConfig = defineConfig([
   // ---- apps/web (Next.js / React) ----
   {
@@ -55,36 +67,27 @@ const eslintConfig = defineConfig([
       // the rule's cwd-relative lookup only ever resolves against the repo
       // root in this monorepo, not apps/web.
       "@next/next/no-html-link-for-pages": "off",
-      // Toasts go through lib/notify.ts, never the library directly, so tone,
-      // timing and error wording stay consistent and the library can be
-      // swapped in one file.
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            { group: ["../../**"], message: "Use the @/ alias instead of climbing directories (AGENTS.md §8)." },
-          ],
-          paths: [{ name: "sonner", message: "Use notify from @/lib/notify instead of importing sonner directly." }],
-        },
-      ],
+      // Toasts go through lib/notify.ts, and controls through the design-
+      // system wrappers in components/common, so every screen looks and
+      // behaves the same and each can change in one file (AGENTS.md §12).
+      "no-restricted-imports": ["error", { patterns: [climbPattern], paths: [sonnerPath, ...primitivePaths] }],
     },
   },
 
-  // The two files allowed to import sonner: the wrapper, and shadcn's
-  // generated Toaster.
+  // components/common is where the wrappers live, so it may import the
+  // shadcn primitives it wraps.
+  {
+    name: "gvps/web-common",
+    files: ["apps/web/src/components/common/**"],
+    rules: { "no-restricted-imports": ["error", { patterns: [climbPattern], paths: [sonnerPath] }] },
+  },
+
+  // The one file allowed to import sonner (shadcn's generated Toaster is
+  // under components/ui, which is exempt already).
   {
     name: "gvps/web-notify",
     files: ["apps/web/src/lib/notify.ts"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            { group: ["../../**"], message: "Use the @/ alias instead of climbing directories (AGENTS.md §8)." },
-          ],
-        },
-      ],
-    },
+    rules: { "no-restricted-imports": ["error", { patterns: [climbPattern], paths: primitivePaths }] },
   },
 
   // §6 shadcn output is generated and never edited, so it is not held to our

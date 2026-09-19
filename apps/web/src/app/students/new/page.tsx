@@ -1,21 +1,18 @@
+import { ContentCard } from "@/components/common/content-card";
+import { PageContainer } from "@/components/common/page-container";
+import { PageHeader } from "@/components/common/page-header";
 import { StudentRegistrationView } from "@/components/students/student-registration-view";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RegisterStudentPage() {
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Register student</CardTitle>
-          <CardDescription>
-            The admission number is allocated automatically on save. Photographs are captured in a second pass and are
-            not needed now.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <StudentRegistrationView />
-        </CardContent>
-      </Card>
-    </div>
+    <PageContainer width="form">
+      <PageHeader
+        title="Register student"
+        subtitle="The admission number is allocated on save. Photographs are taken in a second pass and are not needed now."
+      />
+      <ContentCard>
+        <StudentRegistrationView />
+      </ContentCard>
+    </PageContainer>
   );
 }

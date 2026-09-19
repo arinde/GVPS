@@ -27,6 +27,28 @@ describe("StaffAccountService", () => {
   });
 
   describe("createStaff", () => {
+    it("records the salary account in the audit log masked, never in full", async () => {
+      prisma.staff.findUnique.mockResolvedValue(null);
+      prisma.staff.create.mockResolvedValue({ id: "new-staff" });
+
+      await service.createStaff("admin-1", "school-1", {
+        firstName: "Ngozi",
+        lastName: "Okafor",
+        phone: "+2348012345678",
+        email: "ngozi@school.test",
+        bankName: "Zenith Bank",
+        accountNumber: "0123456789",
+        accountName: "Ngozi Okafor",
+        roles: ["FORM_TEACHER"],
+      } as never);
+
+      const entry = audit.record.mock.calls[0][0];
+      expect(entry.after.accountNumber).toBe("******6789");
+      expect(JSON.stringify(entry)).not.toContain("0123456789");
+      // The staff record itself does hold the full number — it is what pays them.
+      expect(prisma.staff.create.mock.calls[0][0].data.accountNumber).toBe("0123456789");
+    });
+
     it("stores the staff member's basic details, not just an email", async () => {
       prisma.staff.findUnique.mockResolvedValue(null);
       prisma.staff.create.mockResolvedValue({ id: "new-staff" });

@@ -42,14 +42,16 @@ export function DataTable<TData extends RowData>({
   return (
     <div className={cn("w-full overflow-x-auto", className)}>
       <table className="w-full caption-bottom text-sm">
-        <thead className="[&_tr]:border-b">
+        {/* STITCH-GLOBAL.md §9: #EEF3F7 header with #B9C5CE rules above and
+            below, 48px rows, zebra striping, 12px/16px cell padding. */}
+        <thead className="bg-canvas">
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b">
+            <tr key={headerGroup.id} className="border-input border-y">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
                   scope="col"
-                  className="text-muted-foreground h-10 px-3 text-left align-middle font-medium"
+                  className="text-muted-foreground h-12 px-4 text-left align-middle text-[13px] font-semibold"
                 >
                   {header.isPlaceholder ? null : <table.FlexRender header={header} />}
                 </th>
@@ -59,9 +61,9 @@ export function DataTable<TData extends RowData>({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="hover:bg-muted/50 border-b transition-colors">
+            <tr key={row.id} className="even:bg-zebra hover:bg-canvas border-border h-12 border-b transition-colors">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-3 py-2 align-middle">
+                <td key={cell.id} className="text-body px-4 py-3 align-middle">
                   <table.FlexRender cell={cell} />
                 </td>
               ))}

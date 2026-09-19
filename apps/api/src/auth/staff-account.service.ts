@@ -3,6 +3,7 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import * as argon2 from "argon2";
 import type { Role } from "@prisma/client";
 import type { CreateStaffDto } from "@/auth/schemas/create-staff.schema";
+import { maskAccountNumber } from "@/common/mask-account-number";
 import { AuditService } from "@/audit/audit.service";
 import { PrismaService } from "@/prisma/prisma.service";
 
@@ -39,6 +40,13 @@ export class StaffAccountService {
         lastName: dto.lastName,
         otherNames: dto.otherNames,
         phone: dto.phone,
+        address: dto.address,
+        nextOfKinName: dto.nextOfKinName,
+        nextOfKinRelationship: dto.nextOfKinRelationship,
+        nextOfKinPhone: dto.nextOfKinPhone,
+        bankName: dto.bankName,
+        accountNumber: dto.accountNumber,
+        accountName: dto.accountName,
         roles: { create: roles.map((role) => ({ role })) },
       },
     });
@@ -49,7 +57,15 @@ export class StaffAccountService {
       action: "staff.create",
       entityType: "Staff",
       entityId: staff.id,
-      after: { email, roles, name: `${dto.lastName}, ${dto.firstName}` },
+      // The salary account is recorded masked: the log shows an account was
+      // set and which one, without holding the full number itself.
+      after: {
+        email,
+        roles,
+        name: `${dto.lastName}, ${dto.firstName}`,
+        bankName: dto.bankName ?? null,
+        accountNumber: maskAccountNumber(dto.accountNumber),
+      },
     });
 
     return { staffId: staff.id, temporaryPassword };
@@ -86,6 +102,36 @@ export class StaffAccountService {
         },
       },
     });
+  }
+
+  /**
+   * One staff member's full record, salary account included. Superadmin-only
+   * at the controller; the list above deliberately leaves the account out.
+   */
+  async getProfile(schoolId: string, staffId: string) {
+    const staff = await this.prisma.staff.findFirst({
+      where: { id: staffId, schoolId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        otherNames: true,
+        phone: true,
+        address: true,
+        nextOfKinName: true,
+        nextOfKinRelationship: true,
+        nextOfKinPhone: true,
+        bankName: true,
+        accountNumber: true,
+        accountName: true,
+        mustChangePassword: true,
+        createdAt: true,
+        roles: { select: { role: true } },
+      },
+    });
+    if (!staff) throw new NotFoundException("Staff member not found.");
+    return staff;
   }
 
   async grantRole(actorStaffId: string, schoolId: string, staffId: string, role: Role): Promise<void> {

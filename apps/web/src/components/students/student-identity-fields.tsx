@@ -1,7 +1,7 @@
 import { controlProps, FormField } from "@/components/common/form-field";
 import { NativeSelect } from "@/components/common/native-select";
 import type { StudentFieldProps } from "@/components/students/student-field-props";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/common/text-input";
 import type { RegisterStudentRequest } from "@/store/api/students-api";
 
 const SEX_OPTIONS = [
@@ -14,7 +14,7 @@ export function StudentIdentityFields({ value, onChange, errors, disabled }: Stu
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <FormField id="first-name" label="First name" required error={errors.firstName}>
-        <Input
+        <TextInput
           {...controlProps("first-name", errors.firstName)}
           autoFocus
           autoComplete="off"
@@ -25,7 +25,7 @@ export function StudentIdentityFields({ value, onChange, errors, disabled }: Stu
       </FormField>
 
       <FormField id="last-name" label="Surname" required error={errors.lastName}>
-        <Input
+        <TextInput
           {...controlProps("last-name", errors.lastName)}
           autoComplete="off"
           value={value.lastName}
@@ -35,7 +35,7 @@ export function StudentIdentityFields({ value, onChange, errors, disabled }: Stu
       </FormField>
 
       <FormField id="other-names" label="Other names" className="sm:col-span-2" error={errors.otherNames}>
-        <Input
+        <TextInput
           {...controlProps("other-names", errors.otherNames)}
           autoComplete="off"
           value={value.otherNames ?? ""}
@@ -45,7 +45,7 @@ export function StudentIdentityFields({ value, onChange, errors, disabled }: Stu
       </FormField>
 
       <FormField id="dob" label="Date of birth" required error={errors.dateOfBirth}>
-        <Input
+        <TextInput
           {...controlProps("dob", errors.dateOfBirth)}
           type="date"
           value={value.dateOfBirth}

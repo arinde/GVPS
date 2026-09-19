@@ -7,3 +7,12 @@ export const ROLE_OPTIONS = [
   { value: "SUBJECT_TEACHER", label: "Subject teacher" },
   { value: "ADMIN_SECRETARY", label: "Admin / secretary" },
 ] as const;
+
+/**
+ * The role to show beside someone's name when they hold several. ROLE_OPTIONS
+ * runs from most to least senior, so the first match is the one that best
+ * describes what they can do.
+ */
+export function primaryRoleLabel(roles: readonly string[]): string {
+  return ROLE_OPTIONS.find((option) => roles.includes(option.value))?.label ?? "Staff";
+}

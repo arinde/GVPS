@@ -76,6 +76,20 @@ model Staff {
   lastName   String?
   otherNames String?
   phone      String?
+  address    String?
+
+  // FEATURES.md §9.1: next of kin, for emergencies.
+  nextOfKinName         String?
+  nextOfKinRelationship String?
+  nextOfKinPhone        String?
+
+  // FEATURES.md §9.1: the account salary is paid into. The most sensitive
+  // fields in the system — changing them redirects someone's pay — so they
+  // are never returned by the staff list, only by a superadmin-only profile
+  // read, and every change is audited with the number masked.
+  bankName      String?
+  accountNumber String? // NUBAN: exactly 10 digits
+  accountName   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

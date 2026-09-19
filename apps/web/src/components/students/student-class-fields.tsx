@@ -1,7 +1,7 @@
 import { controlProps, FormField } from "@/components/common/form-field";
 import { NativeSelect } from "@/components/common/native-select";
 import type { StudentFieldProps } from "@/components/students/student-field-props";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/common/text-input";
 import type { ClassArmOption } from "@/store/api/academic-api";
 import type { RegisterStudentRequest } from "@/store/api/students-api";
 
@@ -42,7 +42,7 @@ export function StudentClassFields({ value, onChange, errors, disabled, arms }: 
       {isSenior ? (
         fixedDepartment ? (
           <FormField id="department" label="Department" hint={`Set by the class: ${fixedDepartment.label}`}>
-            <Input id="department" value={fixedDepartment.label} disabled readOnly />
+            <TextInput id="department" value={fixedDepartment.label} disabled readOnly />
           </FormField>
         ) : (
           <FormField id="department" label="Department" required error={errors.stream}>
@@ -61,7 +61,7 @@ export function StudentClassFields({ value, onChange, errors, disabled, arms }: 
       ) : null}
 
       <FormField id="admission-date" label="Date of admission" required error={errors.dateOfAdmission}>
-        <Input
+        <TextInput
           {...controlProps("admission-date", errors.dateOfAdmission)}
           type="date"
           value={value.dateOfAdmission}
@@ -71,7 +71,7 @@ export function StudentClassFields({ value, onChange, errors, disabled, arms }: 
       </FormField>
 
       <FormField id="previous-school" label="Previous school" error={errors.previousSchool}>
-        <Input
+        <TextInput
           {...controlProps("previous-school", errors.previousSchool)}
           value={value.previousSchool ?? ""}
           disabled={disabled}

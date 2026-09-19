@@ -250,6 +250,13 @@ weak connection, entering a whole class at a time. Every screen is judged by
 whether they can get through it without help, without losing work, and
 without guessing what happened.
 
+**`STITCH-GLOBAL.md` is the visual source of truth** — colours, type, spacing,
+radii, the sidebar and top bar, tables, pills. It was extracted from the
+school's Figma file and tightened; where the two disagree, follow the md file.
+`STITCH-SCREENS.md` and `STITCH-MISSING-SCREENS.md` describe individual screens.
+Their sample names and school ("SchoolBase", "Adeola Memorial College") are
+mockup content only — the app shows the real school and real records.
+
 **Every action gets feedback — through `notify`, and only `notify`.**
 - `notify` in `lib/notify.ts` is the single way to say an action finished or
   failed. Never import `sonner` directly; ESLint rejects it.
@@ -302,6 +309,14 @@ visitor reaches sign-in, an empty list offers the action that fills it.
 colour alone — it pairs an icon or shape with a word, which also survives
 photocopying. Interactive elements are reachable and usable by keyboard.
 
-**Reuse the building blocks.** `FormField`, `controlProps`, `NativeSelect`,
-`PasswordInput`, `DataTable`, `EmptyState` and `notify` already solve these
-problems. A new form that re-solves any of them is a defect (§1).
+**Reuse the building blocks.** They already solve these problems, and a
+screen that re-solves any of them is a defect (§1):
+
+- Layout: `PageContainer`, `PageHeader`, `ContentCard`, `FormSection`.
+- Controls: `AppButton`, `AppLinkButton` (navigation that looks like a button
+  — a real link, never a button pretending), `TextInput`, `PasswordInput`,
+  `NativeSelect`, with `FormField` + `controlProps` around each.
+- Data and feedback: `DataTable`, `EmptyState`, `notify`.
+
+ESLint rejects importing `ui/button`, `ui/input` or `ui/card` outside
+`components/common/`, so the design-system versions are the only ones in use.

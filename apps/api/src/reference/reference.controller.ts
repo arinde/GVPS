@@ -1,6 +1,7 @@
 import { Controller, Get, Header, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { NIGERIAN_STATES } from "@/reference/nigeria-states";
+import { NEXT_OF_KIN_RELATIONSHIPS, NIGERIAN_BANKS } from "@/reference/staff-reference";
 import { BLOOD_GROUPS } from "@/students/schemas/create-student.schema";
 
 /**
@@ -23,5 +24,17 @@ export class ReferenceController {
   @Header("Cache-Control", "private, max-age=86400")
   bloodGroups() {
     return BLOOD_GROUPS;
+  }
+
+  @Get("banks")
+  @Header("Cache-Control", "private, max-age=86400")
+  banks() {
+    return NIGERIAN_BANKS;
+  }
+
+  @Get("next-of-kin-relationships")
+  @Header("Cache-Control", "private, max-age=86400")
+  nextOfKinRelationships() {
+    return NEXT_OF_KIN_RELATIONSHIPS;
   }
 }
