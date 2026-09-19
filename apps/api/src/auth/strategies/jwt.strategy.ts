@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import type { Role } from "@prisma/client";
+import { TOKEN_AUDIENCE } from "@/common/secrets";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 
 export type AccessTokenPayload = {
@@ -26,6 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: config.getOrThrow<string>("JWT_ACCESS_SECRET"),
+      // Staff tokens only: a parent-portal token is signed with the same
+      // secret and must be refused here (common/secrets.ts).
+      audience: TOKEN_AUDIENCE.staff,
     });
   }
 

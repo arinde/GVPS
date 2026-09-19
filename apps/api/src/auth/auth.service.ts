@@ -1,10 +1,10 @@
-import { createHash, randomBytes } from "node:crypto";
 import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import * as argon2 from "argon2";
 import type { StringValue } from "ms";
 import type { Role, Staff } from "@prisma/client";
+import { hashToken, newRefreshToken, TOKEN_AUDIENCE } from "@/common/secrets";
 import { PrismaService } from "@/prisma/prisma.service";
 
 const MAX_FAILED_LOGIN_ATTEMPTS = 5;
@@ -123,6 +123,7 @@ export class AuthService {
       },
       {
         secret: this.config.getOrThrow<string>("JWT_ACCESS_SECRET"),
+        audience: TOKEN_AUDIENCE.staff,
         // `ms`'s StringValue type can't be verified at compile time against
         // an arbitrary env string — the format (e.g. "15m") is validated at
         // runtime by the jsonwebtoken library itself, which throws on a bad value.
@@ -131,7 +132,7 @@ export class AuthService {
     );
 
     const refreshTtlDays = Number(this.config.get<string>("JWT_REFRESH_TTL_DAYS") ?? "30");
-    const rawRefreshToken = randomBytes(32).toString("base64url");
+    const rawRefreshToken = newRefreshToken();
     await this.prisma.refreshToken.create({
       data: {
         staffId: staff.id,
@@ -142,11 +143,4 @@ export class AuthService {
 
     return { accessToken, refreshToken: rawRefreshToken, mustChangePassword: staff.mustChangePassword };
   }
-}
-
-// Refresh tokens are high-entropy random bytes, not user secrets — a fast
-// hash is enough to keep the DB from holding usable bearer tokens in plain
-// text (unlike passwords, brute-forcing the hash isn't the threat model).
-function hashToken(rawToken: string): string {
-  return createHash("sha256").update(rawToken).digest("hex");
 }

@@ -38,9 +38,9 @@ export function LoginView() {
 
   return (
     <LoginForm
-      email={email}
+      identifier={email}
       password={password}
-      onEmailChange={setEmail}
+      onIdentifierChange={setEmail}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}
       isSubmitting={isLoading}

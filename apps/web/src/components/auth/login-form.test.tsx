@@ -7,9 +7,9 @@ describe("LoginForm", () => {
   it("renders the current values", () => {
     render(
       <LoginForm
-        email="a@example.com"
+        identifier="a@example.com"
         password="secret"
-        onEmailChange={vi.fn()}
+        onIdentifierChange={vi.fn()}
         onPasswordChange={vi.fn()}
         onSubmit={vi.fn()}
       />,
@@ -23,7 +23,13 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     const onEmailChange = vi.fn();
     render(
-      <LoginForm email="" password="" onEmailChange={onEmailChange} onPasswordChange={vi.fn()} onSubmit={vi.fn()} />,
+      <LoginForm
+        identifier=""
+        password=""
+        onIdentifierChange={onEmailChange}
+        onPasswordChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
     );
 
     await user.type(screen.getByLabelText("Email"), "x");
@@ -35,9 +41,9 @@ describe("LoginForm", () => {
     const onSubmit = vi.fn();
     render(
       <LoginForm
-        email="a@example.com"
+        identifier="a@example.com"
         password="secret"
-        onEmailChange={vi.fn()}
+        onIdentifierChange={vi.fn()}
         onPasswordChange={vi.fn()}
         onSubmit={onSubmit}
       />,
@@ -50,9 +56,9 @@ describe("LoginForm", () => {
   it("shows an error message when given one", () => {
     render(
       <LoginForm
-        email=""
+        identifier=""
         password=""
-        onEmailChange={vi.fn()}
+        onIdentifierChange={vi.fn()}
         onPasswordChange={vi.fn()}
         onSubmit={vi.fn()}
         errorMessage="Invalid email or password."
@@ -65,9 +71,9 @@ describe("LoginForm", () => {
   it("disables the submit button while submitting", () => {
     render(
       <LoginForm
-        email=""
+        identifier=""
         password=""
-        onEmailChange={vi.fn()}
+        onIdentifierChange={vi.fn()}
         onPasswordChange={vi.fn()}
         onSubmit={vi.fn()}
         isSubmitting

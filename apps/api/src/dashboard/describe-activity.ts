@@ -23,6 +23,12 @@ function changedList(after: unknown): string | null {
   return keys.length ? `changed ${keys.join(", ")}` : null;
 }
 
+function parentDetail(after: unknown): string {
+  const phone = field(after, "phone");
+  const children = typeof after === "object" && after !== null ? (after as Record<string, unknown>).children : null;
+  return joined(phone, typeof children === "number" ? `${children} child${children === 1 ? "" : "ren"}` : null);
+}
+
 const joined = (...parts: (string | null)[]) => parts.filter(Boolean).join(" · ");
 
 export function describeActivity({ action, after }: ActivityRow): ActivityText {
@@ -38,6 +44,10 @@ export function describeActivity({ action, after }: ActivityRow): ActivityText {
       return { title: "Guardian details corrected", detail: joined(field(after, "name"), changedList(after)) };
     case "staff.updated":
       return { title: "Staff record corrected", detail: joined(field(after, "name"), changedList(after)) };
+    case "parent.access.issued":
+      return { title: "Portal login issued", detail: parentDetail(after) };
+    case "parent.password.reset":
+      return { title: "Portal password reset", detail: parentDetail(after) };
     case "student.photo.set":
       return { title: "Photograph added", detail: field(after, "admissionNo") ?? "" };
     case "staff.create":

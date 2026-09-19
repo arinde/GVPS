@@ -1,9 +1,9 @@
-import { randomBytes } from "node:crypto";
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import type { Role } from "@prisma/client";
 import type { CreateStaffDto } from "@/auth/schemas/create-staff.schema";
 import { maskAccountNumber } from "@/common/mask-account-number";
+import { generateTemporaryPassword } from "@/common/secrets";
 import { AuditService } from "@/audit/audit.service";
 import { PrismaService } from "@/prisma/prisma.service";
 
@@ -210,8 +210,4 @@ export class StaffAccountService {
     const staff = await this.prisma.staff.findUnique({ where: { id: staffId } });
     if (!staff || staff.schoolId !== schoolId) throw new NotFoundException("Staff account not found.");
   }
-}
-
-function generateTemporaryPassword(): string {
-  return randomBytes(12).toString("base64url");
 }

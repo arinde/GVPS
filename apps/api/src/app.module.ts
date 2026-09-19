@@ -6,6 +6,7 @@ import { AcademicModule } from "@/academic/academic.module";
 import { AccessModule } from "@/access/access.module";
 import { ClassAssignmentsModule } from "@/class-assignments/class-assignments.module";
 import { DashboardModule } from "@/dashboard/dashboard.module";
+import { PortalModule } from "@/portal/portal.module";
 import { ReferenceModule } from "@/reference/reference.module";
 import { StudentsModule } from "@/students/students.module";
 import { AuditModule } from "@/audit/audit.module";
@@ -24,6 +25,7 @@ import { PrismaModule } from "@/prisma/prisma.module";
     ReferenceModule,
     ClassAssignmentsModule,
     DashboardModule,
+    PortalModule,
   ],
   controllers: [AppController],
   providers: [AppService],

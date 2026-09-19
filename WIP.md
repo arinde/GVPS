@@ -172,6 +172,18 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
+### 2026-09-20 — decisions confirmed by the owner
+
+- Codes NUR / PRY / SEC are right; early-years order Creche → Nursery 1 →
+  Nursery 2 → KG 1 → KG 2 is right.
+- **Entering secondary changes the admission number** (FEATURES.md §3.1).
+  Not built yet because nothing moves a pupil between classes yet; it belongs
+  to promotion. Plan: an `admission_number_history` table (student, number,
+  code, issued, retired); reissue inside the promotion transaction, with the
+  `admission_no_immutable` trigger relaxed only when that transaction sets a
+  local flag (`SET LOCAL gvps.reissue_admission_no = 'on'`), so every other
+  path still cannot change a number; lookup searches history too; audited.
+
 ### 2026-09-20 (later) — superadmin editing, audited
 
 - **Staff**: "Edit details" on `/staff/[id]` → `/staff/[id]/edit` (the create
@@ -295,7 +307,8 @@ two siblings, enrolment into the current session, search, and detail.
    seen rendered (the dev servers were stopped mid-check). Class sizes
    (`ClassArm.capacity`) are unset until entered on `/classes`, so progress
    shows counts without bars until then. The class setup page is also unseen.
-2. **Confirm the admission number format with the school** before volume entry.
+2. **Promotion and class transfer**, with the primary → secondary number
+   reissue above.
 3. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
    create-staff form (the Figma form has one).
 4. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is

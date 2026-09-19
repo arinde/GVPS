@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { FormField } from "@/components/common/form-field";
+import { controlProps, FormField } from "@/components/common/form-field";
 import { PasswordInput } from "@/components/common/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AppButton } from "@/components/common/app-button";
@@ -11,23 +11,31 @@ import { TextInput } from "@/components/common/text-input";
  * truth and this renders purely from what it's handed.
  */
 export type LoginFormProps = {
-  email: string;
+  /** What identifies the account: an email for staff, a phone number for parents. */
+  identifier: string;
   password: string;
-  onEmailChange: (value: string) => void;
+  onIdentifierChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
   isSubmitting?: boolean;
   errorMessage?: string;
+  /** Defaults suit the staff sign-in; the family portal passes a phone field. */
+  identifierLabel?: string;
+  identifierType?: "email" | "tel";
+  identifierHint?: string;
 };
 
 export function LoginForm({
-  email,
+  identifier,
   password,
-  onEmailChange,
+  onIdentifierChange,
   onPasswordChange,
   onSubmit,
   isSubmitting = false,
   errorMessage,
+  identifierLabel = "Email",
+  identifierType = "email",
+  identifierHint,
 }: LoginFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,15 +44,16 @@ export function LoginForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <FormField id="login-email" label="Email">
+      <FormField id="login-id" label={identifierLabel} hint={identifierHint}>
         <TextInput
-          id="login-email"
-          type="email"
-          autoComplete="email"
+          {...controlProps("login-id", undefined, identifierHint)}
+          type={identifierType}
+          inputMode={identifierType === "tel" ? "tel" : "email"}
+          autoComplete={identifierType === "tel" ? "tel" : "email"}
           required
-          value={email}
+          value={identifier}
           disabled={isSubmitting}
-          onChange={(event) => onEmailChange(event.target.value)}
+          onChange={(event) => onIdentifierChange(event.target.value)}
         />
       </FormField>
 

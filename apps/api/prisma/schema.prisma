@@ -38,6 +38,7 @@ model School {
   admissionCodeSecondary String @default("SEC")
 
   staff            Staff[]
+  parentAccounts   ParentAccount[]
   auditLogs        AuditLog[]
   academicSessions AcademicSession[]
   terms            Term[]
@@ -479,4 +480,44 @@ model ClassAssignment {
   @@unique([sessionId, classArmId])
   @@index([schoolId, sessionId, staffId])
   @@map("class_assignments")
+}
+
+// ---------------------------------------------------------------------------
+// Family portal. One login per phone number: it reaches every child whose
+// parent or guardian record carries that number, so a parent with several
+// children signs in once. The school issues a temporary password on a slip,
+// changed at first sign-in, as for staff. This replaces FEATURES.md §1.3's
+// one-time codes for now — the owner chose it to avoid per-message costs.
+// ---------------------------------------------------------------------------
+model ParentAccount {
+  id                  String    @id @default(cuid())
+  schoolId            String
+  // Normalised +234 form, matched against Guardian.phone.
+  phone               String
+  passwordHash        String
+  mustChangePassword  Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  school        School               @relation(fields: [schoolId], references: [id])
+  refreshTokens ParentRefreshToken[]
+
+  @@unique([schoolId, phone])
+  @@map("parent_accounts")
+}
+
+model ParentRefreshToken {
+  id              String    @id @default(cuid())
+  parentAccountId String
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  parentAccount ParentAccount @relation(fields: [parentAccountId], references: [id], onDelete: Cascade)
+
+  @@map("parent_refresh_tokens")
 }

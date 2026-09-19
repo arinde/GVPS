@@ -229,7 +229,13 @@ Bio data (permanent facts only):
 - Full name, other names, date of birth, sex, nationality, state of origin, LGA.
 - Passport photograph.
 - Admission number (system-generated, format configurable, e.g. `SCH/2026/0142`).
-- Date of admission, admitted into level.
+  Confirmed with the school (2026-09-20): `GVPS/{CODE}/{YEAR}/{SEQ}`, codes
+  `NUR` (Creche–KG 2), `PRY` (Primary 1–6), `SEC` (JSS 1–SSS 3), each with its
+  own count per year. **A pupil who moves from primary into JSS 1 is issued
+  a new `SEC` number**; the old number is kept in the student's history and
+  still finds them in a lookup. Numbers are otherwise never changed.
+- Year of admission (required — it sets the number's year); exact date
+  optional. Admitted into level.
 - Address, blood group (school clinic requirement), and any standing medical
   note the school holds.
 - Previous school.
@@ -268,7 +274,8 @@ biggest determinant of whether Phase 1 completes.
 - `P2`: CSV import, once the school has data worth exporting and re-importing.
 
 ### 3.6 Movement and exit `P2`
-- Promotion (bulk, driven by third-term cumulative performance).
+- Promotion (bulk, driven by third-term cumulative performance). Promoting
+  Primary 6 into JSS 1 issues each pupil a new `SEC` admission number (§3.1).
 - Repetition, with reason.
 - Transfer out, with transfer certificate PDF.
 - Withdrawal, dismissal, alumni status.

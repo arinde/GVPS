@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Kumbh_Sans } from "next/font/google";
-import { AppShell } from "@/components/layout/app-shell";
+import { ShellSwitch } from "@/components/layout/shell-switch";
 import { Toaster } from "@/components/ui/sonner";
 import { StoreProvider } from "@/store/store-provider";
 import "./globals.css";
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         {/* Client boundary starts here so pages below stay server components (AGENTS.md §3). */}
         <StoreProvider>
-          <AppShell>{children}</AppShell>
+          <ShellSwitch>{children}</ShellSwitch>
         </StoreProvider>
         {/* Mounted once; everything else calls notify from @/lib/notify. Top
             centre so it is seen on a phone, where the corners sit under thumbs. */}

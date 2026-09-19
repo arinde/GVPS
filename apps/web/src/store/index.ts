@@ -1,7 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { baseApi } from "@/store/api/base-api";
+import { portalApi } from "@/store/api/portal-api";
 import { authReducer } from "@/store/slices/auth-slice";
+import { portalAuthReducer } from "@/store/slices/portal-auth-slice";
 
 /**
  * Builds a fresh store.
@@ -14,9 +16,11 @@ export function makeStore() {
   const store = configureStore({
     reducer: {
       [baseApi.reducerPath]: baseApi.reducer,
+      [portalApi.reducerPath]: portalApi.reducer,
       auth: authReducer,
+      portalAuth: portalAuthReducer,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware, portalApi.middleware),
   });
 
   // Enables refetchOnFocus / refetchOnReconnect for every endpoint that opts in.
