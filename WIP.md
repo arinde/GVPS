@@ -362,6 +362,24 @@ two siblings, enrolment into the current session, search, and detail.
 - **Bug fixed:** optional list fields ("bank", "blood group") reported a bare
   "Invalid input". `common/schemas/blank-as-undefined.ts` fixes the pattern.
 
+## 4b. Deployed (2026-09-20)
+
+- Web: https://gvps-api-taupe.vercel.app (Vercel project is named "gvps-api" —
+  confusing, worth renaming; renaming changes the URL, so update
+  `FRONTEND_ORIGIN` on Render at the same time). Root Directory `apps/web`,
+  Framework Preset **Next.js** — "No framework detected" was the 404.
+  One env var: `NEXT_PUBLIC_API_URL`.
+- API: https://gvps.onrender.com (Render, free instance — sleeps after ~15
+  minutes idle). Build `npm install --include=dev && npm run build -w apps/api`
+  (`--include=dev` is required: `NODE_ENV=production` prunes the Nest and
+  Prisma CLIs), start `node apps/api/dist/main`, health `/health`.
+- Both point at the same Neon database as development.
+- Cross-domain cookies: `NODE_ENV=production` switches them to
+  `sameSite: "none"` + `secure` (`common/refresh-cookie.ts`). `FRONTEND_ORIGIN`
+  must match the site exactly, comma-separated for preview URLs — a mismatch
+  shows as a CORS error and silent sign-in failure.
+- Full steps in `DEPLOY.md`.
+
 ## 5. Next, in order
 
 1. **Look at the dashboard in a browser.** Built and type-clean but not yet
