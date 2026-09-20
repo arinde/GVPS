@@ -172,7 +172,28 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
-### 2026-09-20 (latest) — public landing page
+### 2026-09-20 (latest) — subjects, enquiries, landing content
+
+- **Subjects** (`apps/api/src/subjects/`, `/subjects` and `/subjects/[id]`):
+  catalogue (name + code), offerings (subject x level x department, core or
+  elective, optional pass mark), and teaching assignments (session x subject x
+  class -> one teacher). Assignments are made from a teacher's staff profile:
+  one subject across several classes, or **every subject in one class** for a
+  primary class teacher (FEATURES.md §2.4). Superadmin only, audited.
+  - **Scope widened:** a teacher now reads students in classes they teach a
+    subject in, as well as their form class (`access-scope.service.ts`).
+    Registration still uses form allocation alone.
+  - `Subject.section` from FEATURES.md §2.3 was left off on purpose: a subject
+    spans sections, and the offerings already say where it is taught.
+- **Enquiries**: public `POST /public/enquiries` (no sign-in, honeypot field,
+  5 per sender per hour, in memory — a second API instance needs a shared
+  store) and the office's `/enquiries` tab (New / Contacted / Closed), with
+  new ones surfaced on the superadmin dashboard. Status changes are audited.
+- **Landing**: motto "Leading for a greater future", established 2012,
+  "Beyond the classroom" (activities, excursions, art, clubs, faith, staff),
+  facilities, WAEC/JAMB band, and the enquiry form in the Admissions section.
+
+### 2026-09-20 — public landing page
 
 - `/` is now the school's public front page (Great Vision Private School):
   hero, the four stages Creche → SSS 3, the family portal, admissions and
@@ -347,12 +368,14 @@ two siblings, enrolment into the current session, search, and detail.
    seen rendered (the dev servers were stopped mid-check). Class sizes
    (`ClassArm.capacity`) are unset until entered on `/classes`, so progress
    shows counts without bars until then. The class setup page is also unseen.
-2. **Promotion and class transfer**, with the primary → secondary number
+2. **Subject catalogue is empty** — add the school's subjects under Subjects,
+   then choose the levels that take each one, before assigning teachers.
+3. **Promotion and class transfer**, with the primary → secondary number
    reissue above.
-3. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
+4. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
    create-staff form (the Figma form has one).
-4. **Subjects and offerings** (§2.3). Class allocation (§2.4, form teacher) is
-   done; subject-teacher allocation comes with subjects.
+5. **Results and score entry** (FEATURES.md §5) — the next big module now
+   that subjects exist.
 
 ---
 

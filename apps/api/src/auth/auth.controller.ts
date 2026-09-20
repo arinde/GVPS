@@ -17,6 +17,7 @@ import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { SkipPasswordChangeCheck } from "@/common/decorators/skip-password-change-check.decorator";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation.pipe";
+import { clearCookieOptions, refreshCookieOptions } from "@/common/refresh-cookie";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 
 const REFRESH_COOKIE_NAME = "refreshToken";
@@ -50,7 +51,7 @@ export class AuthController {
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawRefreshToken = readRefreshCookie(req);
     if (rawRefreshToken) await this.auth.logout(rawRefreshToken);
-    res.clearCookie(REFRESH_COOKIE_NAME, { path: REFRESH_COOKIE_PATH });
+    res.clearCookie(REFRESH_COOKIE_NAME, clearCookieOptions(REFRESH_COOKIE_PATH));
   }
 
   @Post("change-password")
@@ -66,12 +67,7 @@ export class AuthController {
 }
 
 function setRefreshCookie(res: Response, token: string): void {
-  res.cookie(REFRESH_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: REFRESH_COOKIE_PATH,
-  });
+  res.cookie(REFRESH_COOKIE_NAME, token, refreshCookieOptions(REFRESH_COOKIE_PATH));
 }
 
 function readRefreshCookie(req: Request): string | undefined {

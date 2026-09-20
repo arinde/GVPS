@@ -13,6 +13,7 @@ import type { Request, Response } from "express";
 import { ChangePasswordSchema, type ChangePasswordDto } from "@/auth/schemas/change-password.schema";
 import { SkipPasswordChangeCheck } from "@/common/decorators/skip-password-change-check.decorator";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation.pipe";
+import { clearCookieOptions, refreshCookieOptions } from "@/common/refresh-cookie";
 import { ParentAuthService } from "@/portal/parent-auth.service";
 import { CurrentParent, ParentAuthGuard, type AuthenticatedParent } from "@/portal/parent-auth.primitives";
 import { ParentLoginSchema, type ParentLoginDto } from "@/portal/portal.schemas";
@@ -52,7 +53,7 @@ export class ParentAuthController {
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const raw = readCookie(req);
     if (raw) await this.auth.logout(raw);
-    res.clearCookie(COOKIE_NAME, { path: COOKIE_PATH });
+    res.clearCookie(COOKIE_NAME, clearCookieOptions(COOKIE_PATH));
   }
 
   @Post("change-password")
@@ -68,12 +69,7 @@ export class ParentAuthController {
 }
 
 function setCookie(res: Response, token: string): void {
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: COOKIE_PATH,
-  });
+  res.cookie(COOKIE_NAME, token, refreshCookieOptions(COOKIE_PATH));
 }
 
 function readCookie(req: Request): string | undefined {

@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "npm run clean && nest build",
+    "build": "npm run clean && prisma generate && nest build",
+    "postinstall": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
