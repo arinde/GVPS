@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   BookOpenText,
   CalendarDays,
   CircleUserRound,
@@ -45,6 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/classes", label: "Classes", icon: School, roles: ["SUPERADMIN", "PRINCIPAL"] },
   // Academic configuration: superadmin and principal (FEATURES.md §14).
   { href: "/academic", label: "Academic year", icon: CalendarDays, roles: ["SUPERADMIN", "PRINCIPAL"] },
+  { href: "/promotions", label: "Promotion", icon: ArrowUpRight, roles: ["SUPERADMIN", "PRINCIPAL"] },
   { href: "/subjects", label: "Subjects", icon: BookOpenText, roles: ["SUPERADMIN", "PRINCIPAL"] },
   // Admissions is office work (FEATURES.md §1.1).
   { href: "/enquiries", label: "Enquiries", icon: Inbox, roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"] },

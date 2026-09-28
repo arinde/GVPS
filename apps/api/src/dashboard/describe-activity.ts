@@ -38,6 +38,12 @@ export function describeActivity({ action, after }: ActivityRow): ActivityText {
         title: "Student registered",
         detail: joined(field(after, "name"), field(after, "arm"), field(after, "admissionNo")),
       };
+    case "students.promoted":
+      return { title: "Class promoted", detail: joined(field(after, "from"), field(after, "to")) };
+    case "student.transferred":
+      return { title: "Student moved class", detail: joined(field(after, "admissionNo"), field(after, "class")) };
+    case "student.exited":
+      return { title: "Student left", detail: joined(field(after, "admissionNo"), field(after, "status")) };
     case "student.updated":
       return { title: "Student record corrected", detail: joined(field(after, "admissionNo"), changedList(after)) };
     case "guardian.updated":

@@ -172,7 +172,29 @@ two siblings, enrolment into the current session, search, and detail.
 
 ---
 
-### 2026-09-20 (latest) — subjects, enquiries, landing content
+### 2026-09-28 — academic year, promotion, movement and exit
+
+- **Academic year** (`/academic`, superadmin and principal): create a session,
+  make a session current, add its three terms, make a term current, and record
+  each term's "days opened" (report cards need it). The API already existed;
+  only the screen was missing.
+- **Promotion** (`/promotions`, superadmin and principal): move a class into
+  the next session. A new enrolment is created and the old one is left alone
+  (FEATURES.md §3.4), so history stays readable; choosing the same class again
+  repeats the year.
+  - **Secondary admission numbers**: promoting into JSS/SSS issues a new `SEC`
+    number. The old one is archived in `admission_number_history`, and the
+    result card lists every old → new pair once, to be written on the files.
+  - The `admission_no_immutable` trigger now allows a change **only** inside a
+    transaction that sets `gvps.reissue_admission_no = 'on'` (promotion does,
+    right after archiving the old number). Every other path still cannot.
+    Lookup by an old number is **not** wired up yet — `findByAdmissionNo`
+    still searches `students` only.
+- **Move class / record exit**: on a student's profile for superadmin,
+  principal and secretary — move within the session, or record transferred
+  out / withdrawn / graduated with a date and reason. Both audited.
+
+### 2026-09-20 — subjects, enquiries, landing content
 
 - **Subjects** (`apps/api/src/subjects/`, `/subjects` and `/subjects/[id]`):
   catalogue (name + code), offerings (subject x level x department, core or
@@ -382,17 +404,20 @@ two siblings, enrolment into the current session, search, and detail.
 
 ## 5. Next, in order
 
-1. **Look at the dashboard in a browser.** Built and type-clean but not yet
+1. **Nothing here is deployed yet** — the owner commits and pushes; Vercel
+   picks up the web app, Render the API. The local API was stopped for
+   `prisma generate`; restart with `npm run dev:api`.
+2. **Look at the dashboard in a browser.** Built and type-clean but not yet
    seen rendered (the dev servers were stopped mid-check). Class sizes
    (`ClassArm.capacity`) are unset until entered on `/classes`, so progress
    shows counts without bars until then. The class setup page is also unseen.
-2. **Subject catalogue is empty** — add the school's subjects under Subjects,
+3. **Subject catalogue is empty** — add the school's subjects under Subjects,
    then choose the levels that take each one, before assigning teachers.
-3. **Promotion and class transfer**, with the primary → secondary number
+4. **Promotion and class transfer**, with the primary → secondary number
    reissue above.
-4. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
+5. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
    create-staff form (the Figma form has one).
-5. **Results and score entry** (FEATURES.md §5) — the next big module now
+6. **Results and score entry** (FEATURES.md §5) — the next big module now
    that subjects exist.
 
 ---

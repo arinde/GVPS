@@ -9,6 +9,7 @@ import { DashboardModule } from "@/dashboard/dashboard.module";
 import { PortalModule } from "@/portal/portal.module";
 import { SubjectsModule } from "@/subjects/subjects.module";
 import { EnquiriesModule } from "@/enquiries/enquiries.module";
+import { PromotionsModule } from "@/promotions/promotions.module";
 import { ReferenceModule } from "@/reference/reference.module";
 import { StudentsModule } from "@/students/students.module";
 import { AuditModule } from "@/audit/audit.module";
@@ -30,6 +31,7 @@ import { PrismaModule } from "@/prisma/prisma.module";
     PortalModule,
     SubjectsModule,
     EnquiriesModule,
+    PromotionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

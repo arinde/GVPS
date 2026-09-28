@@ -7,6 +7,7 @@ import { ContentCard } from "@/components/common/content-card";
 import { DataTable } from "@/components/common/data-table";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { EnrolmentActionsCard } from "@/components/students/enrolment-actions-card";
 import { PortalAccessRow } from "@/components/students/portal-access-row";
 import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
 import { StudentRecordCard } from "@/components/students/student-record-card";
@@ -49,7 +50,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const { data: access } = useGetMyAccessQuery();
   const accessToken = useAppSelector(selectAccessToken);
   // Only the superadmin corrects records; the API enforces it regardless.
-  const canEdit = (accessToken ? decodeAccessToken(accessToken)?.roles : undefined)?.includes("SUPERADMIN") ?? false;
+  const roles = (accessToken ? decodeAccessToken(accessToken)?.roles : undefined) ?? [];
+  const canEdit = roles.includes("SUPERADMIN");
+  // Moving a class or recording an exit is office work (FEATURES.md §14).
+  const canMove = roles.some((role) => ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"].includes(role));
 
   if (isLoading) {
     return (
@@ -110,6 +114,18 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>
             <DataTable columns={enrolmentColumns} data={student.enrolments} emptyTitle="No enrolments recorded" />
           </ContentCard>
+
+          {canMove && current ? (
+            <EnrolmentActionsCard
+              studentId={student.id}
+              name={`${student.lastName}, ${student.firstName}`}
+              enrolment={{
+                id: current.id,
+                className: `${current.classArm.classLevel.name}${current.classArm.name}`,
+                sessionName: current.session.name,
+              }}
+            />
+          ) : null}
 
           {/* Portal logins open children's records, so only the superadmin issues them (the API agrees). */}
           {canEdit ? (

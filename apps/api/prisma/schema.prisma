@@ -320,8 +320,10 @@ model Student {
 
   // Deferred to a second pass: FEATURES.md §3.5 is explicit that photograph
   // capture must never block data entry.
-  photoUrl String?
-  photo    StudentPhoto?
+  photoUrl           String?
+  photo              StudentPhoto?
+  // Numbers this student held before (see AdmissionNumberHistory).
+  formerAdmissionNos AdmissionNumberHistory[]
 
   // The year is required and sets the admission number's {YEAR}. The exact
   // day is optional: a child admitted years before the school went digital
@@ -437,6 +439,26 @@ model StudentPhoto {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("student_photos")
+}
+
+// A number a student used to hold. An admission number is permanent
+// (admission_no_immutable), with one exception the school asked for: moving
+// from primary into JSS 1 issues a secondary number (FEATURES.md §3.1). The
+// old number is kept here so a lookup by it still finds the student, and so
+// old files and receipts stay traceable.
+model AdmissionNumberHistory {
+  id          String   @id @default(cuid())
+  schoolId    String
+  studentId   String
+  admissionNo String
+  reason      String
+  retiredAt   DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, admissionNo])
+  @@index([studentId])
+  @@map("admission_number_history")
 }
 
 // Admission numbers must be unique under concurrent creation (TESTS.md §7).
