@@ -249,17 +249,34 @@ export class StudentsService {
    * returns 0010 as well.
    */
   async findByAdmissionNo(actor: AuthenticatedStaff, admissionNo: string) {
+    const wanted = admissionNo.trim();
     const scope = await this.access.studentScope(actor);
+    const scoped = AccessScopeService.studentWhere(scope);
+
     const student = await this.prisma.student.findFirst({
       where: {
         schoolId: actor.schoolId,
-        admissionNo: { equals: admissionNo.trim(), mode: "insensitive" },
-        AND: [AccessScopeService.studentWhere(scope)],
+        admissionNo: { equals: wanted, mode: "insensitive" },
+        AND: [scoped],
       },
       select: { id: true },
     });
-    if (!student) throw new NotFoundException(`No student with admission number ${admissionNo.trim()}.`);
-    return this.findOne(actor, student.id);
+    if (student) return this.findOne(actor, student.id);
+
+    // A number retired when the student moved into secondary school still
+    // finds them: old files, receipts and report cards carry it for years
+    // (see AdmissionNumberHistory).
+    const former = await this.prisma.admissionNumberHistory.findFirst({
+      where: {
+        schoolId: actor.schoolId,
+        admissionNo: { equals: wanted, mode: "insensitive" },
+        student: { is: scoped },
+      },
+      select: { studentId: true },
+    });
+    if (former) return this.findOne(actor, former.studentId);
+
+    throw new NotFoundException(`No student with admission number ${wanted}.`);
   }
 
   /**
