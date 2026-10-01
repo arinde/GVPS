@@ -7,6 +7,7 @@ import {
   Inbox,
   LayoutDashboard,
   LayoutGrid,
+  NotebookPen,
   School,
   UserPlus,
   UsersRound,
@@ -48,6 +49,14 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/academic", label: "Academic year", icon: CalendarDays, roles: ["SUPERADMIN", "PRINCIPAL"] },
   { href: "/promotions", label: "Promotion", icon: ArrowUpRight, roles: ["SUPERADMIN", "PRINCIPAL"] },
   { href: "/subjects", label: "Subjects", icon: BookOpenText, roles: ["SUPERADMIN", "PRINCIPAL"] },
+  // Score entry (FEATURES.md §5.3): a subject teacher's own assignments only;
+  // superadmin can open any, for corrections.
+  {
+    href: "/scores",
+    label: "Score entry",
+    icon: NotebookPen,
+    roles: ["SUPERADMIN", "SUBJECT_TEACHER", "FORM_TEACHER"],
+  },
   // Admissions is office work (FEATURES.md §1.1).
   { href: "/enquiries", label: "Enquiries", icon: Inbox, roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"] },
   // Every staff member can see their own record.

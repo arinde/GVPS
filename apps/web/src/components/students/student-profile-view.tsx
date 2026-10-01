@@ -11,6 +11,7 @@ import { EnrolmentActionsCard } from "@/components/students/enrolment-actions-ca
 import { PortalAccessRow } from "@/components/students/portal-access-row";
 import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
 import { StudentRecordCard } from "@/components/students/student-record-card";
+import { StudentResultsCard } from "@/components/students/student-results-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { formatDate, formatMonthYear } from "@/lib/dates";
 import { decodeAccessToken } from "@/lib/decode-access-token";
@@ -42,8 +43,9 @@ const enrolmentColumns = [
  * the viewer may see this student at all — a teacher gets "not found" for a
  * child outside their classes — so this view only renders what comes back.
  *
- * Results, fees and attendance tabs join the right column as those modules
- * are built; until then only enrolment history exists to show.
+ * Fees and attendance tabs join the right column as those modules are built.
+ * Results is live now, though only as a current-term preview — the frozen,
+ * approved report card (FEATURES.md §5.5) replaces it once Block 2 exists.
  */
 export function StudentProfileView({ studentId }: { studentId: string }) {
   const { data: student, isLoading, isError } = useGetStudentQuery(studentId);
@@ -54,6 +56,12 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const canEdit = roles.includes("SUPERADMIN");
   // Moving a class or recording an exit is office work (FEATURES.md §14).
   const canMove = roles.some((role) => ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"].includes(role));
+  // FEATURES.md §14 "Report cards" row: bursar has no result access at all,
+  // and a subject teacher's access stops at the score entry grid — neither
+  // sees this card, even though both can see the record above it.
+  const canViewResults = roles.some((role) =>
+    ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY", "FORM_TEACHER"].includes(role),
+  );
 
   if (isLoading) {
     return (
@@ -110,6 +118,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         />
 
         <div className="flex flex-col gap-5">
+          {canViewResults ? <StudentResultsCard studentId={student.id} /> : null}
+
           <ContentCard flush>
             <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>
             <DataTable columns={enrolmentColumns} data={student.enrolments} emptyTitle="No enrolments recorded" />

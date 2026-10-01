@@ -20,6 +20,7 @@
     "db:seed": "prisma db seed",
     "clean": "rimraf dist tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
     "db:seed:academic": "ts-node prisma/seed-academic.ts",
+    "db:seed:assessment": "ts-node prisma/seed-assessment.ts",
     "db:reset-password": "ts-node prisma/reset-password.ts"
   },
   "dependencies": {
