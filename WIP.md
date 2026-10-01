@@ -417,8 +417,33 @@ two siblings, enrolment into the current session, search, and detail.
    reissue above.
 5. **Bulk entry grid** (`FEATURES.md` §3.5). Also: an optional class on the
    create-staff form (the Figma form has one).
-6. **Results and score entry** (FEATURES.md §5) — the next big module now
-   that subjects exist.
+6. **Results** (FEATURES.md §5) — the next big module now that subjects
+   exist. Ten parts, built in three blocks, each usable on its own:
+
+   **Block 1 — setup and score entry**
+   - §5.1 Assessment configuration: what each subject is scored on (CA1, CA2,
+     exam…), the marks each carries, and which levels it applies to.
+   - §5.2 Grading scales: the school's own boundaries (A = 70+, B = 60+…).
+     A per-subject pass mark already exists on `SubjectOffering.passMark`.
+   - §5.3 Score entry: a teacher's grid for one subject in one class. Scoped
+     by `SubjectAssignment`, which already exists; offline tolerant, because
+     teachers work on phones on weak connections (FEATURES.md §13).
+
+   **Block 2 — approval and computation**
+   - §5.4 Approval: subject teacher submits → form teacher reviews →
+     principal approves, with scores locking as they rise. Unlocking is
+     audited and needs a reason (PLAN.md §4.9).
+   - §5.5 Computation: totals, subject averages, class positions, and a
+     snapshot per student per term that never changes once published.
+
+   **Block 3 — report cards and publication**
+   - §5.6 Traits and §5.7 comments (form teacher, principal).
+   - §5.8 Report card PDF and §5.9 broadsheet.
+   - §5.10 Publication: when a result becomes visible, and the family portal
+     screen that shows it — the portal's first page beyond the child's record.
+
+   **Needed from the owner before block 1:** the assessment components and
+   their marks (e.g. CA1 20, CA2 20, exam 60), and the grade boundaries.
 
 ---
 
