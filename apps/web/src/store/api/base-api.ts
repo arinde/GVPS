@@ -79,6 +79,9 @@ export const baseApi = createApi({
     "Enquiry",
     "SubjectAssignment",
     "GradingScale",
+    "FeeItem",
+    "FeeStructure",
+    "Debtor",
   ],
   endpoints: () => ({}),
 });

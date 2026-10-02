@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { AuditService } from "@/audit/audit.service";
+import { EmailService } from "@/common/email.service";
 import { generateTemporaryPassword } from "@/common/secrets";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
@@ -16,6 +17,7 @@ export class ParentAccountsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly email: EmailService,
   ) {}
 
   /** Whether this number has a login, and how many children it reaches. */
@@ -44,6 +46,7 @@ export class ParentAccountsService {
       data: { schoolId: actor.schoolId, phone, passwordHash: await argon2.hash(temporaryPassword) },
     });
     await this.record(actor, "parent.access.issued", account.id, phone, children);
+    await this.notifyAccountIssued(actor.schoolId, phone);
     return { phone, children, temporaryPassword };
   }
 
@@ -77,6 +80,33 @@ export class ParentAccountsService {
 
   private childCount(schoolId: string, phone: string) {
     return this.prisma.student.count({ where: { schoolId, guardians: { some: { guardian: { phone } } } } });
+  }
+
+  /**
+   * Confirmation only — never the password itself. The temporary password is
+   * shown once on screen and printed on a slip (FEATURES.md §1.2's staff
+   * rule applied here too); email is not a secure enough channel to carry it.
+   * Silently does nothing if no guardian with this phone has an email on
+   * file, or if the send itself fails — EmailService never throws.
+   */
+  private async notifyAccountIssued(schoolId: string, phone: string): Promise<void> {
+    const [guardian, school] = await Promise.all([
+      this.prisma.guardian.findFirst({ where: { schoolId, phone, email: { not: null } } }),
+      this.prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+    ]);
+    if (!guardian?.email) return;
+
+    const schoolName = school?.name ?? "your child's school";
+    await this.email.send({
+      to: guardian.email,
+      subject: `Family portal access created — ${schoolName}`,
+      html: `
+        <p>Hello ${guardian.firstName},</p>
+        <p>A family portal account has been created for your phone number at ${schoolName}.
+           You can use it to see your ward's class, attendance and results once published.</p>
+        <p>Please visit the school office to collect your login details — they are not sent by email.</p>
+      `,
+    });
   }
 
   private record(actor: AuthenticatedStaff, action: string, accountId: string, phone: string, children: number) {

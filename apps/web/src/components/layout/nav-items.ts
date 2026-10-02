@@ -11,6 +11,7 @@ import {
   School,
   UserPlus,
   UsersRound,
+  Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -27,9 +28,9 @@ export type NavItem = {
  * actually reach. Presentation only — RolesGuard and AccessScopeService reject
  * the request regardless of what the client renders (FEATURES.md §1.5).
  *
- * Only screens that exist are listed. STITCH-GLOBAL.md §6 names Fees, Results,
- * Requests and Settings too; those join the menu when they are built, so the
- * menu never leads somewhere empty.
+ * Only screens that exist are listed. STITCH-GLOBAL.md §6 also names Requests
+ * and Settings; those join the menu when they are built, so the menu never
+ * leads somewhere empty.
  */
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: [] },
@@ -59,6 +60,9 @@ export const NAV_ITEMS: NavItem[] = [
   },
   // Admissions is office work (FEATURES.md §1.1).
   { href: "/enquiries", label: "Enquiries", icon: Inbox, roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"] },
+  // Debtor list (FEATURES.md §14): whole-school roles plus a form teacher's
+  // own arm. Fee structure is reached from this page, not its own nav entry.
+  { href: "/fees", label: "Fees", icon: Wallet, roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR", "FORM_TEACHER"] },
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },
 ];

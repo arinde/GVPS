@@ -683,7 +683,7 @@ Read-only:
 | Result approval | RW | RW | — | Review only | Submit only | — | — |
 | Report cards | RW | RW | — | R (own arm) | — | R | R (own wards) |
 | Fee structure | RW | R | RW | — | — | — | — |
-| Invoices / payments | R | — | RW | — | — | — | R (own wards) |
+| Invoices / payments | RW | — | RW | — | — | — | R (own wards) |
 | Debtor reports | RW | R | RW | R (own arm) | — | — | — |
 | Attendance | R | R | — | RW (own arm) | RW (own periods) | R | R (own wards) |
 | Communication | RW | RW | RW (fees only) | RW (own arm) | — | RW | — |

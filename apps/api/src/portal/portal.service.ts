@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { EnrolmentStatus, type Prisma } from "@prisma/client";
+import { fetchStudentLedger } from "@/fees/invoicing.service";
 import type { AuthenticatedParent } from "@/portal/parent-auth.primitives";
 import { PrismaService } from "@/prisma/prisma.service";
+import { computeStudentResults } from "@/results/student-results.service";
 
 const CURRENT_CLASS = {
   where: { status: EnrolmentStatus.ACTIVE },
@@ -101,6 +103,22 @@ export class PortalService {
     if (!student) throw new NotFoundException("Child not found.");
 
     return { ...student, formTeacher: await this.formTeacher(student.enrolments) };
+  }
+
+  // FEATURES.md §14 "Invoices / payments" and "Report cards" rows: a parent
+  // reads their own wards' fees and results, same data the school sees, never
+  // writes either — the ward check below is the only gate; the computation
+  // itself is shared with the staff-side services (fees/results modules).
+  async fees(parent: AuthenticatedParent, studentId: string) {
+    const ward = await this.prisma.student.findFirst({ where: { id: studentId, ...this.wardsWhere(parent) } });
+    if (!ward) throw new NotFoundException("Child not found.");
+    return fetchStudentLedger(this.prisma, parent.schoolId, studentId);
+  }
+
+  async results(parent: AuthenticatedParent, studentId: string) {
+    const ward = await this.prisma.student.findFirst({ where: { id: studentId, ...this.wardsWhere(parent) } });
+    if (!ward) throw new NotFoundException("Child not found.");
+    return computeStudentResults(this.prisma, parent.schoolId, studentId);
   }
 
   async photo(parent: AuthenticatedParent, studentId: string) {

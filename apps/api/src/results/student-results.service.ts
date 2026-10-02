@@ -28,6 +28,76 @@ export type StudentResults = {
 };
 
 /**
+ * Shared by the staff-side results read and the parent portal's read-only
+ * grades view (FEATURES.md §14 "Report cards" row grants parents read access
+ * to their own wards') — each does its own access check first, then calls
+ * this for the same score/grade computation.
+ */
+export async function computeStudentResults(
+  prisma: PrismaService,
+  schoolId: string,
+  studentId: string,
+): Promise<StudentResults> {
+  const enrolment = await prisma.enrolment.findFirst({
+    where: { studentId, status: "ACTIVE" },
+    include: { classArm: { include: { classLevel: true } } },
+  });
+  if (!enrolment) return { term: null, subjects: [] };
+
+  const term = await prisma.term.findFirst({ where: { schoolId, isCurrent: true } });
+  if (!term) return { term: null, subjects: [] };
+
+  const [components, scores, gradingScale] = await Promise.all([
+    prisma.assessmentComponent.findMany({
+      where: { schoolId, termId: term.id, section: enrolment.classArm.classLevel.section },
+    }),
+    prisma.score.findMany({ where: { schoolId, termId: term.id, studentId } }),
+    prisma.gradingScale.findUnique({
+      where: { schoolId_section: { schoolId, section: enrolment.classArm.classLevel.section } },
+      include: { bands: true },
+    }),
+  ]);
+
+  const maxTotal = components.reduce((sum, component) => sum + component.maxScore, 0);
+  const subjectIds = [...new Set(scores.map((score) => score.subjectId))];
+  const subjects = subjectIds.length
+    ? await prisma.subject.findMany({ where: { id: { in: subjectIds } }, select: { id: true, name: true } })
+    : [];
+
+  const results = subjects
+    .map((subject): SubjectResult => {
+      const subjectScores = scores.filter((score) => score.subjectId === subject.id);
+      const detail = components.map((component) => {
+        const score = subjectScores.find((candidate) => candidate.assessmentComponentId === component.id);
+        return {
+          componentId: component.id,
+          componentName: component.name,
+          maxScore: component.maxScore,
+          value: score?.value ?? 0,
+        };
+      });
+      const total = detail.reduce((sum, item) => sum + item.value, 0);
+      const isComplete = subjectScores.length === components.length && components.length > 0;
+      const band =
+        isComplete && gradingScale
+          ? gradingScale.bands.find((b) => total >= b.minScore && total <= b.maxScore)
+          : undefined;
+
+      return {
+        subjectId: subject.id,
+        subjectName: subject.name,
+        scores: detail,
+        total,
+        maxTotal,
+        grade: band ? { letter: band.letter, descriptor: band.descriptor } : null,
+      };
+    })
+    .sort((a, b) => a.subjectName.localeCompare(b.subjectName));
+
+  return { term: { id: term.id, name: term.name }, subjects: results };
+}
+
+/**
  * First piece of the `results` module (PLAN.md §3): a live read of a
  * student's current scores and grades, for the profile page. This is a
  * preview, not the frozen computation FEATURES.md §5.5 will produce at
@@ -63,56 +133,6 @@ export class StudentResultsService {
       }
     }
 
-    const term = await this.prisma.term.findFirst({ where: { schoolId: actor.schoolId, isCurrent: true } });
-    if (!term) return { term: null, subjects: [] };
-
-    const [components, scores, gradingScale] = await Promise.all([
-      this.prisma.assessmentComponent.findMany({
-        where: { schoolId: actor.schoolId, termId: term.id, section: enrolment.classArm.classLevel.section },
-      }),
-      this.prisma.score.findMany({ where: { schoolId: actor.schoolId, termId: term.id, studentId } }),
-      this.prisma.gradingScale.findUnique({
-        where: { schoolId_section: { schoolId: actor.schoolId, section: enrolment.classArm.classLevel.section } },
-        include: { bands: true },
-      }),
-    ]);
-
-    const maxTotal = components.reduce((sum, component) => sum + component.maxScore, 0);
-    const subjectIds = [...new Set(scores.map((score) => score.subjectId))];
-    const subjects = subjectIds.length
-      ? await this.prisma.subject.findMany({ where: { id: { in: subjectIds } }, select: { id: true, name: true } })
-      : [];
-
-    const results = subjects
-      .map((subject): SubjectResult => {
-        const subjectScores = scores.filter((score) => score.subjectId === subject.id);
-        const detail = components.map((component) => {
-          const score = subjectScores.find((candidate) => candidate.assessmentComponentId === component.id);
-          return {
-            componentId: component.id,
-            componentName: component.name,
-            maxScore: component.maxScore,
-            value: score?.value ?? 0,
-          };
-        });
-        const total = detail.reduce((sum, item) => sum + item.value, 0);
-        const isComplete = subjectScores.length === components.length && components.length > 0;
-        const band =
-          isComplete && gradingScale
-            ? gradingScale.bands.find((b) => total >= b.minScore && total <= b.maxScore)
-            : undefined;
-
-        return {
-          subjectId: subject.id,
-          subjectName: subject.name,
-          scores: detail,
-          total,
-          maxTotal,
-          grade: band ? { letter: band.letter, descriptor: band.descriptor } : null,
-        };
-      })
-      .sort((a, b) => a.subjectName.localeCompare(b.subjectName));
-
-    return { term: { id: term.id, name: term.name }, subjects: results };
+    return computeStudentResults(this.prisma, actor.schoolId, studentId);
   }
 }

@@ -106,9 +106,11 @@
   --muted-foreground: #424242; /* Subtitles, captions */
   --placeholder: #b9c5ce;
 
-  /* §13 buttons: primary blue, darker on hover; secondary white, bordered. */
-  --primary: #509cdb;
-  --primary-hover: #2d88d4;
+  /* §13 buttons: primary blue, darker on hover; secondary white, bordered.
+     Deepened from the original Figma extract (#509cdb/#2d88d4) — too pale to
+     read as "active" against white at full opacity. */
+  --primary: #2d88d4;
+  --primary-hover: #1c6cb3;
   --primary-foreground: #ffffff;
   --secondary: #ffffff;
   --secondary-foreground: #282828;
@@ -143,7 +145,7 @@
   --stat-lavender: #e8e8ff;
   --stat-yellow: #fff3c4;
 
-  --chart-1: #509cdb;
+  --chart-1: #2d88d4;
   --chart-2: #152259;
   --chart-3: #b9c5ce;
   --chart-4: #e8e8ff;
@@ -154,12 +156,12 @@
   /* §6 sidebar */
   --sidebar: #152259;
   --sidebar-foreground: #fcfafa;
-  --sidebar-primary: #509cdb; /* Active item */
+  --sidebar-primary: #2d88d4; /* Active item */
   --sidebar-primary-foreground: #fcfafa;
   --sidebar-accent: rgb(252 250 250 / 0.08); /* Hover on inactive items */
   --sidebar-accent-foreground: #fcfafa;
   --sidebar-border: rgb(252 250 250 / 0.15); /* §6 divider under the crest */
-  --sidebar-ring: #509cdb;
+  --sidebar-ring: #2d88d4;
 }
 
 /* No .dark palette: the design system specifies a single light look. */

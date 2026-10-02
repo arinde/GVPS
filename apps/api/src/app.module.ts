@@ -16,6 +16,8 @@ import { ResultsModule } from "@/results/results.module";
 import { StudentsModule } from "@/students/students.module";
 import { AuditModule } from "@/audit/audit.module";
 import { AuthModule } from "@/auth/auth.module";
+import { EmailModule } from "@/common/email.module";
+import { FeesModule } from "@/fees/fees.module";
 import { PrismaModule } from "@/prisma/prisma.module";
 
 @Module({
@@ -23,6 +25,7 @@ import { PrismaModule } from "@/prisma/prisma.module";
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuditModule,
+    EmailModule,
     AccessModule,
     AuthModule,
     AcademicModule,
@@ -36,6 +39,7 @@ import { PrismaModule } from "@/prisma/prisma.module";
     EnquiriesModule,
     PromotionsModule,
     ResultsModule,
+    FeesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

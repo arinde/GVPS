@@ -6,8 +6,10 @@ import { ContentCard } from "@/components/common/content-card";
 import { DataTable } from "@/components/common/data-table";
 import { DetailList } from "@/components/common/detail-list";
 import { PageHeader } from "@/components/common/page-header";
+import { PortalChildFeesCard } from "@/components/portal/portal-child-fees-card";
 import { PortalChildPhoto } from "@/components/portal/portal-child-photo";
 import { currentClassLabel, DEPARTMENT, RELATIONSHIP, statusLabel } from "@/components/portal/portal-labels";
+import { PortalChildResultsCard } from "@/components/portal/portal-child-results-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ageInYears, formatDate } from "@/lib/dates";
 import { staffName } from "@/lib/staff-name";
@@ -27,8 +29,8 @@ const historyColumns = [
 /**
  * One child, as their parent sees them: class and form teacher first, then
  * the record the school holds. Read-only — to correct anything, the parent
- * asks the school office. Results, fees and attendance join as the school
- * starts using those modules.
+ * asks the school office. Attendance joins as the school starts using that
+ * module.
  */
 export function PortalChildView({ studentId }: { studentId: string }) {
   const { data: child, isLoading, isError } = useGetPortalChildQuery(studentId);
@@ -90,6 +92,9 @@ export function PortalChildView({ studentId }: { studentId: string }) {
         </ContentCard>
 
         <div className="flex flex-col gap-5">
+          <PortalChildResultsCard studentId={child.id} />
+          <PortalChildFeesCard studentId={child.id} />
+
           <ContentCard>
             <h2 className="mb-2 text-base">Personal details</h2>
             <DetailList

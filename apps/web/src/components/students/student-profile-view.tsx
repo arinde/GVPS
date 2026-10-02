@@ -11,6 +11,7 @@ import { EnrolmentActionsCard } from "@/components/students/enrolment-actions-ca
 import { PortalAccessRow } from "@/components/students/portal-access-row";
 import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
 import { StudentRecordCard } from "@/components/students/student-record-card";
+import { StudentFeesCard } from "@/components/students/student-fees-card";
 import { StudentResultsCard } from "@/components/students/student-results-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { formatDate, formatMonthYear } from "@/lib/dates";
@@ -62,6 +63,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const canViewResults = roles.some((role) =>
     ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY", "FORM_TEACHER"].includes(role),
   );
+  // FEATURES.md §14 "Invoices / payments" row: superadmin and bursar read
+  // and write — nobody else, not even principal, sees this card.
+  const canViewFees = roles.some((role) => ["SUPERADMIN", "BURSAR"].includes(role));
+  const canRecordPayment = roles.some((role) => ["SUPERADMIN", "BURSAR"].includes(role));
 
   if (isLoading) {
     return (
@@ -119,6 +124,13 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
         <div className="flex flex-col gap-5">
           {canViewResults ? <StudentResultsCard studentId={student.id} /> : null}
+          {canViewFees ? (
+            <StudentFeesCard
+              studentId={student.id}
+              studentName={`${student.firstName} ${student.lastName}`}
+              canRecordPayment={canRecordPayment}
+            />
+          ) : null}
 
           <ContentCard flush>
             <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>
