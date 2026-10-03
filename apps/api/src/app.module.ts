@@ -4,6 +4,7 @@ import { AppController } from "@/app.controller";
 import { AppService } from "@/app.service";
 import { AcademicModule } from "@/academic/academic.module";
 import { AccessModule } from "@/access/access.module";
+import { AssessmentModule } from "@/assessment/assessment.module";
 import { ClassAssignmentsModule } from "@/class-assignments/class-assignments.module";
 import { DashboardModule } from "@/dashboard/dashboard.module";
 import { PortalModule } from "@/portal/portal.module";
@@ -11,6 +12,7 @@ import { SubjectsModule } from "@/subjects/subjects.module";
 import { EnquiriesModule } from "@/enquiries/enquiries.module";
 import { PromotionsModule } from "@/promotions/promotions.module";
 import { ReferenceModule } from "@/reference/reference.module";
+import { ResultsModule } from "@/results/results.module";
 import { StudentsModule } from "@/students/students.module";
 import { AuditModule } from "@/audit/audit.module";
 import { AuthModule } from "@/auth/auth.module";
@@ -24,6 +26,7 @@ import { PrismaModule } from "@/prisma/prisma.module";
     AccessModule,
     AuthModule,
     AcademicModule,
+    AssessmentModule,
     StudentsModule,
     ReferenceModule,
     ClassAssignmentsModule,
@@ -32,6 +35,7 @@ import { PrismaModule } from "@/prisma/prisma.module";
     SubjectsModule,
     EnquiriesModule,
     PromotionsModule,
+    ResultsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

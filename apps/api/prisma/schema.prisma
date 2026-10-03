@@ -644,3 +644,83 @@ model Enquiry {
   @@index([schoolId, status, createdAt])
   @@map("enquiries")
 }
+
+// ---------------------------------------------------------------------------
+// Assessment and results (FEATURES.md §5) — Block 1: setup and score entry.
+// Fully data-driven on purpose (§5.1); none of this is hardcoded.
+// ---------------------------------------------------------------------------
+
+// §5.1: components per (term, section) — never edited once a term has scores
+// against it, only superseded by the next term's own rows. That is what
+// "versioned per session and term" means here: history by not overwriting,
+// not by a version number column. A set's maxScores must sum to 100; checked
+// in the service layer inside the write transaction, not here.
+model AssessmentComponent {
+  id        String   @id @default(cuid())
+  schoolId  String
+  termId    String
+  section   Section
+  name      String
+  maxScore  Int
+  createdAt DateTime @default(now())
+
+  @@unique([termId, section, name])
+  @@index([schoolId, termId, section])
+  @@map("assessment_components")
+}
+
+// §5.2: boundaries per section. Unlike components these are not versioned per
+// term — a school changing its grading scale mid-year is rare enough to
+// revisit when it actually happens, rather than build for now.
+model GradingScale {
+  id                 String   @id @default(cuid())
+  schoolId           String
+  section            Section
+  passMark           Int
+  promotionThreshold Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  bands GradeBand[]
+
+  @@unique([schoolId, section])
+  @@map("grading_scales")
+}
+
+model GradeBand {
+  id             String @id @default(cuid())
+  gradingScaleId String
+  minScore       Int
+  maxScore       Int
+  letter         String
+  descriptor     String
+  remark         String
+
+  gradingScale GradingScale @relation(fields: [gradingScaleId], references: [id], onDelete: Cascade)
+
+  @@map("grade_bands")
+}
+
+// §5.3: one cell of the score-entry grid. Freely overwritten while a term is
+// unlocked (draft entry) — PLAN.md §4.5's "no hard deletes, correction with a
+// reason" applies once Block 2's approval/locking exists, not before it: a
+// teacher fixing their own typo before submitting is not a correction to
+// audit, it is the entry itself. `enteredById` still says who last touched
+// a cell even pre-lock.
+model Score {
+  id                    String   @id @default(cuid())
+  schoolId              String
+  termId                String
+  studentId             String
+  subjectId             String
+  classArmId            String
+  assessmentComponentId String
+  value                 Int
+  enteredById           String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([termId, studentId, subjectId, assessmentComponentId])
+  @@index([schoolId, termId, subjectId, classArmId])
+  @@map("scores")
+}

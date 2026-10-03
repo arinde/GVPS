@@ -78,6 +78,7 @@ export const baseApi = createApi({
     "ParentAccount",
     "Enquiry",
     "SubjectAssignment",
+    "GradingScale",
   ],
   endpoints: () => ({}),
 });
