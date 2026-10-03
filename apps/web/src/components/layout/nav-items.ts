@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LayoutGrid,
   NotebookPen,
+  ScrollText,
   School,
   UserPlus,
   UsersRound,
@@ -63,6 +64,8 @@ export const NAV_ITEMS: NavItem[] = [
   // Debtor list (FEATURES.md §14): whole-school roles plus a form teacher's
   // own arm. Fee structure is reached from this page, not its own nav entry.
   { href: "/fees", label: "Fees", icon: Wallet, roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR", "FORM_TEACHER"] },
+  // The audit log is for the proprietor and principal only (FEATURES.md §11.5).
+  { href: "/audit", label: "Email trail", icon: ScrollText, roles: ["SUPERADMIN", "PRINCIPAL"] },
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },
 ];

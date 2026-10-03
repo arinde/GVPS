@@ -66,7 +66,7 @@ export class PaymentsService {
       },
     });
 
-    await this.notifyReceipt(actor.schoolId, invoice.studentId, payment);
+    await this.notifyReceipt(actor.id, actor.schoolId, invoice.studentId, payment);
     return payment;
   }
 
@@ -94,7 +94,12 @@ export class PaymentsService {
   }
 
   /** Confirmation of the payment, not a legal receipt — a receipt PDF is a separate, not-yet-built capability. */
-  private async notifyReceipt(schoolId: string, studentId: string, payment: Payment): Promise<void> {
+  private async notifyReceipt(
+    actorStaffId: string,
+    schoolId: string,
+    studentId: string,
+    payment: Payment,
+  ): Promise<void> {
     const [guardianLink, school, student] = await Promise.all([
       this.prisma.studentGuardian.findFirst({
         where: { studentId, guardian: { email: { not: null } } },
@@ -109,6 +114,10 @@ export class PaymentsService {
     const naira = (payment.amountKobo / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 });
 
     await this.email.send({
+      schoolId,
+      actorStaffId,
+      entityType: "Payment",
+      entityId: payment.id,
       to: guardianLink.guardian.email,
       subject: `Payment received — receipt ${payment.receiptNumber}`,
       html: `

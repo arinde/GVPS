@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import * as argon2 from "argon2";
 import type { Role } from "@prisma/client";
 import type { CreateStaffDto } from "@/auth/schemas/create-staff.schema";
+import { EmailService } from "@/common/email.service";
 import { maskAccountNumber } from "@/common/mask-account-number";
 import { generateTemporaryPassword } from "@/common/secrets";
 import { AuditService } from "@/audit/audit.service";
@@ -21,6 +22,7 @@ export class StaffAccountService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly email: EmailService,
   ) {}
 
   async createStaff(actorStaffId: string, schoolId: string, dto: CreateStaffDto): Promise<StaffAccountCreated> {
@@ -68,7 +70,35 @@ export class StaffAccountService {
       },
     });
 
+    await this.notifyCreated(actorStaffId, schoolId, staff.id, dto);
     return { staffId: staff.id, temporaryPassword };
+  }
+
+  private async notifyCreated(
+    actorStaffId: string,
+    schoolId: string,
+    staffId: string,
+    dto: CreateStaffDto,
+  ): Promise<void> {
+    const school = await this.prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } });
+    const schoolName = school?.name ?? "your school";
+    const roles = dto.roles.map((role) => role.replace(/_/g, " ").toLowerCase()).join(", ");
+
+    await this.email.send({
+      schoolId,
+      actorStaffId,
+      entityType: "Staff",
+      entityId: staffId,
+      to: dto.email,
+      subject: `Your staff account — ${schoolName}`,
+      html: `
+        <p>Hello ${dto.firstName},</p>
+        <p>A staff account has been created for you at ${schoolName}, with the role: ${roles}.</p>
+        <p><strong>Email:</strong> ${dto.email}</p>
+        <p>To sign in, go to <a href="https://gvps-api-taupe.vercel.app/">https://gvps-api-taupe.vercel.app/</a>.</p>
+        <p>Your password is not sent by email. Ask the school admin for it, and you will be asked to choose a new password when you first sign in.</p>
+      `,
+    });
   }
 
   /**

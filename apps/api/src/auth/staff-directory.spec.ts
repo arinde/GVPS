@@ -15,7 +15,7 @@ describe("StaffAccountService reads", () => {
       academicSession: { findFirst: jest.fn().mockResolvedValue({ id: "session-1" }) },
       staff: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn() },
     };
-    service = new StaffAccountService(prisma as never, { record: jest.fn() } as never);
+    service = new StaffAccountService(prisma as never, { record: jest.fn() } as never, { send: jest.fn() } as never);
   });
 
   describe("listStaff", () => {

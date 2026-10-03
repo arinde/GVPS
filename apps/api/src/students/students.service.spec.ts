@@ -38,7 +38,7 @@ describe("StudentsService", () => {
     academicSession: { findFirst: jest.Mock };
     student: { findFirst: jest.Mock; findMany: jest.Mock; create: jest.Mock };
     guardian: { upsert: jest.Mock };
-    studentGuardian: { create: jest.Mock };
+    studentGuardian: { create: jest.Mock; findMany: jest.Mock };
     enrolment: { create: jest.Mock };
     $transaction: jest.Mock;
   };
@@ -66,7 +66,7 @@ describe("StudentsService", () => {
         create: jest.fn().mockResolvedValue({ id: "student-1", admissionNo: "GVPS/2026/0001" }),
       },
       guardian: { upsert: jest.fn().mockResolvedValue({ id: "guardian-1" }) },
-      studentGuardian: { create: jest.fn() },
+      studentGuardian: { create: jest.fn(), findMany: jest.fn().mockResolvedValue([]) },
       enrolment: { create: jest.fn() },
       $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
     };
@@ -76,7 +76,13 @@ describe("StudentsService", () => {
       allocatedArms: jest.fn().mockResolvedValue({ sessionId: "session-1", armIds: [] }),
       studentScope: jest.fn().mockResolvedValue({ kind: "school" }),
     };
-    service = new StudentsService(prisma as never, audit as never, admissionNumbers as never, access as never);
+    service = new StudentsService(
+      prisma as never,
+      audit as never,
+      admissionNumbers as never,
+      access as never,
+      { send: jest.fn() } as never,
+    );
   });
 
   describe("register", () => {

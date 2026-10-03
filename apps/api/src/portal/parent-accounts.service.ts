@@ -46,7 +46,7 @@ export class ParentAccountsService {
       data: { schoolId: actor.schoolId, phone, passwordHash: await argon2.hash(temporaryPassword) },
     });
     await this.record(actor, "parent.access.issued", account.id, phone, children);
-    await this.notifyAccountIssued(actor.schoolId, phone);
+    await this.notifyAccountIssued(actor.id, actor.schoolId, phone);
     return { phone, children, temporaryPassword };
   }
 
@@ -89,7 +89,7 @@ export class ParentAccountsService {
    * Silently does nothing if no guardian with this phone has an email on
    * file, or if the send itself fails — EmailService never throws.
    */
-  private async notifyAccountIssued(schoolId: string, phone: string): Promise<void> {
+  private async notifyAccountIssued(actorStaffId: string, schoolId: string, phone: string): Promise<void> {
     const [guardian, school] = await Promise.all([
       this.prisma.guardian.findFirst({ where: { schoolId, phone, email: { not: null } } }),
       this.prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
@@ -98,6 +98,10 @@ export class ParentAccountsService {
 
     const schoolName = school?.name ?? "your child's school";
     await this.email.send({
+      schoolId,
+      actorStaffId,
+      entityType: "ParentAccount",
+      entityId: phone,
       to: guardian.email,
       subject: `Family portal access created — ${schoolName}`,
       html: `
