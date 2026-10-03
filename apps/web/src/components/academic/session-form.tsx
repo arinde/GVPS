@@ -56,10 +56,15 @@ export function SessionForm({ value, onChange, onSubmit, errors = {}, isSubmitti
 
       <div className="flex flex-col gap-1.5">
         <span aria-hidden="true" className="hidden h-5 sm:block" />
-        <AppButton type="submit" disabled={isSubmitting || !value.name.trim() || !value.startDate || !value.endDate}>
-          <CalendarPlus aria-hidden="true" />
-          {isSubmitting ? "Creating…" : "Create session"}
-        </AppButton>
+        <div className="flex flex-col items-end gap-1">
+          <AppButton type="submit" disabled={isSubmitting || !value.name.trim() || !value.startDate || !value.endDate}>
+            <CalendarPlus aria-hidden="true" />
+            {isSubmitting ? "Creating…" : "Create session"}
+          </AppButton>
+          {!value.name.trim() || !value.startDate || !value.endDate ? (
+            <p className="text-muted-foreground text-xs">Enter a name and both dates to continue.</p>
+          ) : null}
+        </div>
       </div>
     </form>
   );

@@ -62,14 +62,14 @@ export function RecordExitForm({ value, onChange, onSubmit, errors = {}, isSubmi
         </FormField>
       </div>
 
-      <AppButton
-        type="submit"
-        variant="danger"
-        className="self-start"
-        disabled={isSubmitting || !value.status || !value.exitedOn}
-      >
-        {isSubmitting ? "Recording…" : "Record that they left"}
-      </AppButton>
+      <div className="flex flex-col items-start gap-1">
+        <AppButton type="submit" variant="danger" disabled={isSubmitting || !value.status || !value.exitedOn}>
+          {isSubmitting ? "Recording…" : "Record that they left"}
+        </AppButton>
+        {!value.status || !value.exitedOn ? (
+          <p className="text-muted-foreground text-xs">Choose how they left and the date to continue.</p>
+        ) : null}
+      </div>
     </form>
   );
 }

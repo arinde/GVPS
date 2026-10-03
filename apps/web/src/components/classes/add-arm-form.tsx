@@ -24,6 +24,10 @@ export function AddArmForm({ levels, value, onChange, onSubmit, isSubmitting = f
     onSubmit();
   }
 
+  const needsLevel = !value.levelId;
+  const armHint = needsLevel ? "Choose the level first" : "A letter, e.g. B";
+  const capacityHint = needsLevel ? "Choose the level first" : "Optional";
+
   return (
     <form onSubmit={handleSubmit} noValidate className="grid items-start gap-4 sm:grid-cols-[1fr_120px_140px_auto]">
       <FormField id="arm-level" label="Class level" required error={errors.levelId}>
@@ -37,9 +41,9 @@ export function AddArmForm({ levels, value, onChange, onSubmit, isSubmitting = f
         />
       </FormField>
 
-      <FormField id="arm-name" label="Arm" required hint="A letter, e.g. B" error={errors.name}>
+      <FormField id="arm-name" label="Arm" required hint={armHint} error={errors.name}>
         <TextInput
-          {...controlProps("arm-name", errors.name, "A letter, e.g. B")}
+          {...controlProps("arm-name", errors.name, armHint)}
           value={value.name}
           maxLength={20}
           autoCapitalize="characters"
@@ -48,9 +52,9 @@ export function AddArmForm({ levels, value, onChange, onSubmit, isSubmitting = f
         />
       </FormField>
 
-      <FormField id="arm-capacity" label="Class size" hint="Optional" error={errors.capacity}>
+      <FormField id="arm-capacity" label="Class size" hint={capacityHint} error={errors.capacity}>
         <TextInput
-          {...controlProps("arm-capacity", errors.capacity, "Optional")}
+          {...controlProps("arm-capacity", errors.capacity, capacityHint)}
           type="number"
           inputMode="numeric"
           min={1}
@@ -68,6 +72,9 @@ export function AddArmForm({ levels, value, onChange, onSubmit, isSubmitting = f
           <Plus aria-hidden="true" />
           {isSubmitting ? "Adding…" : "Add class"}
         </AppButton>
+        {!value.levelId || !value.name.trim() ? (
+          <p className="text-muted-foreground text-xs">Choose a level and enter an arm name to add it.</p>
+        ) : null}
       </div>
     </form>
   );

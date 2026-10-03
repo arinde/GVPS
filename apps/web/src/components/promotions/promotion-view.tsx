@@ -77,6 +77,13 @@ export function PromotionView() {
 
   const classOptions = arms.map((arm) => ({ value: arm.id, label: `${arm.classLevel.name}${arm.name}` }));
   const ready = draft.fromClassArmId && draft.toSessionId && draft.toClassArmId && studentIds.length > 0;
+  const promoteHint = !draft.fromClassArmId
+    ? "Choose the class to promote from."
+    : !draft.toSessionId || !draft.toClassArmId
+      ? "Choose the session and class to promote into."
+      : studentIds.length === 0
+        ? "Select at least one student."
+        : null;
 
   return (
     <PageContainer>
@@ -108,12 +115,15 @@ export function PromotionView() {
           />
 
           <div className="flex flex-wrap items-center gap-3">
-            <AppButton onClick={run} disabled={!ready || isLoading}>
-              {isLoading
-                ? "Promoting…"
-                : `Promote ${studentIds.length || ""} student${studentIds.length === 1 ? "" : "s"}`}
-              <ArrowRight aria-hidden="true" />
-            </AppButton>
+            <div className="flex flex-col items-start gap-1">
+              <AppButton onClick={run} disabled={!ready || isLoading}>
+                {isLoading
+                  ? "Promoting…"
+                  : `Promote ${studentIds.length || ""} student${studentIds.length === 1 ? "" : "s"}`}
+                <ArrowRight aria-hidden="true" />
+              </AppButton>
+              {!ready && promoteHint ? <p className="text-muted-foreground text-xs">{promoteHint}</p> : null}
+            </div>
             {students.length ? (
               <AppButton
                 variant="secondary"
