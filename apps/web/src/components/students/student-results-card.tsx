@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ResultsSummary } from "@/components/results/results-summary";
 import { useGetStudentResultsQuery } from "@/store/api/results-api";
 
@@ -11,5 +12,17 @@ export type StudentResultsCardProps = { studentId: string };
  */
 export function StudentResultsCard({ studentId }: StudentResultsCardProps) {
   const { data, isLoading } = useGetStudentResultsQuery(studentId);
-  return <ResultsSummary data={data} isLoading={isLoading} />;
+  return (
+    <div className="flex flex-col gap-3">
+      <ResultsSummary data={data} isLoading={isLoading} caption="Live scores, not yet approved or published." />
+      {data?.term ? (
+        <Link
+          href={`/results/report-cards/${data.term.id}/${studentId}`}
+          className="text-primary self-start text-sm font-semibold underline-offset-4 hover:underline"
+        >
+          Open this term&apos;s report card
+        </Link>
+      ) : null}
+    </div>
+  );
 }

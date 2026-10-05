@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { PortalChildFeesCard } from "@/components/portal/portal-child-fees-card";
 import { PortalChildPhoto } from "@/components/portal/portal-child-photo";
 import { currentClassLabel, DEPARTMENT, RELATIONSHIP, statusLabel } from "@/components/portal/portal-labels";
-import { PortalChildResultsCard } from "@/components/portal/portal-child-results-card";
+import { PortalChildReportCard } from "@/components/portal/portal-child-report-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ageInYears, formatDate } from "@/lib/dates";
 import { staffName } from "@/lib/staff-name";
@@ -92,7 +92,7 @@ export function PortalChildView({ studentId }: { studentId: string }) {
         </ContentCard>
 
         <div className="flex flex-col gap-5">
-          <PortalChildResultsCard studentId={child.id} />
+          <PortalChildReportCard studentId={child.id} />
           <PortalChildFeesCard studentId={child.id} />
 
           <ContentCard>

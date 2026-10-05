@@ -2,6 +2,7 @@ import {
   ArrowUpRight,
   BookOpenText,
   CalendarDays,
+  ClipboardCheck,
   CircleUserRound,
   GraduationCap,
   Inbox,
@@ -64,6 +65,13 @@ export const NAV_ITEMS: NavItem[] = [
   // Debtor list (FEATURES.md §14): whole-school roles plus a form teacher's
   // own arm. Fee structure is reached from this page, not its own nav entry.
   { href: "/fees", label: "Fees", icon: Wallet, roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR", "FORM_TEACHER"] },
+  // Approval steps (FEATURES.md §5.4): each role sees the step it can take.
+  {
+    href: "/results/approval",
+    label: "Results approval",
+    icon: ClipboardCheck,
+    roles: ["SUPERADMIN", "PRINCIPAL", "FORM_TEACHER", "SUBJECT_TEACHER"],
+  },
   // The audit log is for the proprietor and principal only (FEATURES.md §11.5).
   { href: "/audit", label: "Email trail", icon: ScrollText, roles: ["SUPERADMIN", "PRINCIPAL"] },
   // Every staff member can see their own record.

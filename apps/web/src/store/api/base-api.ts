@@ -66,6 +66,7 @@ export const baseApi = createApi({
     "ClassArm",
     "Subject",
     "Score",
+    "ResultSheet",
     "Result",
     "Attendance",
     "Invoice",

@@ -3,7 +3,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { StatusPill } from "@/components/common/status-pill";
 import type { StudentResults } from "@/store/api/results-api";
 
-export type ResultsSummaryProps = { data: StudentResults | undefined; isLoading: boolean };
+export type ResultsSummaryProps = { data: StudentResults | undefined; isLoading: boolean; caption: string };
 
 /**
  * A live read of the current term's scores (FEATURES.md §5.3), not a report
@@ -11,7 +11,7 @@ export type ResultsSummaryProps = { data: StudentResults | undefined; isLoading:
  * Presentational only (AGENTS.md §1): the staff profile page and the parent
  * portal each fetch from their own API and pass the result in here.
  */
-export function ResultsSummary({ data, isLoading }: ResultsSummaryProps) {
+export function ResultsSummary({ data, isLoading, caption }: ResultsSummaryProps) {
   if (isLoading) {
     return (
       <ContentCard>
@@ -37,7 +37,7 @@ export function ResultsSummary({ data, isLoading }: ResultsSummaryProps) {
   return (
     <ContentCard flush>
       <h2 className="px-5 pt-5 pb-1 text-base">Results — {data.term.name}</h2>
-      <p className="text-muted-foreground px-5 pb-3 text-xs">Live scores, not yet approved or published.</p>
+      <p className="text-muted-foreground px-5 pb-3 text-xs">{caption}</p>
       <table className="w-full text-sm">
         <thead className="text-muted-foreground border-b text-left text-xs">
           <tr>

@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { EnrolmentStatus, type Prisma } from "@prisma/client";
+import { isReportCard } from "@/assessment/report-card";
 import { fetchStudentLedger } from "@/fees/invoicing.service";
 import type { AuthenticatedParent } from "@/portal/parent-auth.primitives";
 import { PrismaService } from "@/prisma/prisma.service";
-import { computeStudentResults } from "@/results/student-results.service";
 
 const CURRENT_CLASS = {
   where: { status: EnrolmentStatus.ACTIVE },
@@ -115,10 +115,17 @@ export class PortalService {
     return fetchStudentLedger(this.prisma, parent.schoolId, studentId);
   }
 
-  async results(parent: AuthenticatedParent, studentId: string) {
+  /** The most recent report card published for this ward, frozen when their class was published (FEATURES.md §5.8). */
+  async reportCard(parent: AuthenticatedParent, studentId: string) {
     const ward = await this.prisma.student.findFirst({ where: { id: studentId, ...this.wardsWhere(parent) } });
     if (!ward) throw new NotFoundException("Child not found.");
-    return computeStudentResults(this.prisma, parent.schoolId, studentId);
+
+    const card = await this.prisma.reportCard.findFirst({
+      where: { schoolId: parent.schoolId, studentId },
+      orderBy: { publishedAt: "desc" },
+      select: { frozen: true },
+    });
+    return isReportCard(card?.frozen) ? card.frozen : null;
   }
 
   async photo(parent: AuthenticatedParent, studentId: string) {

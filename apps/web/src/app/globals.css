@@ -205,3 +205,19 @@
     }
   }
 }
+
+/* Printing a report card: only the card itself reaches the paper (see report-card-view.tsx). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #report-card,
+  #report-card * {
+    visibility: visible;
+  }
+  #report-card {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+}

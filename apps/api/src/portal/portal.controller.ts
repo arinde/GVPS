@@ -34,8 +34,8 @@ export class PortalController {
     return this.portal.fees(parent, studentId);
   }
 
-  @Get("children/:studentId/results")
-  results(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
-    return this.portal.results(parent, studentId);
+  @Get("children/:studentId/report-card")
+  reportCard(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
+    return this.portal.reportCard(parent, studentId);
   }
 }

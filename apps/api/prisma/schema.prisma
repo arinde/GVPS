@@ -848,3 +848,76 @@ model ReceiptCounter {
   @@unique([schoolId, year])
   @@map("receipt_counters")
 }
+
+// FEATURES.md §5.4: one sheet per subject per arm per term. The status is the
+// lock: scores are writable only in DRAFT. `frozen` is the snapshot taken at
+// approval — components, grade bands and each student's scores and grade —
+// and publishing reads that snapshot, never the live scores (§5.5).
+enum ResultSheetStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+  APPROVED
+  PUBLISHED
+}
+
+model ResultSheet {
+  id            String            @id @default(cuid())
+  schoolId      String
+  termId        String
+  classArmId    String
+  subjectId     String
+  status        ResultSheetStatus @default(DRAFT)
+  submittedAt   DateTime?
+  submittedById String?
+  reviewedAt    DateTime?
+  reviewedById  String?
+  approvedAt    DateTime?
+  approvedById  String?
+  publishedAt   DateTime?
+  publishedById String?
+  unlockReason  String?
+  frozen        Json?
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([termId, classArmId, subjectId])
+  @@index([schoolId, termId])
+  @@map("result_sheets")
+}
+
+// FEATURES.md §5.6–5.7: a form teacher's and principal's remarks and the
+// traits rating for one student in one term. Editable until the term's report
+// card is published for that student; after that the report card holds the
+// values as they were.
+model StudentRemark {
+  id               String   @id @default(cuid())
+  schoolId         String
+  termId           String
+  studentId        String
+  classArmId       String
+  formComment      String?
+  principalComment String?
+  traits           Json?
+  updatedAt        DateTime @updatedAt
+
+  @@unique([termId, studentId])
+  @@map("student_remarks")
+}
+
+// FEATURES.md §5.5 and §5.8: the report card for one student in one term,
+// frozen when the class is published. Positions, averages, cumulative
+// figures, remarks and fee balance are all computed once, here, and read back
+// as they were — never recomputed on read.
+model ReportCard {
+  id          String   @id @default(cuid())
+  schoolId    String
+  termId      String
+  studentId   String
+  classArmId  String
+  frozen      Json
+  publishedAt DateTime @default(now())
+
+  @@unique([termId, studentId])
+  @@index([schoolId, studentId])
+  @@map("report_cards")
+}
