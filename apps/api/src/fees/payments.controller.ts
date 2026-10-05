@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Roles } from "@/common/decorators/roles.decorator";
@@ -29,6 +29,11 @@ export class PaymentsController {
     @Body(new ZodValidationPipe(RecordPaymentSchema)) body: RecordPaymentDto,
   ) {
     return this.payments.record(actor, invoiceId, body);
+  }
+
+  @Get(":paymentId/receipt")
+  receipt(@CurrentUser() actor: AuthenticatedStaff, @Param("paymentId") paymentId: string) {
+    return this.payments.receiptFor(actor, paymentId);
   }
 
   @Post(":paymentId/reverse")

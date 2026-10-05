@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AdmissionNumberService } from "@/students/admission-number.service";
+import { StudentArchiveService } from "@/students/student-archive.service";
 import { StudentAdminController } from "@/students/student-admin.controller";
 import { StudentPhotoController } from "@/students/student-photo.controller";
 import { StudentPhotoService } from "@/students/student-photo.service";
@@ -10,7 +11,13 @@ import { StudentsService } from "@/students/students.service";
 // Student registry, guardians and enrolment (FEATURES.md §3.2-3.4).
 @Module({
   controllers: [StudentsController, StudentPhotoController, StudentAdminController],
-  providers: [StudentsService, AdmissionNumberService, StudentPhotoService, StudentUpdateService],
+  providers: [
+    StudentsService,
+    AdmissionNumberService,
+    StudentPhotoService,
+    StudentUpdateService,
+    StudentArchiveService,
+  ],
   exports: [StudentsService],
 })
 export class StudentsModule {}

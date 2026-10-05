@@ -1,9 +1,11 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import type { Payment } from "@prisma/client";
+import type { Payment, Prisma } from "@prisma/client";
 import { AuditService } from "@/audit/audit.service";
 import { EmailService } from "@/common/email.service";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
+import { buildReceipt } from "@/fees/receipt";
+import { gatherReceiptContext } from "@/fees/receipt-context";
 import type { RecordPaymentDto } from "@/fees/schemas/fees.schemas";
 
 /**
@@ -34,6 +36,21 @@ export class PaymentsService {
         update: { lastNumber: { increment: 1 } },
       });
       const receiptNumber = `RCT/${year}/${String(counter.lastNumber).padStart(4, "0")}`;
+      const issuedAt = new Date();
+      const { recordedByName, ...context } = await gatherReceiptContext(tx, actor.schoolId, invoiceId, actor.id);
+      const receipt = buildReceipt({
+        ...context,
+        receiptNumber,
+        issuedAt: issuedAt.toISOString(),
+        payment: {
+          amountKobo: dto.amountKobo,
+          method: dto.method,
+          reference: dto.reference ?? null,
+          payerName: dto.payerName,
+          receivedByName: dto.receivedByName,
+          recordedByName,
+        },
+      });
 
       return tx.payment.create({
         data: {
@@ -46,6 +63,8 @@ export class PaymentsService {
           payerName: dto.payerName,
           receivedByName: dto.receivedByName,
           recordedById: actor.id,
+          receipt: receipt as unknown as Prisma.InputJsonValue,
+          createdAt: issuedAt,
         },
       });
     });
@@ -68,6 +87,23 @@ export class PaymentsService {
 
     await this.notifyReceipt(actor.id, actor.schoolId, invoice.studentId, payment);
     return payment;
+  }
+
+  /** The receipt exactly as issued, marked if the payment has since been reversed. */
+  async receiptFor(actor: AuthenticatedStaff, paymentId: string) {
+    const payment = await this.prisma.payment.findFirst({
+      where: { id: paymentId, schoolId: actor.schoolId },
+      select: { receipt: true, reversedAt: true, reversalReason: true },
+    });
+    if (!payment) throw new NotFoundException("Payment not found.");
+    if (!payment.receipt) {
+      throw new NotFoundException("This payment was recorded before receipts were kept, so it cannot be reprinted.");
+    }
+    return {
+      ...(payment.receipt as object),
+      reversed: payment.reversedAt !== null,
+      reversalReason: payment.reversalReason,
+    };
   }
 
   async reverse(actor: AuthenticatedStaff, paymentId: string, reason: string): Promise<Payment> {

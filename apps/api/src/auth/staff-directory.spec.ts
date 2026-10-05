@@ -31,7 +31,7 @@ describe("StaffAccountService reads", () => {
     it("lists only the caller's school", async () => {
       await service.listStaff("school-1");
 
-      expect(prisma.staff.findMany.mock.calls[0][0].where).toEqual({ schoolId: "school-1" });
+      expect(prisma.staff.findMany.mock.calls[0][0].where).toEqual({ schoolId: "school-1", deletedAt: null });
     });
 
     it("shows allocations for the current session only", async () => {
@@ -54,7 +54,11 @@ describe("StaffAccountService reads", () => {
       prisma.staff.findFirst.mockResolvedValue(null);
 
       await expect(service.getProfile("school-1", "elsewhere")).rejects.toThrow(NotFoundException);
-      expect(prisma.staff.findFirst.mock.calls[0][0].where).toEqual({ id: "elsewhere", schoolId: "school-1" });
+      expect(prisma.staff.findFirst.mock.calls[0][0].where).toEqual({
+        id: "elsewhere",
+        schoolId: "school-1",
+        deletedAt: null,
+      });
     });
   });
 });

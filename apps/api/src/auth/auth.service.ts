@@ -29,7 +29,10 @@ export class AuthService {
   // PLAN.md §4.1 notes there is a single school today; a real multi-tenant
   // login needs a school selector or subdomain before this can stay correct.
   async login(email: string, password: string): Promise<TokenPair> {
-    const staff = await this.prisma.staff.findFirst({ where: { email }, include: { roles: true } });
+    const staff = await this.prisma.staff.findFirst({
+      where: { email, deletedAt: null },
+      include: { roles: true },
+    });
     if (!staff) throw new UnauthorizedException("Invalid credentials.");
 
     if (staff.lockedUntil && staff.lockedUntil > new Date()) {

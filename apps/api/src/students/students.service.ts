@@ -244,6 +244,7 @@ export class StudentsService {
     const students = await this.prisma.student.findMany({
       where: {
         schoolId,
+        deletedAt: null,
         AND: [AccessScopeService.studentWhere(scope)],
         ...(params.classArmId
           ? { enrolments: { some: { classArmId: params.classArmId, status: EnrolmentStatus.ACTIVE } } }
@@ -327,7 +328,12 @@ export class StudentsService {
   async findOne(actor: AuthenticatedStaff, studentId: string) {
     const scope = await this.access.studentScope(actor);
     const student = await this.prisma.student.findFirst({
-      where: { id: studentId, schoolId: actor.schoolId, AND: [AccessScopeService.studentWhere(scope)] },
+      where: {
+        id: studentId,
+        schoolId: actor.schoolId,
+        deletedAt: null,
+        AND: [AccessScopeService.studentWhere(scope)],
+      },
       include: profileInclude(studentId),
     });
     if (!student) throw new NotFoundException("Student not found.");

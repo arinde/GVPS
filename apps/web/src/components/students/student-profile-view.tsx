@@ -19,6 +19,7 @@ import { decodeAccessToken } from "@/lib/decode-access-token";
 import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken } from "@/store/slices/auth-slice";
+import { StudentDeleteCard } from "@/components/students/student-delete-card";
 import { useGetStudentQuery, type StudentProfile } from "@/store/api/students-api";
 
 type Enrolment = StudentProfile["enrolments"][number];
@@ -124,6 +125,9 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
         <div className="flex flex-col gap-5">
           {canViewResults ? <StudentResultsCard studentId={student.id} /> : null}
+          {roles.includes("SUPERADMIN") ? (
+            <StudentDeleteCard studentId={student.id} name={`${student.firstName} ${student.lastName}`} />
+          ) : null}
           {canViewFees ? (
             <StudentFeesCard
               studentId={student.id}

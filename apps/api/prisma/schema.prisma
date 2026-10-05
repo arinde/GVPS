@@ -22,6 +22,14 @@ datasource db {
 model School {
   id        String   @id @default(cuid())
   name      String
+  // Printed on every receipt. Blank until the school fills them in.
+  address   String?
+  phone     String?
+  email     String?
+  taxNumber String?
+  // VAT in basis points (750 = 7.5%). Zero means the school charges none, which
+  // is common for education — confirm with the school's accountant.
+  vatRateBps Int @default(0)
   createdAt DateTime @default(now())
 
   // FEATURES.md §3.2: admission number format is configurable. Tokens are
@@ -74,6 +82,8 @@ model Staff {
   mustChangePassword  Boolean   @default(true)
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
+  // Soft delete: the account can no longer sign in; its history stays.
+  deletedAt           DateTime?
 
   // Basic details, so the office knows who an account belongs to rather than
   // just an email address. Nullable only because the bootstrap superadmin was
@@ -337,6 +347,8 @@ model Student {
   medicalNote    String?
   previousSchool String?
 
+  // Soft delete (FEATURES.md §0): the row stays for history and is hidden from lists.
+  deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -827,6 +839,8 @@ model Payment {
   reversedAt     DateTime?
   reversalReason String?
   reversedById   String?
+  // The receipt as it was issued (FEATURES.md §6.4): frozen at recording, so a reprint never changes.
+  receipt        Json?
   createdAt      DateTime      @default(now())
 
   invoice Invoice @relation(fields: [invoiceId], references: [id])
