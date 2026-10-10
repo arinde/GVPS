@@ -7,6 +7,7 @@ import { AppButton, AppLinkButton } from "@/components/common/app-button";
 import { ContentCard } from "@/components/common/content-card";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { SubjectForm } from "@/components/subjects/subject-form";
 import { SubjectOfferingsEditor } from "@/components/subjects/subject-offerings-editor";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -81,9 +82,7 @@ export function SubjectDetailView({ subjectId }: { subjectId: string }) {
         }
       />
       {isLoading ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading…
-        </p>
+        <LoadingState />
       ) : !subject ? (
         <Alert variant="destructive" role="alert">
           <AlertDescription>This subject could not be found.</AlertDescription>

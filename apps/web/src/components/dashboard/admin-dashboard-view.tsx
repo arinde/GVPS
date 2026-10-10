@@ -4,6 +4,7 @@ import { ContentCard } from "@/components/common/content-card";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
 import { StatCard } from "@/components/common/stat-card";
+import { LoadingState } from "@/components/common/spinner";
 import { attentionItems } from "@/components/dashboard/attention-items";
 import { AttentionList } from "@/components/dashboard/attention-list";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
@@ -25,9 +26,7 @@ export function AdminDashboardView({ firstName }: AdminDashboardViewProps) {
   if (isLoading) {
     return (
       <PageContainer>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading the dashboard…
-        </p>
+        <LoadingState label="Loading the dashboard…" />
       </PageContainer>
     );
   }

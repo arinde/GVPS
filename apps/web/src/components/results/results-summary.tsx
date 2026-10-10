@@ -1,6 +1,7 @@
 import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { StatusPill } from "@/components/common/status-pill";
+import { LoadingState } from "@/components/common/spinner";
 import type { StudentResults } from "@/store/api/results-api";
 
 export type ResultsSummaryProps = { data: StudentResults | undefined; isLoading: boolean; caption: string };
@@ -15,9 +16,7 @@ export function ResultsSummary({ data, isLoading, caption }: ResultsSummaryProps
   if (isLoading) {
     return (
       <ContentCard>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading results…
-        </p>
+        <LoadingState label="Loading results…" />
       </ContentCard>
     );
   }

@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { NativeSelect } from "@/components/common/native-select";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { SubjectLoadEditor, type SubjectLoadDraft } from "@/components/timetable/subject-load-editor";
 import { TimetableLegend } from "@/components/timetable/timetable-legend";
 import { WeeklyTimetableGrid } from "@/components/timetable/weekly-timetable-grid";
@@ -243,9 +244,7 @@ export function TimetableBuilderView() {
         )}
 
         {!classArmId ? null : isLoading || !grid ? (
-          <p className="text-muted-foreground text-sm" role="status">
-            Loading…
-          </p>
+          <LoadingState />
         ) : grid.periods.length === 0 ? (
           <ContentCard>
             <EmptyState

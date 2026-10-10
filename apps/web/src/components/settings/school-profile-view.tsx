@@ -7,6 +7,7 @@ import { FormField, controlProps } from "@/components/common/form-field";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
 import { TextInput } from "@/components/common/text-input";
+import { LoadingState } from "@/components/common/spinner";
 import { notify } from "@/lib/notify";
 import {
   useGetSchoolProfileQuery,
@@ -22,9 +23,7 @@ export function SchoolProfileView() {
     <PageContainer width="form">
       <PageHeader title="School details" subtitle="Printed on every receipt." />
       {isLoading ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading…
-        </p>
+        <LoadingState />
       ) : isError || !data ? (
         <ContentCard>
           <p className="text-sm">The school details could not be loaded.</p>

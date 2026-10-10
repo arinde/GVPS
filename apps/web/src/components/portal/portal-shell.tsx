@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { AppButton } from "@/components/common/app-button";
+import { LoadingState } from "@/components/common/spinner";
 import { crestInitials } from "@/components/layout/app-sidebar";
 import { authRedirect, PORTAL_ROUTES } from "@/lib/auth-redirect";
 import { notify } from "@/lib/notify";
@@ -45,11 +46,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
   }, [redirectTo, router]);
 
   if (isRestoringSession || redirectTo) {
-    return (
-      <p className="text-muted-foreground m-auto text-sm" role="status">
-        Loading…
-      </p>
-    );
+    return <LoadingState className="m-auto" />;
   }
 
   if (BARE_ROUTES.some((route) => pathname.startsWith(route)) || !accessToken) return <>{children}</>;

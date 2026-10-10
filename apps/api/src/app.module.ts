@@ -4,6 +4,7 @@ import { AppController } from "@/app.controller";
 import { AppService } from "@/app.service";
 import { AcademicModule } from "@/academic/academic.module";
 import { AccessModule } from "@/access/access.module";
+import { AnalyticsModule } from "@/analytics/analytics.module";
 import { AssessmentModule } from "@/assessment/assessment.module";
 import { AttendanceModule } from "@/attendance/attendance.module";
 import { ClassAssignmentsModule } from "@/class-assignments/class-assignments.module";
@@ -32,6 +33,7 @@ import { TimetableModule } from "@/timetable/timetable.module";
     AccessModule,
     AuthModule,
     AcademicModule,
+    AnalyticsModule,
     AssessmentModule,
     AttendanceModule,
     StudentsModule,

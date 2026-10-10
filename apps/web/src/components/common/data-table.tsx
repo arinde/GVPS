@@ -3,6 +3,7 @@
 import { stockFeatures, useTable, type ColumnDef, type RowData, type StockFeatures } from "@tanstack/react-table";
 import { cn } from "cn";
 import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/spinner";
 
 /**
  * The one table shell in the app (AGENTS.md §4). Features supply `columns` and
@@ -74,9 +75,7 @@ export function DataTable<TData extends RowData>({
 
       {rows.length === 0 ? (
         isLoading ? (
-          <p className="text-muted-foreground py-12 text-center text-sm" role="status">
-            Loading…
-          </p>
+          <LoadingState className="py-12 text-center" />
         ) : (
           <EmptyState title={emptyTitle} description={emptyDescription} />
         )

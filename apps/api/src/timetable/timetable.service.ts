@@ -9,7 +9,6 @@ import { DayOfWeek, Role } from "@prisma/client";
 import { AuditService } from "@/audit/audit.service";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
-import { planTimetable } from "@/timetable/auto-generate";
 import type { SetSlotDto } from "@/timetable/schemas/timetable.schema";
 
 export const WRITERS: Role[] = [Role.SUPERADMIN, Role.PRINCIPAL, Role.ADMIN_SECRETARY];
@@ -22,11 +21,10 @@ export const DAYS: DayOfWeek[] = [
 ];
 
 /**
- * FEATURES.md §8.1 — the arm-by-arm builder and the per-teacher view. A
- * subject has exactly one teacher per arm per session (SubjectAssignment's
- * own unique constraint), so a cell only ever needs a subject: the teacher
- * comes from that assignment, which also means a subject with nobody
- * assigned to teach it in that class simply cannot be timetabled.
+ * FEATURES.md §8.1 — the arm-by-arm grid, its single-cell editor, and the
+ * per-teacher view. The class's subject list and the auto-generator that
+ * reads it live in TimetableSubjectsService instead — split out to keep
+ * this file under the 400-line hard cap (AGENTS.md §7).
  */
 @Injectable()
 export class TimetableService {
@@ -56,12 +54,18 @@ export class TimetableService {
       this.prisma.timetableSlot.findMany({ where: { schoolId, sessionId, classArmId } }),
     ]);
 
-    const [subjects, staff] = await Promise.all([
+    const [subjects, staff, loads] = await Promise.all([
       this.prisma.subject.findMany({ where: { id: { in: slots.map((slot) => slot.subjectId) } } }),
-      this.prisma.staff.findMany({ where: { id: { in: slots.map((slot) => slot.staffId) } } }),
+      this.prisma.staff.findMany({
+        where: { id: { in: slots.flatMap((slot) => (slot.staffId ? [slot.staffId] : [])) } },
+      }),
+      this.prisma.classSubjectLoad.findMany({ where: { schoolId, sessionId, classArmId } }),
     ]);
     const subjectName = new Map(subjects.map((subject) => [subject.id, subject.name]));
     const staffName = new Map(staff.map((member) => [member.id, staffLabel(member)]));
+    // A subject pinned to one day (Sports every Wednesday) is a fixture, not a regular
+    // lesson — the UI styles it differently, hence exposing it per slot here.
+    const fixedDayBySubject = new Map(loads.map((load) => [load.subjectId, load.fixedDay]));
 
     return {
       classLabel: `${classArm.classLevel.name}${classArm.name}`,
@@ -74,133 +78,8 @@ export class TimetableService {
         subjectId: slot.subjectId,
         subjectName: subjectName.get(slot.subjectId) ?? "—",
         staffId: slot.staffId,
-        staffName: staffName.get(slot.staffId) ?? "—",
-      })),
-    };
-  }
-
-  /** The subjects this arm actually has a teacher for this session, and how many periods each needs this week. */
-  async availableSubjects(actor: AuthenticatedStaff, sessionId: string, classArmId: string) {
-    await this.assertWriterOrOwnFormTeacher(actor, sessionId, classArmId);
-    const assignments = await this.prisma.subjectAssignment.findMany({
-      where: { schoolId: actor.schoolId, sessionId, classArmId },
-      include: { subject: { select: { name: true } }, staff: true },
-      orderBy: { subject: { name: "asc" } },
-    });
-    return assignments.map((assignment) => ({
-      subjectId: assignment.subjectId,
-      subjectName: assignment.subject.name,
-      staffName: staffLabel(assignment.staff),
-      periodsPerWeek: assignment.periodsPerWeek,
-      fixedDay: assignment.fixedDay,
-    }));
-  }
-
-  /**
-   * How much of the week this class's subject needs, and optionally which
-   * single day it's pinned to (Sports every Wednesday) — the input the
-   * auto-generator reads.
-   */
-  async setSubjectLoad(
-    actor: AuthenticatedStaff,
-    sessionId: string,
-    classArmId: string,
-    subjectId: string,
-    periodsPerWeek: number,
-    fixedDay: DayOfWeek | null,
-  ) {
-    await this.assertWriterOrOwnFormTeacher(actor, sessionId, classArmId);
-    const assignment = await this.prisma.subjectAssignment.findFirst({
-      where: { schoolId: actor.schoolId, sessionId, classArmId, subjectId },
-    });
-    if (!assignment) throw new NotFoundException("This subject is not assigned to this class.");
-    return this.prisma.subjectAssignment.update({
-      where: { id: assignment.id },
-      data: { periodsPerWeek, fixedDay },
-    });
-  }
-
-  /**
-   * Builds the whole week from the class's subject list in one go, instead of
-   * a cell at a time. Replaces whatever this class's timetable currently
-   * holds — a manual touch-up after this runs is fine, but running it again
-   * starts over.
-   */
-  async autoGenerate(actor: AuthenticatedStaff, sessionId: string, classArmId: string) {
-    await this.assertWriterOrOwnFormTeacher(actor, sessionId, classArmId);
-
-    const classArm = await this.prisma.classArm.findFirst({
-      where: { id: classArmId, schoolId: actor.schoolId },
-      include: { classLevel: true },
-    });
-    if (!classArm) throw new NotFoundException("Class not found.");
-
-    const [periods, loads, otherSlots] = await Promise.all([
-      this.prisma.period.findMany({
-        where: { schoolId: actor.schoolId, section: classArm.classLevel.section, isTeaching: true },
-        orderBy: { sequence: "asc" },
-      }),
-      this.prisma.subjectAssignment.findMany({ where: { schoolId: actor.schoolId, sessionId, classArmId } }),
-      this.prisma.timetableSlot.findMany({
-        where: { schoolId: actor.schoolId, sessionId, classArmId: { not: classArmId } },
-        select: { staffId: true, dayOfWeek: true, periodId: true },
-      }),
-    ]);
-    if (periods.length === 0) {
-      throw new BadRequestException("No teaching periods are defined for this section yet. Add periods first.");
-    }
-    if (loads.length === 0) {
-      throw new BadRequestException(
-        "This class has no subjects assigned yet. Assign subjects and set how many periods each needs first.",
-      );
-    }
-
-    const busyElsewhere = new Set(otherSlots.map((slot) => `${slot.staffId}|${slot.dayOfWeek}|${slot.periodId}`));
-    const { placed, unplaced } = planTimetable({
-      days: DAYS,
-      periods: periods.map((period) => ({ id: period.id, sequence: period.sequence })),
-      loads: loads.map((load) => ({
-        subjectId: load.subjectId,
-        staffId: load.staffId,
-        periodsPerWeek: load.periodsPerWeek,
-        fixedDay: load.fixedDay,
-      })),
-      busyElsewhere,
-    });
-
-    await this.prisma.$transaction([
-      this.prisma.timetableSlot.deleteMany({ where: { schoolId: actor.schoolId, sessionId, classArmId } }),
-      this.prisma.timetableSlot.createMany({
-        data: placed.map((slot) => ({
-          schoolId: actor.schoolId,
-          sessionId,
-          classArmId,
-          dayOfWeek: slot.day,
-          periodId: slot.periodId,
-          subjectId: slot.subjectId,
-          staffId: slot.staffId,
-        })),
-      }),
-    ]);
-    await this.audit.record({
-      schoolId: actor.schoolId,
-      actorStaffId: actor.id,
-      action: "timetable.autoGenerated",
-      entityType: "ClassArm",
-      entityId: classArmId,
-      after: { sessionId, placed: placed.length, unplaced },
-    });
-
-    const subjectIds = [...new Set(unplaced.map((item) => item.subjectId))];
-    const subjects = subjectIds.length ? await this.prisma.subject.findMany({ where: { id: { in: subjectIds } } }) : [];
-    const subjectName = new Map(subjects.map((subject) => [subject.id, subject.name]));
-
-    return {
-      placed: placed.length,
-      unplaced: unplaced.map((item) => ({
-        subjectId: item.subjectId,
-        subjectName: subjectName.get(item.subjectId) ?? "—",
-        missing: item.missing,
+        staffName: slot.staffId ? (staffName.get(slot.staffId) ?? "—") : "No teacher assigned yet",
+        fixedDay: fixedDayBySubject.get(slot.subjectId) ?? null,
       })),
     };
   }
@@ -213,7 +92,7 @@ export class TimetableService {
     periodId: string,
     dto: SetSlotDto,
   ) {
-    await this.assertWriterOrOwnFormTeacher(actor, sessionId, classArmId);
+    await assertWriterOrOwnFormTeacher(this.prisma, actor, sessionId, classArmId);
     const classArm = await this.prisma.classArm.findFirst({
       where: { id: classArmId, schoolId: actor.schoolId },
       include: { classLevel: true },
@@ -234,6 +113,30 @@ export class TimetableService {
       throw new BadRequestException(
         "No teacher is assigned to teach this subject in this class yet. Assign one under Subject assignments first.",
       );
+    }
+
+    const newSubject = await this.prisma.subject.findFirst({ where: { id: dto.subjectId, schoolId: actor.schoolId } });
+    if (!newSubject) throw new NotFoundException("Subject not found.");
+
+    // A slot can hold more than one subject only when they're the same
+    // elective combo (different students, different combo rooms, same
+    // period). Setting a lesson by hand otherwise still replaces whatever
+    // was there, same as before this could happen at all.
+    const existing = await this.prisma.timetableSlot.findMany({
+      where: { schoolId: actor.schoolId, sessionId, classArmId, dayOfWeek, periodId },
+    });
+    const existingSubjects = await this.prisma.subject.findMany({
+      where: { id: { in: existing.map((slot) => slot.subjectId) } },
+      select: { id: true, comboGroup: true },
+    });
+    const comboGroupBySubjectId = new Map(existingSubjects.map((subject) => [subject.id, subject.comboGroup]));
+    const othersToClear = existing.filter(
+      (slot) =>
+        slot.subjectId !== dto.subjectId &&
+        !(newSubject.comboGroup && comboGroupBySubjectId.get(slot.subjectId) === newSubject.comboGroup),
+    );
+    if (othersToClear.length > 0) {
+      await this.prisma.timetableSlot.deleteMany({ where: { id: { in: othersToClear.map((slot) => slot.id) } } });
     }
 
     const clash = await this.prisma.timetableSlot.findFirst({
@@ -258,7 +161,7 @@ export class TimetableService {
     }
 
     const slot = await this.prisma.timetableSlot.upsert({
-      where: { classArmId_dayOfWeek_periodId: { classArmId, dayOfWeek, periodId } },
+      where: { classArmId_dayOfWeek_periodId_subjectId: { classArmId, dayOfWeek, periodId, subjectId: dto.subjectId } },
       create: {
         schoolId: actor.schoolId,
         sessionId,
@@ -268,7 +171,7 @@ export class TimetableService {
         subjectId: dto.subjectId,
         staffId: assignment.staffId,
       },
-      update: { subjectId: dto.subjectId, staffId: assignment.staffId },
+      update: { staffId: assignment.staffId },
     });
     await this.audit.record({
       schoolId: actor.schoolId,
@@ -284,7 +187,7 @@ export class TimetableService {
   async clearSlot(actor: AuthenticatedStaff, slotId: string): Promise<void> {
     const slot = await this.prisma.timetableSlot.findFirst({ where: { id: slotId, schoolId: actor.schoolId } });
     if (!slot) throw new NotFoundException("Lesson not found.");
-    await this.assertWriterOrOwnFormTeacher(actor, slot.sessionId, slot.classArmId);
+    await assertWriterOrOwnFormTeacher(this.prisma, actor, slot.sessionId, slot.classArmId);
     await this.prisma.timetableSlot.delete({ where: { id: slotId } });
     await this.audit.record({
       schoolId: actor.schoolId,
@@ -347,31 +250,33 @@ export class TimetableService {
   private assertReader(actor: AuthenticatedStaff) {
     if (actor.roles.includes(Role.BURSAR)) throw new ForbiddenException("You do not have access to the timetable.");
   }
-
-  /**
-   * FEATURES.md §14 "Timetable" row, extended at the owner's request: a class's
-   * own form teacher may also manage its subject list, periods-per-week, and
-   * timetable — not just the whole-school writer roles.
-   */
-  private async assertWriterOrOwnFormTeacher(
-    actor: AuthenticatedStaff,
-    sessionId: string,
-    classArmId: string,
-  ): Promise<void> {
-    if (actor.roles.some((role) => WRITERS.includes(role))) return;
-    if (actor.roles.includes(Role.FORM_TEACHER)) {
-      const assignment = await this.prisma.classAssignment.findUnique({
-        where: { sessionId_classArmId: { sessionId, classArmId } },
-        select: { staffId: true },
-      });
-      if (assignment?.staffId === actor.id) return;
-    }
-    throw new ForbiddenException(
-      "Only this class's form teacher, or the superadmin, principal or admin office, can change its timetable.",
-    );
-  }
 }
 
-function staffLabel(staff: { firstName: string | null; lastName: string | null; email: string }): string {
+export function staffLabel(staff: { firstName: string | null; lastName: string | null; email: string }): string {
   return staff.firstName && staff.lastName ? `${staff.firstName} ${staff.lastName}` : staff.email;
+}
+
+/**
+ * FEATURES.md §14 "Timetable" row, extended at the owner's request: a class's
+ * own form teacher may also manage its subject list, periods-per-week, and
+ * timetable — not just the whole-school writer roles. Shared with
+ * TimetableSubjectsService, which needs the identical check.
+ */
+export async function assertWriterOrOwnFormTeacher(
+  prisma: PrismaService,
+  actor: AuthenticatedStaff,
+  sessionId: string,
+  classArmId: string,
+): Promise<void> {
+  if (actor.roles.some((role) => WRITERS.includes(role))) return;
+  if (actor.roles.includes(Role.FORM_TEACHER)) {
+    const assignment = await prisma.classAssignment.findUnique({
+      where: { sessionId_classArmId: { sessionId, classArmId } },
+      select: { staffId: true },
+    });
+    if (assignment?.staffId === actor.id) return;
+  }
+  throw new ForbiddenException(
+    "Only this class's form teacher, or the superadmin, principal or admin office, can change its timetable.",
+  );
 }

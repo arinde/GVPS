@@ -1,7 +1,9 @@
 import {
   ArrowUpRight,
+  BarChart3,
   Building2,
   BookOpenText,
+  CalendarCheck,
   CalendarClock,
   CalendarDays,
   ClipboardCheck,
@@ -13,6 +15,7 @@ import {
   NotebookPen,
   ScrollText,
   School,
+  Table2,
   UserPlus,
   UsersRound,
   Wallet,
@@ -108,6 +111,31 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SUPERADMIN", "PRINCIPAL", "FORM_TEACHER", "SUBJECT_TEACHER"],
     group: "Results",
   },
+  // FEATURES.md §5.9: same access as report cards — no subject teacher, no parent.
+  {
+    href: "/results/broadsheet",
+    label: "Broadsheet",
+    icon: Table2,
+    roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY", "FORM_TEACHER"],
+    group: "Results",
+  },
+
+  // FEATURES.md §4.1/4.2: a form teacher marks their own arm's daily
+  // register; a subject teacher marks their own subject's period register.
+  {
+    href: "/attendance/daily",
+    label: "Daily attendance",
+    icon: CalendarCheck,
+    roles: ["SUPERADMIN", "FORM_TEACHER"],
+    group: "Attendance",
+  },
+  {
+    href: "/attendance/periods",
+    label: "Period attendance",
+    icon: CalendarCheck,
+    roles: ["SUPERADMIN", "SUBJECT_TEACHER"],
+    group: "Attendance",
+  },
 
   { href: "/staff", label: "Staff", icon: UsersRound, roles: ["SUPERADMIN"], group: "Staff" },
   { href: "/staff/classes", label: "Class allocation", icon: LayoutGrid, roles: ["SUPERADMIN"], group: "Staff" },
@@ -132,6 +160,15 @@ export const NAV_ITEMS: NavItem[] = [
   },
   // The audit log is for the proprietor and principal only (FEATURES.md §11.5).
   { href: "/audit", label: "Email trail", icon: ScrollText, roles: ["SUPERADMIN", "PRINCIPAL"], group: "Admin" },
+  // FEATURES.md §10/§14 "Analytics" row: superadmin and principal see all of
+  // it; bursar sees only the financial card (enforced in the view itself).
+  {
+    href: "/analytics",
+    label: "Analytics",
+    icon: BarChart3,
+    roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR"],
+    group: "Admin",
+  },
 
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },

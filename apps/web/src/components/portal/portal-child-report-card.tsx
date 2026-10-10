@@ -2,6 +2,7 @@
 
 import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/spinner";
 import { ReportCardView } from "@/components/results/report-card-view";
 import { TRAIT_LABELS } from "@/lib/traits";
 import { useGetPortalChildReportCardQuery, useGetPortalMeQuery } from "@/store/api/portal-api";
@@ -14,11 +15,7 @@ export function PortalChildReportCard({ studentId }: PortalChildReportCardProps)
   const { data: me } = useGetPortalMeQuery();
 
   if (isLoading) {
-    return (
-      <p className="text-muted-foreground text-sm" role="status">
-        Loading report card…
-      </p>
-    );
+    return <LoadingState label="Loading report card…" />;
   }
   if (!card) {
     return (

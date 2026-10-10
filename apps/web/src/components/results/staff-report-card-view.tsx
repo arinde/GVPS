@@ -3,6 +3,7 @@
 import { AppButton } from "@/components/common/app-button";
 import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/spinner";
 import { ReportCardView } from "@/components/results/report-card-view";
 import { TRAIT_LABELS } from "@/lib/traits";
 import { useGetMyAccessQuery } from "@/store/api/access-api";
@@ -16,11 +17,7 @@ export function StaffReportCardView({ termId, studentId }: StaffReportCardViewPr
   const { data: access } = useGetMyAccessQuery();
 
   if (isLoading) {
-    return (
-      <p className="text-muted-foreground text-sm" role="status">
-        Loading report card…
-      </p>
-    );
+    return <LoadingState label="Loading report card…" />;
   }
   if (isError || !card) {
     return (

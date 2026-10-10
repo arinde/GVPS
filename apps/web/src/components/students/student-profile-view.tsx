@@ -7,6 +7,7 @@ import { ContentCard } from "@/components/common/content-card";
 import { DataTable } from "@/components/common/data-table";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { EnrolmentActionsCard } from "@/components/students/enrolment-actions-card";
 import { PortalAccessRow } from "@/components/students/portal-access-row";
 import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
@@ -73,9 +74,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   if (isLoading) {
     return (
       <PageContainer>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading student…
-        </p>
+        <LoadingState label="Loading student…" />
       </PageContainer>
     );
   }

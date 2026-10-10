@@ -3,6 +3,7 @@
 import { Pencil } from "lucide-react";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
+import { LoadingState } from "@/components/common/spinner";
 import { StaffProfileDetails } from "@/components/staff/staff-profile-details";
 import { StaffAccountActions } from "@/components/staff/staff-account-actions";
 import { StaffOnboardingCard } from "@/components/staff/staff-onboarding-card";
@@ -20,9 +21,7 @@ export function StaffProfileView({ staffId }: { staffId: string }) {
   if (isLoading) {
     return (
       <PageContainer>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading…
-        </p>
+        <LoadingState />
       </PageContainer>
     );
   }
