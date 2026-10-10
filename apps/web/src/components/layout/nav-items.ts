@@ -172,3 +172,64 @@ export function activeNavItem(items: NavItem[], currentPath: string): NavItem | 
   if (matches.length === 0) return null;
   return matches.reduce((longest, item) => (item.href.length > longest.href.length ? item : longest));
 }
+
+export type Breadcrumb = { label: string; href?: string };
+
+function commonPrefixLength(a: string[], b: string[]): number {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  return i;
+}
+
+/** "cmusw2tiz000hplccvagmk274" — a database id, not a word worth printing. */
+function looksLikeAnId(segment: string): boolean {
+  return /^[a-z0-9]{16,}$/i.test(segment);
+}
+
+function prettifySegment(segment: string): string {
+  if (looksLikeAnId(segment)) return "";
+  return segment
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
+ * Builds the trail for the current path with no per-page wiring: finds the
+ * nav item the path belongs to (exactly, or — for a screen reached only from
+ * inside another page, like a report card or fee structure — the nearest one
+ * sharing its first path segment), then turns whatever path is left over into
+ * plain-word crumbs, dropping ids a person wouldn't recognise anyway. The
+ * group (if any) leads, and the current page never links to itself.
+ */
+export function breadcrumbTrail(items: NavItem[], pathname: string): Breadcrumb[] {
+  if (pathname === "/" || pathname === "/dashboard") return [];
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return [];
+
+  const anchor =
+    activeNavItem(items, pathname) ??
+    items.find((item) => item.href.split("/").filter(Boolean)[0] === segments[0]) ??
+    null;
+  if (!anchor) {
+    const labels = segments.map(prettifySegment).filter(Boolean);
+    return labels.map((label) => ({ label }));
+  }
+
+  const trail: Breadcrumb[] = [];
+  // Skip the group crumb when it would just repeat the item under it, e.g.
+  // the "Students" group above the "Students" list page.
+  if (anchor.group && anchor.group !== anchor.label) trail.push({ label: anchor.group });
+  const anchorSegments = anchor.href.split("/").filter(Boolean);
+  const isCurrent = pathname === anchor.href;
+  trail.push({ label: anchor.label, href: isCurrent ? undefined : anchor.href });
+
+  const matched = commonPrefixLength(segments, anchorSegments);
+  const extra = segments.slice(matched);
+  const labels = extra.map(prettifySegment).filter(Boolean);
+  if (labels.length > 0) for (const label of labels) trail.push({ label });
+  else if (extra.length > 0) trail.push({ label: "Details" });
+
+  return trail;
+}

@@ -41,6 +41,35 @@ export class TimetableController {
     return this.timetable.availableSubjects(actor, sessionId, classArmId);
   }
 
+  @Get("sessions/:sessionId/arms/:classArmId/subjects/addable")
+  addableSubjects(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("sessionId") sessionId: string,
+    @Param("classArmId") classArmId: string,
+  ) {
+    return this.timetable.addableSubjects(actor, sessionId, classArmId);
+  }
+
+  @Post("sessions/:sessionId/arms/:classArmId/subjects/:subjectId")
+  addSubject(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("sessionId") sessionId: string,
+    @Param("classArmId") classArmId: string,
+    @Param("subjectId") subjectId: string,
+  ) {
+    return this.timetable.addSubject(actor, sessionId, classArmId, subjectId);
+  }
+
+  @Delete("sessions/:sessionId/arms/:classArmId/subjects/:subjectId")
+  removeSubject(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("sessionId") sessionId: string,
+    @Param("classArmId") classArmId: string,
+    @Param("subjectId") subjectId: string,
+  ) {
+    return this.timetable.removeSubject(actor, sessionId, classArmId, subjectId);
+  }
+
   @Put("sessions/:sessionId/arms/:classArmId/subjects/:subjectId/load")
   setSubjectLoad(
     @CurrentUser() actor: AuthenticatedStaff,

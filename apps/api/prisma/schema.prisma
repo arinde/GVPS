@@ -214,6 +214,7 @@ model AcademicSession {
   enrolments         Enrolment[]
   classAssignments   ClassAssignment[]
   subjectAssignments SubjectAssignment[]
+  classSubjectLoads  ClassSubjectLoad[]
 
   @@unique([schoolId, name])
   @@map("academic_sessions")
@@ -279,6 +280,7 @@ model ClassArm {
   enrolments         Enrolment[]
   assignments        ClassAssignment[]
   subjectAssignments SubjectAssignment[]
+  classSubjectLoads  ClassSubjectLoad[]
 
   @@unique([classLevelId, name])
   @@map("class_arms")
@@ -580,6 +582,7 @@ model Subject {
 
   offerings   SubjectOffering[]
   assignments SubjectAssignment[]
+  loads       ClassSubjectLoad[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -616,6 +619,30 @@ model SubjectAssignment {
   subjectId  String
   classArmId String
   staffId    String
+  createdAt  DateTime @default(now())
+
+  session  AcademicSession @relation(fields: [sessionId], references: [id])
+  subject  Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  classArm ClassArm        @relation(fields: [classArmId], references: [id], onDelete: Cascade)
+  staff    Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  // One teacher per subject per class per session.
+  @@unique([sessionId, subjectId, classArmId])
+  @@index([schoolId, sessionId, staffId])
+  @@map("subject_assignments")
+}
+
+// A class's subject list, kept separate from who teaches each one: the
+// owner asked to add a subject (and set its weekly load) before a teacher
+// exists, then regenerate once a SubjectAssignment gives it a staffId. If
+// the load lived on SubjectAssignment itself, removing or reassigning a
+// teacher would wipe the periods-per-week/fixedDay a form teacher already set.
+model ClassSubjectLoad {
+  id         String @id @default(cuid())
+  schoolId   String
+  sessionId  String
+  subjectId  String
+  classArmId String
   // How much of the week this subject needs in this class — what the
   // timetable auto-generator uses to decide how many slots to give it.
   periodsPerWeek Int        @default(1)
@@ -627,12 +654,9 @@ model SubjectAssignment {
   session  AcademicSession @relation(fields: [sessionId], references: [id])
   subject  Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   classArm ClassArm        @relation(fields: [classArmId], references: [id], onDelete: Cascade)
-  staff    Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
-  // One teacher per subject per class per session.
   @@unique([sessionId, subjectId, classArmId])
-  @@index([schoolId, sessionId, staffId])
-  @@map("subject_assignments")
+  @@map("class_subject_loads")
 }
 
 // ---------------------------------------------------------------------------
@@ -986,7 +1010,10 @@ model TimetableSlot {
   dayOfWeek  DayOfWeek
   periodId   String
   subjectId  String
-  staffId    String
+  // Null until a teacher is assigned to this subject in this class — the
+  // generator places the lesson regardless, so the class isn't held up
+  // waiting for staffing, and fills this in on the next regenerate.
+  staffId    String?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 

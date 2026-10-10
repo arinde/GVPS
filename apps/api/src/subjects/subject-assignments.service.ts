@@ -141,14 +141,22 @@ export class SubjectAssignmentsService {
     staffId: string,
     pairs: { armId: string; subjectId: string }[],
   ) {
+    // Assigning a teacher also puts the subject on the class's timetable list
+    // if it isn't there yet — but never touches an existing one, so a
+    // periods-per-week/fixedDay a form teacher already set survives this.
     return this.prisma.$transaction(
-      pairs.map(({ armId, subjectId }) =>
+      pairs.flatMap(({ armId, subjectId }) => [
         this.prisma.subjectAssignment.upsert({
           where: { sessionId_subjectId_classArmId: { sessionId, subjectId, classArmId: armId } },
           create: { schoolId, sessionId, subjectId, classArmId: armId, staffId },
           update: { staffId },
         }),
-      ),
+        this.prisma.classSubjectLoad.upsert({
+          where: { sessionId_subjectId_classArmId: { sessionId, subjectId, classArmId: armId } },
+          create: { schoolId, sessionId, subjectId, classArmId: armId, periodsPerWeek: 1, fixedDay: null },
+          update: {},
+        }),
+      ]),
     );
   }
 

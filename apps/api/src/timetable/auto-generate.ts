@@ -2,13 +2,14 @@ import type { DayOfWeek } from "@prisma/client";
 
 export type SubjectLoad = {
   subjectId: string;
-  staffId: string;
+  /** Null until a teacher is assigned — the subject is placed anyway, just with no clash check. */
+  staffId: string | null;
   periodsPerWeek: number;
   /** Pins every occurrence to one day — Sports every Wednesday — instead of spreading across the week. */
   fixedDay: DayOfWeek | null;
 };
 export type TeachingPeriod = { id: string; sequence: number };
-export type PlannedSlot = { day: DayOfWeek; periodId: string; subjectId: string; staffId: string };
+export type PlannedSlot = { day: DayOfWeek; periodId: string; subjectId: string; staffId: string | null };
 export type UnplacedLoad = { subjectId: string; missing: number };
 
 /**
@@ -19,7 +20,9 @@ export type UnplacedLoad = { subjectId: string; missing: number };
  * up on a day once every other day already has it, rather than piling up on
  * the first day with room. `busyElsewhere` is every (teacher, day, period)
  * another arm already holds this session — the same clash a manual edit is
- * refused for.
+ * refused for. A subject with no teacher yet (owner's call: draft the whole
+ * week regardless of staffing) is placed with no clash check at all, since
+ * there's no one to clash against yet.
  */
 export function planTimetable(input: {
   days: DayOfWeek[];
@@ -47,13 +50,13 @@ export function planTimetable(input: {
 
       const period = input.periods.find((candidate) => {
         if (filled.has(`${day}|${candidate.id}`)) return false;
-        if (teacherBusy.has(`${load.staffId}|${day}|${candidate.id}`)) return false;
+        if (load.staffId && teacherBusy.has(`${load.staffId}|${day}|${candidate.id}`)) return false;
         return true;
       });
       if (!period) continue;
 
       filled.add(`${day}|${period.id}`);
-      teacherBusy.add(`${load.staffId}|${day}|${period.id}`);
+      if (load.staffId) teacherBusy.add(`${load.staffId}|${day}|${period.id}`);
       placed.push({ day, periodId: period.id, subjectId: load.subjectId, staffId: load.staffId });
       remaining--;
     }

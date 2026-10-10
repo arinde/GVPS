@@ -36,14 +36,16 @@ export type ArmGrid = { classLabel: string; days: DayOfWeek[]; periods: Period[]
 export type AvailableSubject = {
   subjectId: string;
   subjectName: string;
-  staffName: string;
+  staffName: string | null;
   periodsPerWeek: number;
   fixedDay: DayOfWeek | null;
 };
 
+export type AddableSubject = { subjectId: string; subjectName: string };
+
 export type AutoGenerateResult = {
   placed: number;
-  unplaced: { subjectId: string; subjectName: string; missing: number }[];
+  unplaced: { subjectId: string; subjectName: string; missing: number; reason: "noTeacher" | "noSpace" }[];
 };
 
 export type StaffScheduleSlot = { dayOfWeek: DayOfWeek; periodId: string; classLabel: string; subjectName: string };
@@ -87,6 +89,26 @@ export const timetableApi = baseApi.injectEndpoints({
         url: `/timetable/sessions/${sessionId}/arms/${classArmId}/subjects`,
       }),
       providesTags: ["TimetableSlot"],
+    }),
+    getAddableSubjects: builder.query<AddableSubject[], { sessionId: string; classArmId: string }>({
+      query: ({ sessionId, classArmId }) => ({
+        url: `/timetable/sessions/${sessionId}/arms/${classArmId}/subjects/addable`,
+      }),
+      providesTags: ["TimetableSlot"],
+    }),
+    addSubject: builder.mutation<unknown, { sessionId: string; classArmId: string; subjectId: string }>({
+      query: ({ sessionId, classArmId, subjectId }) => ({
+        url: `/timetable/sessions/${sessionId}/arms/${classArmId}/subjects/${subjectId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["TimetableSlot"],
+    }),
+    removeSubject: builder.mutation<void, { sessionId: string; classArmId: string; subjectId: string }>({
+      query: ({ sessionId, classArmId, subjectId }) => ({
+        url: `/timetable/sessions/${sessionId}/arms/${classArmId}/subjects/${subjectId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TimetableSlot"],
     }),
     setSubjectLoad: builder.mutation<
       unknown,
@@ -136,6 +158,9 @@ export const {
   useDeletePeriodMutation,
   useGetArmGridQuery,
   useGetAvailableSubjectsQuery,
+  useGetAddableSubjectsQuery,
+  useAddSubjectMutation,
+  useRemoveSubjectMutation,
   useSetSubjectLoadMutation,
   useAutoGenerateMutation,
   useSetSlotMutation,

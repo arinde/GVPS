@@ -13,10 +13,13 @@ import { printArmTimetable } from "@/lib/print-timetable";
 import { useGetCurrentPeriodQuery, useListClassArmsQuery } from "@/store/api/academic-api";
 import {
   DAY_LABELS,
+  useAddSubjectMutation,
   useAutoGenerateMutation,
   useClearSlotMutation,
+  useGetAddableSubjectsQuery,
   useGetArmGridQuery,
   useGetAvailableSubjectsQuery,
+  useRemoveSubjectMutation,
   useSetSlotMutation,
   useSetSubjectLoadMutation,
   type DayOfWeek,
@@ -37,10 +40,17 @@ export function TimetableBuilderView() {
     { sessionId, classArmId },
     { skip: !sessionId || !classArmId },
   );
+  const { data: addable = [] } = useGetAddableSubjectsQuery(
+    { sessionId, classArmId },
+    { skip: !sessionId || !classArmId },
+  );
   const [setSlot, setting] = useSetSlotMutation();
   const [clearSlot, clearing] = useClearSlotMutation();
   const [setSubjectLoad, savingLoads] = useSetSubjectLoadMutation();
   const [autoGenerate, generating] = useAutoGenerateMutation();
+  const [addSubject, adding] = useAddSubjectMutation();
+  const [removeSubject] = useRemoveSubjectMutation();
+  const [removingSubjectId, setRemovingSubjectId] = useState<string | null>(null);
 
   async function saveLoads(rows: { subjectId: string; draft: SubjectLoadDraft }[]) {
     try {
@@ -67,11 +77,38 @@ export function TimetableBuilderView() {
       if (result.unplaced.length === 0) {
         notify.success(`Timetable generated — ${result.placed} lessons placed`);
       } else {
-        const missing = result.unplaced.map((item) => `${item.subjectName} (${item.missing} short)`).join(", ");
-        notify.warning(`Generated ${result.placed} lessons, but couldn't fit: ${missing}`, { durationMs: 10_000 });
+        const described = result.unplaced.map((item) =>
+          item.reason === "noTeacher"
+            ? `${item.subjectName} (no teacher yet)`
+            : `${item.subjectName} (${item.missing} short)`,
+        );
+        notify.warning(`Generated ${result.placed} lessons, but couldn't fit: ${described.join(", ")}`, {
+          durationMs: 10_000,
+        });
       }
     } catch (error) {
       notify.error(error, "Could not generate this class's timetable.");
+    }
+  }
+
+  async function addSubjectToClass(subjectId: string) {
+    try {
+      await addSubject({ sessionId, classArmId, subjectId }).unwrap();
+      notify.success("Subject added");
+    } catch (error) {
+      notify.error(error, "Could not add this subject.");
+    }
+  }
+
+  async function removeSubjectFromClass(subjectId: string) {
+    setRemovingSubjectId(subjectId);
+    try {
+      await removeSubject({ sessionId, classArmId, subjectId }).unwrap();
+      notify.success("Subject removed");
+    } catch (error) {
+      notify.error(error, "Could not remove this subject.");
+    } finally {
+      setRemovingSubjectId(null);
     }
   }
 
@@ -126,7 +163,10 @@ export function TimetableBuilderView() {
         title="Timetable builder"
         subtitle={current?.term?.name}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <AppLinkButton href="/subjects" variant="secondary">
+              Subjects
+            </AppLinkButton>
             <AppLinkButton href="/timetable/periods" variant="secondary">
               Periods
             </AppLinkButton>
@@ -167,10 +207,15 @@ export function TimetableBuilderView() {
           <SubjectLoadEditor
             key={classArmId}
             subjects={subjects}
+            addable={addable}
             saving={savingLoads.isLoading}
             generating={generating.isLoading}
+            adding={adding.isLoading}
+            removingSubjectId={removingSubjectId}
             onSave={saveLoads}
             onGenerate={runAutoGenerate}
+            onAdd={addSubjectToClass}
+            onRemove={removeSubjectFromClass}
           />
         )}
 
@@ -253,7 +298,7 @@ export function TimetableBuilderView() {
             <h2 className="mb-2 text-base">
               {editing.period.name}, {DAY_LABELS[editing.day]}
             </h2>
-            {subjects.length === 0 ? (
+            {teachableSubjects.length === 0 ? (
               <p className="text-muted-foreground text-sm">
                 No subject has a teacher assigned to this class yet. Assign one under Subject assignments first.
               </p>
@@ -263,7 +308,7 @@ export function TimetableBuilderView() {
                 placeholder="Choose a subject…"
                 value={subjectId}
                 onChange={(event) => setSubjectId(event.target.value)}
-                options={subjects.map((subject) => ({
+                options={teachableSubjects.map((subject) => ({
                   value: subject.subjectId,
                   label: `${subject.subjectName} — ${subject.staffName}`,
                 }))}
@@ -271,7 +316,7 @@ export function TimetableBuilderView() {
               />
             )}
             <div className="mt-4 flex gap-2">
-              <AppButton type="button" onClick={save} disabled={setting.isLoading || subjects.length === 0}>
+              <AppButton type="button" onClick={save} disabled={setting.isLoading || teachableSubjects.length === 0}>
                 {setting.isLoading ? "Saving…" : "Save lesson"}
               </AppButton>
               <AppButton type="button" variant="danger" onClick={clear} disabled={clearing.isLoading}>
