@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { AppLinkButton } from "@/components/common/app-button";
+import { AppButton, AppLinkButton } from "@/components/common/app-button";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { cleanedStaff, EMPTY_STAFF, useStaffDraft } from "@/components/staff/use-staff-draft";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { decodeAccessToken } from "@/lib/decode-access-token";
 import { notify } from "@/lib/notify";
+import { printSignInSlip } from "@/lib/print-sign-in-slip";
+import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useAppSelector } from "@/store/hooks";
 import { useGetBanksQuery, useGetNextOfKinRelationshipsQuery } from "@/store/api/reference-api";
 import { useCreateStaffMutation } from "@/store/api/staff-api";
@@ -55,6 +57,7 @@ export function AddStaffView() {
     }
   }
 
+  const { data: access } = useGetMyAccessQuery();
   if (!accessToken || mustChangePassword) return null;
 
   const isSuperadmin = decodeAccessToken(accessToken)?.roles.includes("SUPERADMIN") ?? false;
@@ -76,12 +79,29 @@ export function AddStaffView() {
             Temporary password for {createdAccount.email}:{" "}
             <strong className="font-mono">{createdAccount.temporaryPassword}</strong>
             <br />
-            Shown once — copy it now and hand it to them. They will be asked to change it at first sign-in.
-            {createdAccount.teaches ? (
-              <AppLinkButton href={`/staff/${createdAccount.staffId}`} size="small" className="mt-3">
-                Next: assign their subjects and classes
-              </AppLinkButton>
-            ) : null}
+            Shown once — print the slip now and hand it to them. They will be asked to change it at first sign-in.
+            <span className="mt-3 flex flex-wrap gap-2">
+              <AppButton
+                type="button"
+                variant="secondary"
+                size="small"
+                onClick={() =>
+                  printSignInSlip({
+                    schoolName: access?.school.name ?? "",
+                    name: createdAccount.name,
+                    email: createdAccount.email,
+                    temporaryPassword: createdAccount.temporaryPassword,
+                  })
+                }
+              >
+                Print sign-in slip
+              </AppButton>
+              {createdAccount.teaches ? (
+                <AppLinkButton href={`/staff/${createdAccount.staffId}`} size="small">
+                  Next: assign their subjects and classes
+                </AppLinkButton>
+              ) : null}
+            </span>
           </AlertDescription>
         </Alert>
       ) : null}

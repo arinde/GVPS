@@ -7,6 +7,9 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "@/store";
 import type { ChangePasswordRequest, TokenResponse } from "@/store/api/auth-api";
+import type { StudentLedger } from "@/store/api/fees-api";
+import type { ReportCard } from "@/store/api/report-card-api";
+import type { ArmGrid } from "@/store/api/timetable-api";
 import type { Credentials } from "@/store/slices/auth-actions";
 import { clearPortalCredentials, setPortalCredentials } from "@/store/slices/portal-auth-actions";
 
@@ -116,6 +119,17 @@ export const portalApi = createApi({
     getPortalChildPhoto: builder.query<{ dataUrl: string }, { studentId: string; version: string }>({
       query: ({ studentId }) => ({ url: `/portal/children/${studentId}/photo` }),
     }),
+    // FEATURES.md §14: a parent reads their own ward's fees and results,
+    // same shape the staff side sees, read-only.
+    getPortalChildFees: builder.query<StudentLedger, string>({
+      query: (studentId) => ({ url: `/portal/children/${studentId}/fees` }),
+    }),
+    getPortalChildReportCard: builder.query<ReportCard | null, string>({
+      query: (studentId) => ({ url: `/portal/children/${studentId}/report-card` }),
+    }),
+    getPortalChildTimetable: builder.query<ArmGrid | null, string>({
+      query: (studentId) => ({ url: `/portal/children/${studentId}/timetable` }),
+    }),
   }),
 });
 
@@ -128,4 +142,7 @@ export const {
   useListPortalChildrenQuery,
   useGetPortalChildQuery,
   useGetPortalChildPhotoQuery,
+  useGetPortalChildFeesQuery,
+  useGetPortalChildReportCardQuery,
+  useGetPortalChildTimetableQuery,
 } = portalApi;

@@ -22,6 +22,7 @@ import {
 } from "@/auth/schemas/create-staff.schema";
 import { GrantRoleSchema, type GrantRoleDto } from "@/auth/schemas/grant-role.schema";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
+import { DeleteReasonSchema, type DeleteReasonDto } from "@/common/schemas/delete-reason.schema";
 import { Roles } from "@/common/decorators/roles.decorator";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
@@ -85,6 +86,20 @@ export class StaffAccountController {
   @Post(":staffId/reset-password")
   resetPassword(@CurrentUser() actor: AuthenticatedStaff, @Param("staffId") staffId: string) {
     return this.staffAccounts.resetPassword(actor.id, actor.schoolId, staffId);
+  }
+
+  @Get(":staffId/onboarding")
+  onboarding(@CurrentUser() actor: AuthenticatedStaff, @Param("staffId") staffId: string) {
+    return this.staffAccounts.onboarding(actor.schoolId, staffId);
+  }
+
+  @Delete(":staffId")
+  remove(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("staffId") staffId: string,
+    @Body(new ZodValidationPipe(DeleteReasonSchema)) body: DeleteReasonDto,
+  ) {
+    return this.staffAccounts.softDelete(actor.id, actor.schoolId, staffId, body.reason);
   }
 }
 

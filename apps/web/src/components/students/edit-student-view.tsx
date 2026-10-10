@@ -32,6 +32,7 @@ function toDraft(student: StudentProfile): UpdateStudentRequest {
     bloodGroup: student.bloodGroup ?? "",
     medicalNote: student.medicalNote ?? "",
     previousSchool: student.previousSchool ?? "",
+    position: student.position ?? "",
     dateOfAdmission: student.dateOfAdmission?.slice(0, 10) ?? "",
   };
 }

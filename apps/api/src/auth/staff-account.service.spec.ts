@@ -11,6 +11,7 @@ describe("StaffAccountService", () => {
     staff: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock };
     staffRole: { upsert: jest.Mock; deleteMany: jest.Mock };
     refreshToken: { updateMany: jest.Mock };
+    school: { findUnique: jest.Mock };
   };
   let audit: { record: jest.Mock };
   let service: StaffAccountService;
@@ -20,9 +21,10 @@ describe("StaffAccountService", () => {
       staff: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
       staffRole: { upsert: jest.fn(), deleteMany: jest.fn() },
       refreshToken: { updateMany: jest.fn() },
+      school: { findUnique: jest.fn().mockResolvedValue({ name: "Test School" }) },
     };
     audit = { record: jest.fn() };
-    service = new StaffAccountService(prisma as never, audit as never);
+    service = new StaffAccountService(prisma as never, audit as never, { send: jest.fn() } as never);
     mockedArgon2.hash.mockReset().mockResolvedValue("hashed" as never);
   });
 

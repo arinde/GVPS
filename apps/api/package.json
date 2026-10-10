@@ -21,6 +21,8 @@
     "clean": "rimraf dist tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
     "db:seed:academic": "ts-node prisma/seed-academic.ts",
     "db:seed:assessment": "ts-node prisma/seed-assessment.ts",
+    "db:seed:subjects": "ts-node prisma/seed-subjects.ts",
+    "db:seed:results-test": "ts-node prisma/seed-results-test.ts",
     "db:reset-password": "ts-node prisma/reset-password.ts"
   },
   "dependencies": {
@@ -36,6 +38,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.32.0",
     "rxjs": "^7.8.2",
     "zod": "^4.6.2"
   },

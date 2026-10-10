@@ -1,16 +1,21 @@
 import {
   ArrowUpRight,
+  Building2,
   BookOpenText,
+  CalendarClock,
   CalendarDays,
+  ClipboardCheck,
   CircleUserRound,
   GraduationCap,
   Inbox,
   LayoutDashboard,
   LayoutGrid,
   NotebookPen,
+  ScrollText,
   School,
   UserPlus,
   UsersRound,
+  Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -20,6 +25,8 @@ export type NavItem = {
   icon: LucideIcon;
   /** Empty means every signed-in staff member sees it. */
   roles: string[];
+  /** Undefined means the item stands alone, with no section header above it. */
+  group?: string;
 };
 
 /**
@@ -27,28 +34,63 @@ export type NavItem = {
  * actually reach. Presentation only — RolesGuard and AccessScopeService reject
  * the request regardless of what the client renders (FEATURES.md §1.5).
  *
- * Only screens that exist are listed. STITCH-GLOBAL.md §6 names Fees, Results,
- * Requests and Settings too; those join the menu when they are built, so the
- * menu never leads somewhere empty.
+ * Grouped so the sidebar reads as a handful of sections (STITCH-GLOBAL.md §6's
+ * own list is 7 items) rather than one long flat list. Order here is the
+ * order both the sidebar and the mobile tab bar's "first four" use, so
+ * Dashboard and the Students section — the two almost every role needs —
+ * come first.
+ *
+ * Only screens that exist are listed. STITCH-GLOBAL.md §6 also names Requests;
+ * that joins the menu when it is built, so the menu never leads somewhere empty.
  */
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: [] },
-  { href: "/students", label: "Students", icon: GraduationCap, roles: [] },
+
+  { href: "/students", label: "Students", icon: GraduationCap, roles: [], group: "Students" },
   {
     href: "/students/new",
     label: "Register student",
     icon: UserPlus,
     // A form teacher registers into their own allocated classes only.
     roles: ["SUPERADMIN", "ADMIN_SECRETARY", "PRINCIPAL", "FORM_TEACHER"],
+    group: "Students",
   },
-  { href: "/staff", label: "Staff", icon: UsersRound, roles: ["SUPERADMIN"] },
-  { href: "/staff/classes", label: "Class allocation", icon: LayoutGrid, roles: ["SUPERADMIN"] },
-  // Class structure is configuration: superadmin and principal (FEATURES.md §14).
-  { href: "/classes", label: "Classes", icon: School, roles: ["SUPERADMIN", "PRINCIPAL"] },
-  // Academic configuration: superadmin and principal (FEATURES.md §14).
-  { href: "/academic", label: "Academic year", icon: CalendarDays, roles: ["SUPERADMIN", "PRINCIPAL"] },
-  { href: "/promotions", label: "Promotion", icon: ArrowUpRight, roles: ["SUPERADMIN", "PRINCIPAL"] },
-  { href: "/subjects", label: "Subjects", icon: BookOpenText, roles: ["SUPERADMIN", "PRINCIPAL"] },
+  // Admissions is office work (FEATURES.md §1.1) — a prospective student, so it sits with Students.
+  {
+    href: "/enquiries",
+    label: "Enquiries",
+    icon: Inbox,
+    roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"],
+    group: "Students",
+  },
+
+  // Class and academic structure is configuration: superadmin and principal (FEATURES.md §14).
+  { href: "/classes", label: "Classes", icon: School, roles: ["SUPERADMIN", "PRINCIPAL"], group: "Academics" },
+  {
+    href: "/academic",
+    label: "Academic year",
+    icon: CalendarDays,
+    roles: ["SUPERADMIN", "PRINCIPAL"],
+    group: "Academics",
+  },
+  { href: "/subjects", label: "Subjects", icon: BookOpenText, roles: ["SUPERADMIN", "PRINCIPAL"], group: "Academics" },
+  {
+    href: "/promotions",
+    label: "Promotion",
+    icon: ArrowUpRight,
+    roles: ["SUPERADMIN", "PRINCIPAL"],
+    group: "Academics",
+  },
+  // FEATURES.md §14 "Timetable" row: everyone except the bursar reads;
+  // superadmin, principal and admin/secretary also write.
+  {
+    href: "/timetable",
+    label: "Timetable",
+    icon: CalendarClock,
+    roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY", "FORM_TEACHER", "SUBJECT_TEACHER"],
+    group: "Academics",
+  },
+
   // Score entry (FEATURES.md §5.3): a subject teacher's own assignments only;
   // superadmin can open any, for corrections.
   {
@@ -56,15 +98,66 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Score entry",
     icon: NotebookPen,
     roles: ["SUPERADMIN", "SUBJECT_TEACHER", "FORM_TEACHER"],
+    group: "Results",
   },
-  // Admissions is office work (FEATURES.md §1.1).
-  { href: "/enquiries", label: "Enquiries", icon: Inbox, roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY"] },
+  // Approval steps (FEATURES.md §5.4): each role sees the step it can take.
+  {
+    href: "/results/approval",
+    label: "Results approval",
+    icon: ClipboardCheck,
+    roles: ["SUPERADMIN", "PRINCIPAL", "FORM_TEACHER", "SUBJECT_TEACHER"],
+    group: "Results",
+  },
+
+  { href: "/staff", label: "Staff", icon: UsersRound, roles: ["SUPERADMIN"], group: "Staff" },
+  { href: "/staff/classes", label: "Class allocation", icon: LayoutGrid, roles: ["SUPERADMIN"], group: "Staff" },
+
+  // Debtor list (FEATURES.md §14): whole-school roles plus a form teacher's
+  // own arm. Fee structure is reached from this page, not its own nav entry.
+  {
+    href: "/fees",
+    label: "Fees",
+    icon: Wallet,
+    roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR", "FORM_TEACHER"],
+    group: "Finance",
+  },
+
+  // School details print on receipts; only the superadmin edits them (FEATURES.md §6.4).
+  {
+    href: "/settings/school",
+    label: "School details",
+    icon: Building2,
+    roles: ["SUPERADMIN"],
+    group: "Admin",
+  },
+  // The audit log is for the proprietor and principal only (FEATURES.md §11.5).
+  { href: "/audit", label: "Email trail", icon: ScrollText, roles: ["SUPERADMIN", "PRINCIPAL"], group: "Admin" },
+
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },
 ];
 
 export function visibleNavItems(roles: string[]): NavItem[] {
   return NAV_ITEMS.filter((item) => item.roles.length === 0 || item.roles.some((role) => roles.includes(role)));
+}
+
+export type NavGroup = { group: string | null; items: NavItem[] };
+
+/**
+ * Buckets an already role-filtered list into sections for the sidebar, in
+ * the order they first appear — an item with no group stands alone, exactly
+ * where it falls (so Dashboard and My profile never merge into one bucket
+ * even though both are group-less).
+ */
+export function groupedNavItems(items: NavItem[]): NavGroup[] {
+  const groups: NavGroup[] = [];
+  for (const item of items) {
+    const key = item.group ?? null;
+    const last = groups.at(-1);
+    if (last && last.group === key) last.items.push(item);
+    else groups.push({ group: key, items: [item] });
+  }
+  return groups;
 }
 
 /**
@@ -78,4 +171,65 @@ export function activeNavItem(items: NavItem[], currentPath: string): NavItem | 
   );
   if (matches.length === 0) return null;
   return matches.reduce((longest, item) => (item.href.length > longest.href.length ? item : longest));
+}
+
+export type Breadcrumb = { label: string; href?: string };
+
+function commonPrefixLength(a: string[], b: string[]): number {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  return i;
+}
+
+/** "cmusw2tiz000hplccvagmk274" — a database id, not a word worth printing. */
+function looksLikeAnId(segment: string): boolean {
+  return /^[a-z0-9]{16,}$/i.test(segment);
+}
+
+function prettifySegment(segment: string): string {
+  if (looksLikeAnId(segment)) return "";
+  return segment
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
+ * Builds the trail for the current path with no per-page wiring: finds the
+ * nav item the path belongs to (exactly, or — for a screen reached only from
+ * inside another page, like a report card or fee structure — the nearest one
+ * sharing its first path segment), then turns whatever path is left over into
+ * plain-word crumbs, dropping ids a person wouldn't recognise anyway. The
+ * group (if any) leads, and the current page never links to itself.
+ */
+export function breadcrumbTrail(items: NavItem[], pathname: string): Breadcrumb[] {
+  if (pathname === "/" || pathname === "/dashboard") return [];
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return [];
+
+  const anchor =
+    activeNavItem(items, pathname) ??
+    items.find((item) => item.href.split("/").filter(Boolean)[0] === segments[0]) ??
+    null;
+  if (!anchor) {
+    const labels = segments.map(prettifySegment).filter(Boolean);
+    return labels.map((label) => ({ label }));
+  }
+
+  const trail: Breadcrumb[] = [];
+  // Skip the group crumb when it would just repeat the item under it, e.g.
+  // the "Students" group above the "Students" list page.
+  if (anchor.group && anchor.group !== anchor.label) trail.push({ label: anchor.group });
+  const anchorSegments = anchor.href.split("/").filter(Boolean);
+  const isCurrent = pathname === anchor.href;
+  trail.push({ label: anchor.label, href: isCurrent ? undefined : anchor.href });
+
+  const matched = commonPrefixLength(segments, anchorSegments);
+  const extra = segments.slice(matched);
+  const labels = extra.map(prettifySegment).filter(Boolean);
+  if (labels.length > 0) for (const label of labels) trail.push({ label });
+  else if (extra.length > 0) trail.push({ label: "Details" });
+
+  return trail;
 }

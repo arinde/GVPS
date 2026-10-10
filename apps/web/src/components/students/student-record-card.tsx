@@ -33,6 +33,7 @@ export function StudentRecordCard({ student, photo }: StudentRecordCardProps) {
             label: "Admitted",
             value: `${admitted} into ${student.admittedIntoLevel.name}`,
           },
+          { label: "Position", value: student.position },
           { label: "State of origin", value: student.stateOfOrigin },
           { label: "LGA", value: student.lga },
           { label: "Home address", value: student.address },

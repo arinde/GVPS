@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { EnrolmentStatus, Role, type ClassArm, type ClassLevel, type Term } from "@prisma/client";
+import { EnrolmentStatus, ResultSheetStatus, Role, type ClassArm, type ClassLevel, type Term } from "@prisma/client";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
 import type { UpsertScoreDto } from "@/assessment/schemas/score.schema";
@@ -52,6 +52,7 @@ export class ScoreEntryService {
     dto: UpsertScoreDto,
   ): Promise<void> {
     const { term, classArm } = await this.assertCanEnter(actor, termId, subjectId, classArmId);
+    await this.assertUnlocked(actor.schoolId, termId, subjectId, classArmId);
 
     const component = await this.prisma.assessmentComponent.findFirst({
       where: {
@@ -130,6 +131,19 @@ export class ScoreEntryService {
   }
 
   /** A teacher may only open their own subject × arm assignment this session; superadmin may open any, for corrections. */
+  /** FEATURES.md §5.4: scores lock once a sheet leaves draft; only a reopen (unlock) makes them writable again. */
+  private async assertUnlocked(schoolId: string, termId: string, subjectId: string, classArmId: string) {
+    const sheet = await this.prisma.resultSheet.findFirst({
+      where: { schoolId, termId, subjectId, classArmId },
+      select: { status: true },
+    });
+    if (sheet && sheet.status !== ResultSheetStatus.DRAFT) {
+      throw new ForbiddenException(
+        `These scores are ${sheet.status.toLowerCase()} and locked. The principal or superadmin can reopen them with a reason.`,
+      );
+    }
+  }
+
   private async assertCanEnter(
     actor: AuthenticatedStaff,
     termId: string,

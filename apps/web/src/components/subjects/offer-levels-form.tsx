@@ -114,10 +114,17 @@ export function OfferLevelsForm({
         ) : null}
       </div>
 
-      <AppButton type="submit" className="self-start" disabled={isSubmitting || chosen.length === 0}>
-        <Plus aria-hidden="true" />
-        {isSubmitting ? "Adding…" : `Offer at ${chosen.length || "the chosen"} level${chosen.length === 1 ? "" : "s"}`}
-      </AppButton>
+      <div className="flex flex-col items-start gap-1">
+        <AppButton type="submit" disabled={isSubmitting || chosen.length === 0}>
+          <Plus aria-hidden="true" />
+          {isSubmitting
+            ? "Adding…"
+            : `Offer at ${chosen.length || "the chosen"} level${chosen.length === 1 ? "" : "s"}`}
+        </AppButton>
+        {chosen.length === 0 ? (
+          <p className="text-muted-foreground text-xs">Tick at least one class level to continue.</p>
+        ) : null}
+      </div>
     </form>
   );
 }

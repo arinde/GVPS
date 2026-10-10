@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { EnrolmentStatus, type Prisma } from "@prisma/client";
+import { isReportCard } from "@/assessment/report-card";
+import { fetchStudentLedger } from "@/fees/invoicing.service";
 import type { AuthenticatedParent } from "@/portal/parent-auth.primitives";
 import { PrismaService } from "@/prisma/prisma.service";
+import { TimetableService } from "@/timetable/timetable.service";
 
 const CURRENT_CLASS = {
   where: { status: EnrolmentStatus.ACTIVE },
@@ -26,7 +29,10 @@ const CURRENT_CLASS = {
  */
 @Injectable()
 export class PortalService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly timetableService: TimetableService,
+  ) {}
 
   private wardsWhere(parent: AuthenticatedParent): Prisma.StudentWhereInput {
     return { schoolId: parent.schoolId, guardians: { some: { guardian: { phone: parent.phone } } } };
@@ -101,6 +107,42 @@ export class PortalService {
     if (!student) throw new NotFoundException("Child not found.");
 
     return { ...student, formTeacher: await this.formTeacher(student.enrolments) };
+  }
+
+  // FEATURES.md §14 "Invoices / payments" and "Report cards" rows: a parent
+  // reads their own wards' fees and results, same data the school sees, never
+  // writes either — the ward check below is the only gate; the computation
+  // itself is shared with the staff-side services (fees/results modules).
+  async fees(parent: AuthenticatedParent, studentId: string) {
+    const ward = await this.prisma.student.findFirst({ where: { id: studentId, ...this.wardsWhere(parent) } });
+    if (!ward) throw new NotFoundException("Child not found.");
+    return fetchStudentLedger(this.prisma, parent.schoolId, studentId);
+  }
+
+  /** The most recent report card published for this ward, frozen when their class was published (FEATURES.md §5.8). */
+  async reportCard(parent: AuthenticatedParent, studentId: string) {
+    const ward = await this.prisma.student.findFirst({ where: { id: studentId, ...this.wardsWhere(parent) } });
+    if (!ward) throw new NotFoundException("Child not found.");
+
+    const card = await this.prisma.reportCard.findFirst({
+      where: { schoolId: parent.schoolId, studentId },
+      orderBy: { publishedAt: "desc" },
+      select: { frozen: true },
+    });
+    return isReportCard(card?.frozen) ? card.frozen : null;
+  }
+
+  /** FEATURES.md §14 "Timetable" row: a parent reads their own ward's class timetable, read-only. */
+  async timetable(parent: AuthenticatedParent, studentId: string) {
+    const ward = await this.prisma.student.findFirst({ where: { id: studentId, ...this.wardsWhere(parent) } });
+    if (!ward) throw new NotFoundException("Child not found.");
+
+    const enrolment = await this.prisma.enrolment.findFirst({
+      where: { studentId, status: EnrolmentStatus.ACTIVE },
+      select: { sessionId: true, classArmId: true },
+    });
+    if (!enrolment) return null;
+    return this.timetableService.buildArmGrid(parent.schoolId, enrolment.sessionId, enrolment.classArmId);
   }
 
   async photo(parent: AuthenticatedParent, studentId: string) {

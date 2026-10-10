@@ -20,9 +20,17 @@ datasource db {
 
 // PLAN.md §4.1: school_id on every table, even single-tenant today.
 model School {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  // Printed on every receipt. Blank until the school fills them in.
+  address    String?
+  phone      String?
+  email      String?
+  taxNumber  String?
+  // VAT in basis points (750 = 7.5%). Zero means the school charges none, which
+  // is common for education — confirm with the school's accountant.
+  vatRateBps Int      @default(0)
+  createdAt  DateTime @default(now())
 
   // FEATURES.md §3.2: admission number format is configurable. Tokens are
   // {PREFIX}, {CODE}, {YEAR} and {SEQ}; {SEQ} is left-padded to
@@ -74,6 +82,8 @@ model Staff {
   mustChangePassword  Boolean   @default(true)
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
+  // Soft delete: the account can no longer sign in; its history stays.
+  deletedAt           DateTime?
 
   // Basic details, so the office knows who an account belongs to rather than
   // just an email address. Nullable only because the bootstrap superadmin was
@@ -204,6 +214,7 @@ model AcademicSession {
   enrolments         Enrolment[]
   classAssignments   ClassAssignment[]
   subjectAssignments SubjectAssignment[]
+  classSubjectLoads  ClassSubjectLoad[]
 
   @@unique([schoolId, name])
   @@map("academic_sessions")
@@ -269,6 +280,7 @@ model ClassArm {
   enrolments         Enrolment[]
   assignments        ClassAssignment[]
   subjectAssignments SubjectAssignment[]
+  classSubjectLoads  ClassSubjectLoad[]
 
   @@unique([classLevelId, name])
   @@map("class_arms")
@@ -336,9 +348,14 @@ model Student {
   bloodGroup     String?
   medicalNote    String?
   previousSchool String?
+  // A leadership title — "Head Boy", "Senior Prefect" — printed on the ID
+  // card's front. Null means no title; most students have none.
+  position       String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Soft delete (FEATURES.md §0): the row stays for history and is hidden from lists.
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   school            School            @relation(fields: [schoolId], references: [id])
   admittedIntoLevel ClassLevel        @relation(fields: [admittedIntoLevelId], references: [id])
@@ -423,6 +440,44 @@ model Enrolment {
   @@unique([studentId, sessionId])
   @@index([schoolId, sessionId, classArmId])
   @@map("enrolments")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+// FEATURES.md §4.1/4.2: one mark a day for Primary/Junior (periodId null),
+// or one mark per period for Senior (periodId set) where a school marks
+// attendance that granularly. `date` is the calendar day regardless of mode,
+// so termly reporting (§4.3) never needs to know which mode produced a row.
+model Attendance {
+  id              String           @id @default(cuid())
+  schoolId        String
+  sessionId       String
+  termId          String
+  classArmId      String
+  studentId       String
+  date            DateTime         @db.Date
+  status          AttendanceStatus
+  // Senior, period-based marking only — null for a daily mark.
+  periodId        String?
+  subjectId       String?
+  markedByStaffId String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // One row per student per day for daily marking; one per student per day
+  // per period for period marking. Postgres treats two NULLs as distinct by
+  // default, which would let daily marking double up — overridden with a
+  // NULLS NOT DISTINCT index in the migration, which Prisma cannot express
+  // (same pattern as SubjectOffering's stream).
+  @@unique([classArmId, studentId, date, periodId])
+  @@index([schoolId, termId, studentId])
+  @@index([schoolId, classArmId, date])
+  @@map("attendance_records")
 }
 
 // The passport photograph, kept apart from Student so every list and search
@@ -555,16 +610,22 @@ model ParentRefreshToken {
 // teacher (ClassAssignment).
 // ---------------------------------------------------------------------------
 model Subject {
-  id        String   @id @default(cuid())
-  schoolId  String
-  name      String
+  id         String   @id @default(cuid())
+  schoolId   String
+  name       String
   // Short code for reports and broadsheets, e.g. "MTH", "ENG".
-  code      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  code       String
+  // Senior elective combo (owner's own groups, e.g. "Accounting/Chemistry/
+  // Government") — every subject sharing a combo is forced onto the same
+  // period across however many arms teach them, so a student can be in any
+  // of them at once. Null for subjects that aren't part of a combo.
+  comboGroup String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   offerings   SubjectOffering[]
   assignments SubjectAssignment[]
+  loads       ClassSubjectLoad[]
 
   @@unique([schoolId, name])
   @@unique([schoolId, code])
@@ -612,6 +673,33 @@ model SubjectAssignment {
   @@unique([sessionId, subjectId, classArmId])
   @@index([schoolId, sessionId, staffId])
   @@map("subject_assignments")
+}
+
+// A class's subject list, kept separate from who teaches each one: the
+// owner asked to add a subject (and set its weekly load) before a teacher
+// exists, then regenerate once a SubjectAssignment gives it a staffId. If
+// the load lived on SubjectAssignment itself, removing or reassigning a
+// teacher would wipe the periods-per-week/fixedDay a form teacher already set.
+model ClassSubjectLoad {
+  id             String     @id @default(cuid())
+  schoolId       String
+  sessionId      String
+  subjectId      String
+  classArmId     String
+  // How much of the week this subject needs in this class — what the
+  // timetable auto-generator uses to decide how many slots to give it.
+  periodsPerWeek Int        @default(1)
+  // Pins every occurrence to one day — Sports every Wednesday, Fellowship
+  // every Friday. Null means the auto-generator may spread it across the week.
+  fixedDay       DayOfWeek?
+  createdAt      DateTime   @default(now())
+
+  session  AcademicSession @relation(fields: [sessionId], references: [id])
+  subject  Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  classArm ClassArm        @relation(fields: [classArmId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, subjectId, classArmId])
+  @@map("class_subject_loads")
 }
 
 // ---------------------------------------------------------------------------
@@ -723,4 +811,263 @@ model Score {
   @@unique([termId, studentId, subjectId, assessmentComponentId])
   @@index([schoolId, termId, subjectId, classArmId])
   @@map("scores")
+}
+
+// ---------------------------------------------------------------------------
+// Fees and finance (FEATURES.md §6). Discounts/waivers (§6.2) and financial
+// reporting (§6.6, P5) are deliberately not here yet — structure, invoicing
+// and payments are their own complete slice first.
+//
+// Money is integer kobo (PLAN.md §4.4), stored as Int not BigInt: a single
+// amount here never approaches Int's ~2.1 billion kobo (~21M naira) ceiling,
+// and Int avoids BigInt's JSON-serialisation friction in every response.
+// A SUM() across many rows still returns a true bigint from Postgres —
+// callers convert with Number(...) at that point, not by storing BigInt.
+// ---------------------------------------------------------------------------
+
+// §6.1: a school's fee catalogue — "Tuition", "Development Levy", etc.
+// Schools name these however they like; nothing is hardcoded.
+model FeeItem {
+  id        String   @id @default(cuid())
+  schoolId  String
+  name      String
+  createdAt DateTime @default(now())
+
+  @@unique([schoolId, name])
+  @@map("fee_items")
+}
+
+// §6.1: structure per class level per term. Compulsory items are included
+// automatically when invoices are generated in bulk; optional items are
+// added to an individual student's invoice afterward, by choice.
+model FeeStructureItem {
+  id           String   @id @default(cuid())
+  schoolId     String
+  termId       String
+  classLevelId String
+  feeItemId    String
+  amountKobo   Int
+  isCompulsory Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@unique([termId, classLevelId, feeItemId])
+  @@map("fee_structure_items")
+}
+
+// §6.3: one invoice per student per term. `openingBalanceKobo` is a snapshot
+// of what was still owed from every prior term, taken once at generation —
+// the same principle as a published result (PLAN.md §4.3): a later payment
+// on an old invoice must not silently rewrite this term's invoice.
+model Invoice {
+  id                 String   @id @default(cuid())
+  schoolId           String
+  termId             String
+  studentId          String
+  openingBalanceKobo Int      @default(0)
+  createdById        String
+  createdAt          DateTime @default(now())
+
+  lineItems InvoiceLineItem[]
+  payments  Payment[]
+
+  @@unique([termId, studentId])
+  @@map("invoices")
+}
+
+// Name and amount are copied from FeeStructureItem/FeeItem at generation
+// time. Renaming a fee item later, or changing next term's structure, must
+// never rewrite an invoice that already went out.
+model InvoiceLineItem {
+  id         String @id @default(cuid())
+  invoiceId  String
+  feeItemId  String
+  name       String
+  amountKobo Int
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_line_items")
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  POS
+}
+
+// §6.4: bursar-recorded offline payment. PLAN.md §4.5: never a hard delete —
+// a mistake is reversed by filling in the reversal fields, with a mandatory
+// reason, not by editing or deleting the row.
+model Payment {
+  id             String        @id @default(cuid())
+  schoolId       String
+  invoiceId      String
+  receiptNumber  String
+  amountKobo     Int
+  method         PaymentMethod
+  reference      String?
+  // Free text, for audit: who physically handed over the money and who
+  // accepted it, which can differ from recordedById (the bursar who typed it
+  // in may not be who stood at the counter).
+  payerName      String
+  receivedByName String
+  recordedById   String
+  reversedAt     DateTime?
+  reversalReason String?
+  reversedById   String?
+  // The receipt as it was issued (FEATURES.md §6.4): frozen at recording, so a reprint never changes.
+  receipt        Json?
+  createdAt      DateTime      @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@unique([schoolId, receiptNumber])
+  @@map("payments")
+}
+
+// Same atomic-increment pattern as AdmissionCounter: incremented inside the
+// caller's transaction so two payments recorded at once still get distinct
+// receipt numbers, with the unique index on Payment as the backstop.
+model ReceiptCounter {
+  id         String   @id @default(cuid())
+  schoolId   String
+  year       Int
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([schoolId, year])
+  @@map("receipt_counters")
+}
+
+// FEATURES.md §5.4: one sheet per subject per arm per term. The status is the
+// lock: scores are writable only in DRAFT. `frozen` is the snapshot taken at
+// approval — components, grade bands and each student's scores and grade —
+// and publishing reads that snapshot, never the live scores (§5.5).
+enum ResultSheetStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+  APPROVED
+  PUBLISHED
+}
+
+model ResultSheet {
+  id            String            @id @default(cuid())
+  schoolId      String
+  termId        String
+  classArmId    String
+  subjectId     String
+  status        ResultSheetStatus @default(DRAFT)
+  submittedAt   DateTime?
+  submittedById String?
+  reviewedAt    DateTime?
+  reviewedById  String?
+  approvedAt    DateTime?
+  approvedById  String?
+  publishedAt   DateTime?
+  publishedById String?
+  unlockReason  String?
+  frozen        Json?
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([termId, classArmId, subjectId])
+  @@index([schoolId, termId])
+  @@map("result_sheets")
+}
+
+// FEATURES.md §5.6–5.7: a form teacher's and principal's remarks and the
+// traits rating for one student in one term. Editable until the term's report
+// card is published for that student; after that the report card holds the
+// values as they were.
+model StudentRemark {
+  id               String   @id @default(cuid())
+  schoolId         String
+  termId           String
+  studentId        String
+  classArmId       String
+  formComment      String?
+  principalComment String?
+  traits           Json?
+  updatedAt        DateTime @updatedAt
+
+  @@unique([termId, studentId])
+  @@map("student_remarks")
+}
+
+// FEATURES.md §5.5 and §5.8: the report card for one student in one term,
+// frozen when the class is published. Positions, averages, cumulative
+// figures, remarks and fee balance are all computed once, here, and read back
+// as they were — never recomputed on read.
+model ReportCard {
+  id          String   @id @default(cuid())
+  schoolId    String
+  termId      String
+  studentId   String
+  classArmId  String
+  frozen      Json
+  publishedAt DateTime @default(now())
+
+  @@unique([termId, studentId])
+  @@index([schoolId, studentId])
+  @@map("report_cards")
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+// FEATURES.md §8.1: period definitions per section — a normal teaching slot,
+// a break or assembly. Times are wall-clock strings ("08:00"), not DateTime:
+// this is a daily recurring template, not a dated event.
+model Period {
+  id         String   @id @default(cuid())
+  schoolId   String
+  section    Section
+  name       String
+  startTime  String
+  endTime    String
+  sequence   Int
+  // False for break/assembly — the builder and clash checks skip these.
+  isTeaching Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  slots TimetableSlot[]
+
+  @@unique([schoolId, section, sequence])
+  @@map("periods")
+}
+
+// FEATURES.md §8.1: one lesson — arm, day, period, subject, teacher — for one
+// session. A teacher cannot hold two slots at the same day and period across
+// different arms; that clash is cross-row and is checked in the service, not
+// as a database constraint.
+model TimetableSlot {
+  id         String    @id @default(cuid())
+  schoolId   String
+  sessionId  String
+  classArmId String
+  dayOfWeek  DayOfWeek
+  periodId   String
+  subjectId  String
+  // Null until a teacher is assigned to this subject in this class — the
+  // generator places the lesson regardless, so the class isn't held up
+  // waiting for staffing, and fills this in on the next regenerate.
+  staffId    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  period Period @relation(fields: [periodId], references: [id])
+
+  // Not unique on (classArmId, dayOfWeek, periodId) alone: an elective combo
+  // (Accounting/Chemistry/Government) puts more than one subject in the same
+  // slot on purpose, since different students are in different combo rooms
+  // at once. Still exactly one row per subject per slot.
+  @@unique([classArmId, dayOfWeek, periodId, subjectId])
+  @@index([classArmId, dayOfWeek, periodId])
+  @@index([schoolId, sessionId, staffId, dayOfWeek, periodId])
+  @@map("timetable_slots")
 }

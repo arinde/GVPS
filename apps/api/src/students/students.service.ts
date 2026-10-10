@@ -9,6 +9,7 @@ import { EnrolmentStatus, type Prisma, type Student } from "@prisma/client";
 import { mayRegisterInto } from "@/access/access-scope";
 import { AccessScopeService } from "@/access/access-scope.service";
 import { AuditService } from "@/audit/audit.service";
+import { EmailService } from "@/common/email.service";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
 import { AdmissionNumberService } from "@/students/admission-number.service";
@@ -38,6 +39,7 @@ export class StudentsService {
     private readonly audit: AuditService,
     private readonly admissionNumbers: AdmissionNumberService,
     private readonly access: AccessScopeService,
+    private readonly email: EmailService,
   ) {}
 
   async register(actor: AuthenticatedStaff, dto: CreateStudentDto): Promise<Student> {
@@ -128,7 +130,41 @@ export class StudentsService {
       },
     });
 
+    await this.notifyGuardians(actorStaffId, student, school.name, `${arm.classLevel.name}${arm.name}`, session.name);
     return student;
+  }
+
+  private async notifyGuardians(
+    actorStaffId: string,
+    student: Student,
+    schoolName: string,
+    classLabel: string,
+    sessionName: string,
+  ): Promise<void> {
+    const links = await this.prisma.studentGuardian.findMany({
+      where: { studentId: student.id, guardian: { email: { not: null } } },
+      include: { guardian: true },
+    });
+
+    for (const { guardian } of links) {
+      if (!guardian.email) continue;
+      await this.email.send({
+        schoolId: student.schoolId,
+        actorStaffId,
+        entityType: "Student",
+        entityId: student.id,
+        to: guardian.email,
+        subject: `${student.firstName} ${student.lastName} registered at ${schoolName}`,
+        html: `
+          <p>Hello ${guardian.firstName},</p>
+          <p>${student.firstName} ${student.lastName} has been registered at ${schoolName}.</p>
+          <p><strong>Admission number:</strong> ${student.admissionNo}<br/>
+             <strong>Class:</strong> ${classLabel}<br/>
+             <strong>Session:</strong> ${sessionName}</p>
+          <p>Please keep the admission number for your records.</p>
+        `,
+      });
+    }
   }
 
   /**
@@ -208,6 +244,7 @@ export class StudentsService {
     const students = await this.prisma.student.findMany({
       where: {
         schoolId,
+        deletedAt: null,
         AND: [AccessScopeService.studentWhere(scope)],
         ...(params.classArmId
           ? { enrolments: { some: { classArmId: params.classArmId, status: EnrolmentStatus.ACTIVE } } }
@@ -291,7 +328,12 @@ export class StudentsService {
   async findOne(actor: AuthenticatedStaff, studentId: string) {
     const scope = await this.access.studentScope(actor);
     const student = await this.prisma.student.findFirst({
-      where: { id: studentId, schoolId: actor.schoolId, AND: [AccessScopeService.studentWhere(scope)] },
+      where: {
+        id: studentId,
+        schoolId: actor.schoolId,
+        deletedAt: null,
+        AND: [AccessScopeService.studentWhere(scope)],
+      },
       include: profileInclude(studentId),
     });
     if (!student) throw new NotFoundException("Student not found.");

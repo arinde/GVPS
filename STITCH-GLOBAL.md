@@ -37,9 +37,10 @@ Each prompt states which to use. Never guess.
 SIDEBAR AND NAVIGATION
   #152259   Sidebar background. The darkest navy. Also the fill of
             inactive nav items.
-  #509CDB   Active nav item background. Also primary action buttons,
-            links, and the logo accent.
-  #2D88D4   Primary blue, darker variant. Hover state on buttons.
+  #2D88D4   Active nav item background. Also primary action buttons,
+            links, and the logo accent. Deepened from the original Figma
+            extract (#509CDB) — too pale to read as active at full opacity.
+  #1C6CB3   Primary blue, darker variant. Hover state on buttons.
   #FCFAFA   All text inside the sidebar and on dark backgrounds.
 
 PAGE AND CONTENT
@@ -170,7 +171,7 @@ A vertical list of nav items starting 28px below the divider.
 Each item is 40px tall, 192px wide, 4px radius, left-aligned,
 16px left padding, gap 8px between items.
 
-ACTIVE item: background #509CDB, text #FCFAFA, icon #FCFAFA.
+ACTIVE item: background #2D88D4, text #FCFAFA, icon #FCFAFA.
 INACTIVE item: background #152259, text #FCFAFA, icon #FCFAFA at 70%.
 
 Each nav item contains a 16px icon on the left and a 14px SemiBold
@@ -203,7 +204,7 @@ LEFT SIDE: a promo or context strip in Kumbh Sans Regular 16px
 #424242 with two lines of text. Each prompt states the content.
 
 RIGHT SIDE: a bell notification icon (24px, #282828), then a
-"Log out" button: background #509CDB, text #FCFAFA, SemiBold 14px,
+"Log out" button: background #2D88D4, text #FCFAFA, SemiBold 14px,
 8px radius, 40px tall, 120px wide, 10px horizontal padding.
 
 ----------------------------------------------------------------
@@ -277,15 +278,15 @@ NO sidebar on mobile screens.
 
 MOBILE BOTTOM TAB BAR
 Height: 60px. Background: #FFFFFF. 1px #DEE6EC top border.
-Four items evenly spaced. Active item: icon and label in #509CDB.
+Four items evenly spaced. Active item: icon and label in #2D88D4.
 Inactive: #B9C5CE.
 
 ----------------------------------------------------------------
 13. BUTTONS
 ----------------------------------------------------------------
-PRIMARY: background #509CDB. Text #FFFFFF. SemiBold 14px. 8px radius.
+PRIMARY: background #2D88D4. Text #FFFFFF. SemiBold 14px. 8px radius.
 40px tall. 20px horizontal padding.
-Hover: background #2D88D4.
+Hover: background #1C6CB3.
 
 SECONDARY: background #FFFFFF. Text #282828. Border 1px #B9C5CE.
 SemiBold 14px. 8px radius. 40px tall.
@@ -357,7 +358,7 @@ name not on the list above.
   [ ] Font is Kumbh Sans throughout. No serif, no other sans.
   [ ] Sidebar is #152259, 241px, with nav items per section 6.
   [ ] Top bar is #FCFAFA, 95px.
-  [ ] Active nav item has #509CDB background.
+  [ ] Active nav item has #2D88D4 background.
   [ ] Every numeric column is right-aligned.
   [ ] Every status shows a shape AND a word.
   [ ] Desktop table shows 12+ rows, mobile list 7+ rows.

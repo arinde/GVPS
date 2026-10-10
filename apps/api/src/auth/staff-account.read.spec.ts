@@ -7,7 +7,11 @@ describe("StaffAccountService reads", () => {
       academicSession: { findFirst: jest.fn().mockResolvedValue({ id: "session-1" }) },
       staff: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn() },
     };
-    const service = new StaffAccountService(prisma as never, { record: jest.fn() } as never);
+    const service = new StaffAccountService(
+      prisma as never,
+      { record: jest.fn() } as never,
+      { send: jest.fn() } as never,
+    );
     return { prisma, service };
   }
 
@@ -30,7 +34,7 @@ describe("StaffAccountService reads", () => {
     await service.getProfile("school-1", "s1");
 
     const query = prisma.staff.findFirst.mock.calls[0][0];
-    expect(query.where).toEqual({ id: "s1", schoolId: "school-1" });
+    expect(query.where).toEqual({ id: "s1", schoolId: "school-1", deletedAt: null });
     expect(query.select).toMatchObject({ accountNumber: true, bankName: true, accountName: true });
     expect(query.select).not.toHaveProperty("passwordHash");
   });

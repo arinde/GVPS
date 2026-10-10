@@ -4,14 +4,18 @@ import { Pencil } from "lucide-react";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
 import { StaffProfileDetails } from "@/components/staff/staff-profile-details";
+import { StaffAccountActions } from "@/components/staff/staff-account-actions";
+import { StaffOnboardingCard } from "@/components/staff/staff-onboarding-card";
 import { SubjectTeachingCard } from "@/components/staff/subject-teaching-card";
 import { staffName } from "@/lib/staff-name";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useGetStaffProfileQuery } from "@/store/api/staff-api";
 
 /** The superadmin's view of one colleague's record. */
 export function StaffProfileView({ staffId }: { staffId: string }) {
   const { data: profile, isLoading, isError } = useGetStaffProfileQuery(staffId);
+  const { data: access } = useGetMyAccessQuery();
 
   if (isLoading) {
     return (
@@ -49,12 +53,17 @@ export function StaffProfileView({ staffId }: { staffId: string }) {
           </AppLinkButton>
         }
       />
-      {/* Only teachers are given subjects; the API refuses anyone else. */}
-      {teaches ? (
-        <div className="mt-5">
-          <SubjectTeachingCard staffId={profile.id} name={staffName(profile)} />
-        </div>
-      ) : null}
+      <div className="mt-5 flex flex-col gap-5">
+        <StaffOnboardingCard staffId={profile.id} />
+        {/* Only teachers are given subjects; the API refuses anyone else. */}
+        {teaches ? <SubjectTeachingCard staffId={profile.id} name={staffName(profile)} /> : null}
+        <StaffAccountActions
+          staffId={profile.id}
+          name={staffName(profile)}
+          email={profile.email}
+          schoolName={access?.school.name ?? ""}
+        />
+      </div>
     </PageContainer>
   );
 }

@@ -72,9 +72,12 @@ export function MoveClassForm({
         </FormField>
       </div>
 
-      <AppButton type="submit" variant="secondary" className="self-start" disabled={isSubmitting || !value.classArmId}>
-        {isSubmitting ? "Moving…" : "Move to this class"}
-      </AppButton>
+      <div className="flex flex-col items-start gap-1">
+        <AppButton type="submit" variant="secondary" disabled={isSubmitting || !value.classArmId}>
+          {isSubmitting ? "Moving…" : "Move to this class"}
+        </AppButton>
+        {!value.classArmId ? <p className="text-muted-foreground text-xs">Choose the new class first.</p> : null}
+      </div>
     </form>
   );
 }

@@ -36,9 +36,12 @@ export function AssignWholeClassForm({
             onChange={(event) => onChange(event.target.value)}
           />
         </FormField>
-        <AppButton variant="secondary" onClick={onSubmit} disabled={!classArmId || isSubmitting}>
-          {isSubmitting ? "Assigning…" : "Assign all subjects"}
-        </AppButton>
+        <div className="flex flex-col items-start gap-1">
+          <AppButton variant="secondary" onClick={onSubmit} disabled={!classArmId || isSubmitting}>
+            {isSubmitting ? "Assigning…" : "Assign all subjects"}
+          </AppButton>
+          {!classArmId ? <p className="text-muted-foreground text-xs">Choose the class first.</p> : null}
+        </div>
       </div>
     </div>
   );

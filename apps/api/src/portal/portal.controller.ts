@@ -28,4 +28,19 @@ export class PortalController {
   photo(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
     return this.portal.photo(parent, studentId);
   }
+
+  @Get("children/:studentId/fees")
+  fees(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
+    return this.portal.fees(parent, studentId);
+  }
+
+  @Get("children/:studentId/report-card")
+  reportCard(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
+    return this.portal.reportCard(parent, studentId);
+  }
+
+  @Get("children/:studentId/timetable")
+  timetable(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
+    return this.portal.timetable(parent, studentId);
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Put, UseGuards } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Roles } from "@/common/decorators/roles.decorator";
@@ -12,7 +12,9 @@ import {
   type UpdateGuardianDto,
   type UpdateStudentDto,
 } from "@/students/schemas/update-student.schema";
+import { StudentArchiveService } from "@/students/student-archive.service";
 import { StudentUpdateService } from "@/students/student-update.service";
+import { DeleteReasonSchema, type DeleteReasonDto } from "@/common/schemas/delete-reason.schema";
 
 // Superadmin only: correcting a registered record is an owner's decision,
 // unlike registration itself, and every correction is audited.
@@ -20,7 +22,19 @@ import { StudentUpdateService } from "@/students/student-update.service";
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.SUPERADMIN)
 export class StudentAdminController {
-  constructor(private readonly updates: StudentUpdateService) {}
+  constructor(
+    private readonly updates: StudentUpdateService,
+    private readonly archive: StudentArchiveService,
+  ) {}
+
+  @Delete(":studentId")
+  removeStudent(
+    @CurrentUser() actor: AuthenticatedStaff,
+    @Param("studentId") studentId: string,
+    @Body(new ZodValidationPipe(DeleteReasonSchema)) body: DeleteReasonDto,
+  ) {
+    return this.archive.remove(actor, studentId, body.reason);
+  }
 
   @Put(":studentId")
   updateStudent(

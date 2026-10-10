@@ -5,8 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { primaryRoleLabel } from "@/components/auth/roles";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppTopBar } from "@/components/layout/app-top-bar";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { MobileTabBar, MobileTopBar } from "@/components/layout/mobile-nav";
-import { activeNavItem, visibleNavItems } from "@/components/layout/nav-items";
+import { activeNavItem, breadcrumbTrail, visibleNavItems } from "@/components/layout/nav-items";
 import { authRedirect } from "@/lib/auth-redirect";
 import { decodeAccessToken } from "@/lib/decode-access-token";
 import { notify } from "@/lib/notify";
@@ -104,6 +105,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           isSigningOut={isSigningOut}
         />
         <MobileTopBar title={active?.label ?? schoolName} onSignOut={signOut} isSigningOut={isSigningOut} />
+        <Breadcrumbs items={breadcrumbTrail(items, pathname)} />
 
         {/* Bottom padding on phones keeps content clear of the tab bar. */}
         <main className="flex flex-1 flex-col pb-[60px] lg:pb-0">{children}</main>

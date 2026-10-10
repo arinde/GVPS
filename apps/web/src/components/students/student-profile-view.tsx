@@ -11,6 +11,7 @@ import { EnrolmentActionsCard } from "@/components/students/enrolment-actions-ca
 import { PortalAccessRow } from "@/components/students/portal-access-row";
 import { StudentProfilePhoto } from "@/components/students/student-profile-photo";
 import { StudentRecordCard } from "@/components/students/student-record-card";
+import { StudentFeesCard } from "@/components/students/student-fees-card";
 import { StudentResultsCard } from "@/components/students/student-results-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { formatDate, formatMonthYear } from "@/lib/dates";
@@ -18,6 +19,8 @@ import { decodeAccessToken } from "@/lib/decode-access-token";
 import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken } from "@/store/slices/auth-slice";
+import { StudentDeleteCard } from "@/components/students/student-delete-card";
+import { PrintIdCardButton } from "@/components/students/print-id-card-button";
 import { useGetStudentQuery, type StudentProfile } from "@/store/api/students-api";
 
 type Enrolment = StudentProfile["enrolments"][number];
@@ -62,6 +65,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const canViewResults = roles.some((role) =>
     ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY", "FORM_TEACHER"].includes(role),
   );
+  // FEATURES.md §14 "Invoices / payments" row: superadmin and bursar read
+  // and write — nobody else, not even principal, sees this card.
+  const canViewFees = roles.some((role) => ["SUPERADMIN", "BURSAR"].includes(role));
+  const canRecordPayment = roles.some((role) => ["SUPERADMIN", "BURSAR"].includes(role));
 
   if (isLoading) {
     return (
@@ -95,12 +102,26 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           student.dateOfAdmission ? formatMonthYear(student.dateOfAdmission) : student.admissionYear
         }`}
         actions={
-          canEdit ? (
-            <AppLinkButton href={`/students/${student.id}/edit`} variant="secondary">
-              <Pencil aria-hidden="true" />
-              Edit details
-            </AppLinkButton>
-          ) : undefined
+          <div className="flex flex-wrap gap-2">
+            <PrintIdCardButton
+              studentId={student.id}
+              schoolName={access?.school.name ?? ""}
+              schoolAddress={null}
+              schoolPhone={null}
+              name={`${student.firstName} ${student.lastName}`}
+              admissionNo={student.admissionNo}
+              classLabel={current ? `${current.classArm.classLevel.name}${current.classArm.name}` : null}
+              session={current?.session.name ?? null}
+              photo={student.photo}
+              position={student.position}
+            />
+            {canEdit ? (
+              <AppLinkButton href={`/students/${student.id}/edit`} variant="secondary">
+                <Pencil aria-hidden="true" />
+                Edit details
+              </AppLinkButton>
+            ) : null}
+          </div>
         }
       />
 
@@ -119,6 +140,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
         <div className="flex flex-col gap-5">
           {canViewResults ? <StudentResultsCard studentId={student.id} /> : null}
+          {roles.includes("SUPERADMIN") ? (
+            <StudentDeleteCard studentId={student.id} name={`${student.firstName} ${student.lastName}`} />
+          ) : null}
+          {canViewFees ? <StudentFeesCard studentId={student.id} canRecordPayment={canRecordPayment} /> : null}
 
           <ContentCard flush>
             <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>

@@ -1,7 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import * as argon2 from "argon2";
-import type { Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import type { CreateStaffDto } from "@/auth/schemas/create-staff.schema";
+import { EmailService } from "@/common/email.service";
 import { maskAccountNumber } from "@/common/mask-account-number";
 import { generateTemporaryPassword } from "@/common/secrets";
 import { AuditService } from "@/audit/audit.service";
@@ -21,6 +22,7 @@ export class StaffAccountService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly email: EmailService,
   ) {}
 
   async createStaff(actorStaffId: string, schoolId: string, dto: CreateStaffDto): Promise<StaffAccountCreated> {
@@ -68,7 +70,35 @@ export class StaffAccountService {
       },
     });
 
+    await this.notifyCreated(actorStaffId, schoolId, staff.id, dto);
     return { staffId: staff.id, temporaryPassword };
+  }
+
+  private async notifyCreated(
+    actorStaffId: string,
+    schoolId: string,
+    staffId: string,
+    dto: CreateStaffDto,
+  ): Promise<void> {
+    const school = await this.prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } });
+    const schoolName = school?.name ?? "your school";
+    const roles = dto.roles.map((role) => role.replace(/_/g, " ").toLowerCase()).join(", ");
+
+    await this.email.send({
+      schoolId,
+      actorStaffId,
+      entityType: "Staff",
+      entityId: staffId,
+      to: dto.email,
+      subject: `Your staff account — ${schoolName}`,
+      html: `
+        <p>Hello ${dto.firstName},</p>
+        <p>A staff account has been created for you at ${schoolName}, with the role: ${roles}.</p>
+        <p><strong>Email:</strong> ${dto.email}</p>
+        <p>To sign in, go to <a href="https://gvps-api-taupe.vercel.app/">https://gvps-api-taupe.vercel.app/</a>.</p>
+        <p>Your password is not sent by email. Ask the school admin for it, and you will be asked to choose a new password when you first sign in.</p>
+      `,
+    });
   }
 
   /**
@@ -83,7 +113,7 @@ export class StaffAccountService {
     });
 
     return this.prisma.staff.findMany({
-      where: { schoolId },
+      where: { schoolId, deletedAt: null },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }, { email: "asc" }],
       select: {
         id: true,
@@ -115,7 +145,7 @@ export class StaffAccountService {
     });
 
     const staff = await this.prisma.staff.findFirst({
-      where: { id: staffId, schoolId },
+      where: { id: staffId, schoolId, deletedAt: null },
       select: {
         id: true,
         email: true,
@@ -206,8 +236,74 @@ export class StaffAccountService {
     return { staffId, temporaryPassword };
   }
 
+  /** FEATURES.md §0: a deleted account can no longer sign in; its record stays for history. */
+  async softDelete(actorStaffId: string, schoolId: string, staffId: string, reason: string): Promise<void> {
+    if (actorStaffId === staffId) throw new ForbiddenException("You cannot delete your own account.");
+    await this.assertStaffInSchool(schoolId, staffId);
+
+    await this.prisma.$transaction([
+      this.prisma.staff.update({ where: { id: staffId }, data: { deletedAt: new Date() } }),
+      this.prisma.refreshToken.updateMany({ where: { staffId, revokedAt: null }, data: { revokedAt: new Date() } }),
+    ]);
+    await this.audit.record({
+      schoolId,
+      actorStaffId,
+      action: "staff.deleted",
+      entityType: "Staff",
+      entityId: staffId,
+      reason,
+    });
+  }
+
+  /** What a new teacher still needs before they can teach. Steps that don't apply to their roles are marked so. */
+  async onboarding(schoolId: string, staffId: string) {
+    const staff = await this.prisma.staff.findFirst({
+      where: { id: staffId, schoolId, deletedAt: null },
+      select: { mustChangePassword: true, roles: { select: { role: true } } },
+    });
+    if (!staff) throw new NotFoundException("Staff account not found.");
+
+    const roles = staff.roles.map((link) => link.role);
+    const session = await this.prisma.academicSession.findFirst({
+      where: { schoolId, isCurrent: true },
+      select: { id: true },
+    });
+    const [subjectCount, classCount] = session
+      ? await Promise.all([
+          this.prisma.subjectAssignment.count({ where: { schoolId, staffId, sessionId: session.id } }),
+          this.prisma.classAssignment.count({ where: { schoolId, staffId, sessionId: session.id } }),
+        ])
+      : [0, 0];
+
+    const steps = [
+      { key: "account", label: "Account created", required: true, done: true },
+      {
+        key: "password",
+        label: "Password changed on first sign-in",
+        required: true,
+        done: !staff.mustChangePassword,
+      },
+      { key: "roles", label: "Role set", required: true, done: roles.length > 0 },
+      {
+        key: "subjects",
+        label: "Subjects assigned this session",
+        required: roles.includes(Role.SUBJECT_TEACHER),
+        done: subjectCount > 0,
+      },
+      {
+        key: "class",
+        label: "Class allocated as form teacher",
+        required: roles.includes(Role.FORM_TEACHER),
+        done: classCount > 0,
+      },
+    ];
+    return { steps, complete: steps.every((step) => !step.required || step.done) };
+  }
+
   private async assertStaffInSchool(schoolId: string, staffId: string): Promise<void> {
     const staff = await this.prisma.staff.findUnique({ where: { id: staffId } });
-    if (!staff || staff.schoolId !== schoolId) throw new NotFoundException("Staff account not found.");
+    if (!staff || staff.schoolId !== schoolId || staff.deletedAt) {
+      throw new NotFoundException("Staff account not found.");
+    }
   }
 }

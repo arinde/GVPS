@@ -73,14 +73,19 @@ export function TermForm({
 
       <div className="flex flex-col gap-1.5">
         <span aria-hidden="true" className="hidden h-5 sm:block" />
-        <AppButton
-          type="submit"
-          variant="secondary"
-          disabled={isSubmitting || !value.sequence || !value.startDate || !value.endDate}
-        >
-          <Plus aria-hidden="true" />
-          {isSubmitting ? "Adding…" : "Add term"}
-        </AppButton>
+        <div className="flex flex-col items-end gap-1">
+          <AppButton
+            type="submit"
+            variant="secondary"
+            disabled={isSubmitting || !value.sequence || !value.startDate || !value.endDate}
+          >
+            <Plus aria-hidden="true" />
+            {isSubmitting ? "Adding…" : "Add term"}
+          </AppButton>
+          {!value.sequence || !value.startDate || !value.endDate ? (
+            <p className="text-muted-foreground text-xs">Choose the term number and both dates to continue.</p>
+          ) : null}
+        </div>
       </div>
     </form>
   );

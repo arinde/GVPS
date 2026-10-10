@@ -59,6 +59,9 @@ export function SubjectForm({
         <AppButton type="submit" disabled={isSubmitting || !value.name.trim() || !value.code.trim()}>
           {isSubmitting ? "Saving…" : submitLabel}
         </AppButton>
+        {!value.name.trim() || !value.code.trim() ? (
+          <p className="text-muted-foreground text-xs">Enter a name and a code to save.</p>
+        ) : null}
       </div>
     </form>
   );

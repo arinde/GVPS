@@ -76,10 +76,17 @@ export function AssignSubjectForm({
         )
       ) : null}
 
-      <AppButton type="submit" className="self-start" disabled={isSubmitting || !subjectId || classArmIds.length === 0}>
-        <BookPlus aria-hidden="true" />
-        {isSubmitting ? "Assigning…" : "Assign subject"}
-      </AppButton>
+      <div className="flex flex-col items-start gap-1">
+        <AppButton type="submit" disabled={isSubmitting || !subjectId || classArmIds.length === 0}>
+          <BookPlus aria-hidden="true" />
+          {isSubmitting ? "Assigning…" : "Assign subject"}
+        </AppButton>
+        {!subjectId || classArmIds.length === 0 ? (
+          <p className="text-muted-foreground text-xs">
+            {!subjectId ? "Choose a subject first." : "Tick at least one class to continue."}
+          </p>
+        ) : null}
+      </div>
     </form>
   );
 }
