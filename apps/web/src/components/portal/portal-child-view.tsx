@@ -6,6 +6,7 @@ import { ContentCard } from "@/components/common/content-card";
 import { DataTable } from "@/components/common/data-table";
 import { DetailList } from "@/components/common/detail-list";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { PortalChildFeesCard } from "@/components/portal/portal-child-fees-card";
 import { PortalChildTimetable } from "@/components/portal/portal-child-timetable";
 import { PortalChildPhoto } from "@/components/portal/portal-child-photo";
@@ -38,11 +39,7 @@ export function PortalChildView({ studentId }: { studentId: string }) {
   const { data: siblings = [] } = useListPortalChildrenQuery();
 
   if (isLoading) {
-    return (
-      <p className="text-muted-foreground text-sm" role="status">
-        Loading…
-      </p>
-    );
+    return <LoadingState />;
   }
   if (isError || !child) {
     return (

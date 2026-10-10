@@ -1,5 +1,6 @@
 import { AppButton } from "@/components/common/app-button";
 import { ContentCard } from "@/components/common/content-card";
+import { LoadingState } from "@/components/common/spinner";
 import type { SubjectScores } from "@/store/api/approval-api";
 
 export type SubjectScoresCardProps = {
@@ -20,9 +21,7 @@ export function SubjectScoresCard({ subjectName, scores, isLoading, onClose }: S
         </AppButton>
       </div>
       {isLoading || !scores ? (
-        <p className="text-muted-foreground px-5 pb-5 text-sm" role="status">
-          Loading scores…
-        </p>
+        <LoadingState label="Loading scores…" className="px-5 pb-5" />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

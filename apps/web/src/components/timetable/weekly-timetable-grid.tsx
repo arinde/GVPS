@@ -1,6 +1,6 @@
 import { cn } from "cn";
 import { ACTIVITY_COLOR, READING_COLOR, colorForSubject } from "@/lib/subject-color";
-import { buildDayActions, isReadingPeriod, timeRange, todayDayOfWeek } from "@/lib/timetable-grid";
+import { buildDayActions, isReadingPeriod, timeRange, todayDayOfWeek, type SubjectEntry } from "@/lib/timetable-grid";
 import { DAY_LABELS, type ArmGrid, type DayOfWeek, type Period } from "@/store/api/timetable-api";
 
 export type WeeklyTimetableGridProps = {
@@ -105,10 +105,10 @@ export function WeeklyTimetableGrid({ grid, onCellClick }: WeeklyTimetableGridPr
                   const isCombo = action.subjects.length > 1;
 
                   if (isCombo) {
-                    const label = `${DAY_LABELS[day]}, choice of ${action.subjects.map((s) => s.subjectName).join(", ")}, ${range}`;
+                    const label = `${DAY_LABELS[day]}, choice of ${action.subjects.map((subject: SubjectEntry) => subject.subjectName).join(", ")}, ${range}`;
                     const content = (
                       <>
-                        {action.subjects.map((subject) => {
+                        {action.subjects.map((subject: SubjectEntry) => {
                           const color = subject.isActivity ? ACTIVITY_COLOR : colorForSubject(subject.subjectId);
                           return (
                             <span key={subject.subjectId} className={cn("block rounded px-1", color.bg, color.fg)}>

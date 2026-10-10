@@ -5,6 +5,7 @@ import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
 import { StatCard } from "@/components/common/stat-card";
+import { LoadingState } from "@/components/common/spinner";
 import { AttentionList } from "@/components/dashboard/attention-list";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { RegistrationProgress } from "@/components/dashboard/registration-progress";
@@ -25,9 +26,7 @@ export function StaffDashboardView({ greeting }: StaffDashboardViewProps) {
   if (isLoading) {
     return (
       <PageContainer>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading your dashboard…
-        </p>
+        <LoadingState label="Loading your dashboard…" />
       </PageContainer>
     );
   }

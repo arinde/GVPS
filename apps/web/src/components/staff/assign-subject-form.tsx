@@ -4,6 +4,7 @@ import { AppButton } from "@/components/common/app-button";
 import { CheckboxGroup, type CheckboxOption } from "@/components/common/checkbox-group";
 import { FormField, controlProps } from "@/components/common/form-field";
 import { NativeSelect, type SelectOption } from "@/components/common/native-select";
+import { LoadingState } from "@/components/common/spinner";
 
 export type AssignSubjectFormProps = {
   subjects: SelectOption[];
@@ -55,9 +56,7 @@ export function AssignSubjectForm({
 
       {subjectId ? (
         isLoadingClasses ? (
-          <p className="text-muted-foreground text-sm" role="status">
-            Loading classes…
-          </p>
+          <LoadingState label="Loading classes…" />
         ) : classes.length ? (
           <CheckboxGroup
             id="assign-class"

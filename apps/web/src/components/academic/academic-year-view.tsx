@@ -7,6 +7,7 @@ import { SessionForm } from "@/components/academic/session-form";
 import { ContentCard } from "@/components/common/content-card";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { withoutFieldErrors } from "@/lib/api-error";
 import { notify } from "@/lib/notify";
 import {
@@ -116,9 +117,7 @@ export function AcademicYearView() {
         </ContentCard>
 
         {isLoading ? (
-          <p className="text-muted-foreground text-sm" role="status">
-            Loading sessions…
-          </p>
+          <LoadingState label="Loading sessions…" />
         ) : (
           sessions.map((session) => (
             <SessionCard

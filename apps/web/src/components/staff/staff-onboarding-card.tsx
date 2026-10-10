@@ -1,6 +1,7 @@
 "use client";
 
 import { ContentCard } from "@/components/common/content-card";
+import { LoadingState } from "@/components/common/spinner";
 import { OnboardingChecklist } from "@/components/staff/onboarding-checklist";
 import { useGetStaffOnboardingQuery } from "@/store/api/staff-lifecycle-api";
 
@@ -14,9 +15,7 @@ export function StaffOnboardingCard({ staffId }: StaffOnboardingCardProps) {
     <ContentCard>
       <h2 className="mb-3 text-base">Onboarding</h2>
       {isLoading || !data ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Checking onboarding…
-        </p>
+        <LoadingState label="Checking onboarding…" />
       ) : (
         <OnboardingChecklist steps={data.steps} complete={data.complete} />
       )}

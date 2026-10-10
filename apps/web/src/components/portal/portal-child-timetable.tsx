@@ -2,6 +2,7 @@
 
 import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/spinner";
 import { TimetableLegend } from "@/components/timetable/timetable-legend";
 import { WeeklyTimetableGrid } from "@/components/timetable/weekly-timetable-grid";
 import { WeeklyTimetableMobile } from "@/components/timetable/weekly-timetable-mobile";
@@ -14,11 +15,7 @@ export function PortalChildTimetable({ studentId }: PortalChildTimetableProps) {
   const { data: grid, isLoading } = useGetPortalChildTimetableQuery(studentId);
 
   if (isLoading) {
-    return (
-      <p className="text-muted-foreground text-sm" role="status">
-        Loading timetable…
-      </p>
-    );
+    return <LoadingState label="Loading timetable…" />;
   }
   if (!grid || grid.periods.length === 0) {
     return (

@@ -5,6 +5,7 @@ import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { decodeAccessToken } from "@/lib/decode-access-token";
 import { printStaffTimetable } from "@/lib/print-timetable";
 import { useGetCurrentPeriodQuery } from "@/store/api/academic-api";
@@ -39,9 +40,7 @@ export function MyTimetableView() {
       />
 
       {isLoading ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading…
-        </p>
+        <LoadingState />
       ) : !data || data.sections.length === 0 ? (
         <ContentCard>
           <EmptyState

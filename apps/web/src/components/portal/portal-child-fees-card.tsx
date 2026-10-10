@@ -3,6 +3,7 @@
 import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { StatusPill } from "@/components/common/status-pill";
+import { LoadingState } from "@/components/common/spinner";
 import { formatDate } from "@/lib/dates";
 import { formatKobo } from "@/lib/money";
 import { useGetPortalChildFeesQuery } from "@/store/api/portal-api";
@@ -17,9 +18,7 @@ export function PortalChildFeesCard({ studentId }: PortalChildFeesCardProps) {
   if (isLoading) {
     return (
       <ContentCard>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading fees…
-        </p>
+        <LoadingState label="Loading fees…" />
       </ContentCard>
     );
   }

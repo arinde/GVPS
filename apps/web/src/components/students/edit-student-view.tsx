@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { EditGuardianCard } from "@/components/students/edit-guardian-card";
 import { EditStudentDetailsForm } from "@/components/students/edit-student-details-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -107,9 +108,7 @@ export function EditStudentView({ studentId }: { studentId: string }) {
         }
       />
       {isLoading ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading…
-        </p>
+        <LoadingState />
       ) : isError || !student ? (
         <Alert variant="destructive" role="alert">
           <AlertDescription>This student could not be found.</AlertDescription>

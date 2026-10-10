@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ContentCard } from "@/components/common/content-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { PortalChildPhoto } from "@/components/portal/portal-child-photo";
 import { PortalChildView } from "@/components/portal/portal-child-view";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,11 +19,7 @@ export function PortalHomeView() {
   const { data: children = [], isLoading, isError } = useListPortalChildrenQuery();
 
   if (isLoading) {
-    return (
-      <p className="text-muted-foreground text-sm" role="status">
-        Loading your children…
-      </p>
-    );
+    return <LoadingState label="Loading your children…" />;
   }
 
   if (isError) {

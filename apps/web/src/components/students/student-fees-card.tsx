@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { NativeSelect } from "@/components/common/native-select";
 import { StatusPill } from "@/components/common/status-pill";
 import { TextInput } from "@/components/common/text-input";
+import { LoadingState } from "@/components/common/spinner";
 import { formatKobo, parseNairaToKobo } from "@/lib/money";
 import { notify } from "@/lib/notify";
 import { printReceipt } from "@/lib/print-receipt";
@@ -41,9 +42,7 @@ export function StudentFeesCard({ studentId, canRecordPayment }: StudentFeesCard
   if (isLoading) {
     return (
       <ContentCard>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading fees…
-        </p>
+        <LoadingState label="Loading fees…" />
       </ContentCard>
     );
   }

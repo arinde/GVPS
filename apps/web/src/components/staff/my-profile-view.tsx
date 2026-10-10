@@ -3,6 +3,7 @@
 import { Pencil } from "lucide-react";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
+import { LoadingState } from "@/components/common/spinner";
 import { StaffProfileDetails } from "@/components/staff/staff-profile-details";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetMyProfileQuery } from "@/store/api/staff-api";
@@ -20,9 +21,7 @@ export function MyProfileView() {
   if (isLoading) {
     return (
       <PageContainer>
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading your profile…
-        </p>
+        <LoadingState label="Loading your profile…" />
       </PageContainer>
     );
   }

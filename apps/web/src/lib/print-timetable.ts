@@ -53,13 +53,25 @@ function armRows(grid: ArmGrid): string {
           }
 
           const range = timeRange(period, action.endTime);
-          const tint = action.isActivity ? ACTIVITY_COLOR : colorForSubject(action.subjectId);
-          const tag = action.isActivity ? "Activity" : action.span > 1 ? "Double" : "";
           const colspan = action.span > 1 ? ` colspan="${action.span}"` : "";
+
+          if (action.subjects.length > 1) {
+            const lines = action.subjects
+              .map((subject) => {
+                const tint = subject.isActivity ? ACTIVITY_COLOR : colorForSubject(subject.subjectId);
+                return `<div style="color:${tint.fgHex}">${escapeHtml(subject.subjectName)}${subject.staffId ? "" : "*"}</div>`;
+              })
+              .join("");
+            return `<td${colspan}>${lines}<div class="muted">${range}</div></td>`;
+          }
+
+          const subject = action.subjects[0];
+          const tint = subject.isActivity ? ACTIVITY_COLOR : colorForSubject(subject.subjectId);
+          const tag = subject.isActivity ? "Activity" : action.span > 1 ? "Double" : "";
           return `<td${colspan} style="background:${tint.bgHex};color:${tint.fgHex}"><strong>${escapeHtml(
-            action.subjectName,
+            subject.subjectName,
           )}</strong><div class="muted" style="color:inherit;opacity:.8">${range}${tag ? ` · ${tag}` : ""}${
-            action.staffId ? "" : " · no teacher yet"
+            subject.staffId ? "" : " · no teacher yet"
           }</div></td>`;
         })
         .filter((cell): cell is string => cell !== null)
@@ -118,8 +130,13 @@ export function armTimetableText(grid: ArmGrid): string {
       if (!action || action.type === "consumed") continue;
       if (action.type === "empty") continue;
       const range = timeRange(period, action.endTime);
-      const tag = action.isActivity ? " (activity)" : action.span > 1 ? " (double)" : "";
-      entries.push(`  ${range} ${action.subjectName}${tag}`);
+      if (action.subjects.length > 1) {
+        entries.push(`  ${range} choice of: ${action.subjects.map((s) => s.subjectName).join(", ")}`);
+        continue;
+      }
+      const subject = action.subjects[0];
+      const tag = subject.isActivity ? " (activity)" : action.span > 1 ? " (double)" : "";
+      entries.push(`  ${range} ${subject.subjectName}${tag}`);
     }
     lines.push(`${DAY_LABELS[day]}:`, ...(entries.length ? entries : ["  —"]), "");
   }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
+import { LoadingState } from "@/components/common/spinner";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { cleanedStaff, useStaffDraft } from "@/components/staff/use-staff-draft";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -95,9 +96,7 @@ export function EditStaffView({ staffId }: { staffId: string }) {
         }
       />
       {isLoading ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Loading…
-        </p>
+        <LoadingState />
       ) : isError || !profile ? (
         <Alert variant="destructive" role="alert">
           <AlertDescription>

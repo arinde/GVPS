@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { LoadingState } from "@/components/common/spinner";
 import { usePathname, useRouter } from "next/navigation";
 import { primaryRoleLabel } from "@/components/auth/roles";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -63,11 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Render nothing protected while restoring or mid-redirect, so a signed-out
   // visitor never glimpses a page before being moved.
   if (isRestoringSession || redirectTo) {
-    return (
-      <p className="text-muted-foreground m-auto text-sm" role="status">
-        Loading…
-      </p>
-    );
+    return <LoadingState className="m-auto" />;
   }
 
   const bare = BARE_ROUTES.some((route) => pathname.startsWith(route));
