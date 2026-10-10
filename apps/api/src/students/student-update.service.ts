@@ -45,6 +45,7 @@ export class StudentUpdateService {
       bloodGroup: dto.bloodGroup ?? null,
       medicalNote: dto.medicalNote ?? null,
       previousSchool: dto.previousSchool ?? null,
+      position: dto.position ?? null,
     };
 
     const diff = auditDiff(existing, details);

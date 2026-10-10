@@ -36,6 +36,39 @@ export type Invoice = {
 };
 export type StudentLedger = { invoices: Invoice[]; outstanding: number };
 
+/** FEATURES.md §6.4 — the receipt as issued, with the reversal flag added at print time. */
+export type ReceiptSnapshot = {
+  school: {
+    name: string;
+    address: string | null;
+    phone: string | null;
+    email: string | null;
+    taxNumber: string | null;
+  };
+  receiptNumber: string;
+  issuedAt: string;
+  student: { name: string; admissionNo: string; classLabel: string | null };
+  session: string;
+  term: string;
+  items: { name: string; amountKobo: number }[];
+  openingBalanceKobo: number;
+  totalDueKobo: number;
+  paidBeforeKobo: number;
+  payment: {
+    amountKobo: number;
+    method: PaymentMethod;
+    reference: string | null;
+    payerName: string;
+    receivedByName: string;
+    recordedByName: string;
+  };
+  balanceBeforeKobo: number;
+  balanceAfterKobo: number;
+  vat: { rateBps: number; vatKobo: number; netKobo: number };
+  reversed: boolean;
+  reversalReason: string | null;
+};
+
 export type Debtor = {
   studentId: string;
   studentName: string;
@@ -105,6 +138,9 @@ export const feesApi = baseApi.injectEndpoints({
       query: ({ invoiceId, ...body }) => ({ url: `/fees/payments/invoices/${invoiceId}`, method: "POST", body }),
       invalidatesTags: ["Invoice", "Debtor"],
     }),
+    getPaymentReceipt: builder.query<ReceiptSnapshot, string>({
+      query: (paymentId) => ({ url: `/fees/payments/${paymentId}/receipt` }),
+    }),
     reversePayment: builder.mutation<Payment, { paymentId: string; reason: string }>({
       query: ({ paymentId, reason }) => ({
         url: `/fees/payments/${paymentId}/reverse`,
@@ -130,6 +166,7 @@ export const {
   useGenerateInvoicesMutation,
   useGetStudentLedgerQuery,
   useRecordPaymentMutation,
+  useLazyGetPaymentReceiptQuery,
   useReversePaymentMutation,
   useListDebtorsQuery,
 } = feesApi;

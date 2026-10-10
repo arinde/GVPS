@@ -58,6 +58,9 @@ export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   tagTypes: [
+    "School",
+    "Period",
+    "TimetableSlot",
     "Student",
     "Guardian",
     "Enrolment",

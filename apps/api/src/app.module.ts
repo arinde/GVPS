@@ -19,6 +19,8 @@ import { AuthModule } from "@/auth/auth.module";
 import { EmailModule } from "@/common/email.module";
 import { FeesModule } from "@/fees/fees.module";
 import { PrismaModule } from "@/prisma/prisma.module";
+import { SchoolModule } from "@/school/school.module";
+import { TimetableModule } from "@/timetable/timetable.module";
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { PrismaModule } from "@/prisma/prisma.module";
     PromotionsModule,
     ResultsModule,
     FeesModule,
+    SchoolModule,
+    TimetableModule,
   ],
   controllers: [AppController],
   providers: [AppService],

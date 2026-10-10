@@ -4,7 +4,8 @@ import { AuditService } from "@/audit/audit.service";
 import { EmailService } from "@/common/email.service";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
-import { buildReceipt } from "@/fees/receipt";
+import { buildReceipt, type ReceiptSnapshot } from "@/fees/receipt";
+import { renderReceiptEmail } from "@/fees/receipt-email";
 import { gatherReceiptContext } from "@/fees/receipt-context";
 import type { RecordPaymentDto } from "@/fees/schemas/fees.schemas";
 
@@ -28,8 +29,16 @@ export class PaymentsService {
     const invoice = await this.prisma.invoice.findFirst({ where: { id: invoiceId, schoolId: actor.schoolId } });
     if (!invoice) throw new NotFoundException("Invoice not found.");
 
+    // Read outside the transaction: it's several round trips to a remote
+    // database, and running it inside the transaction that also creates the
+    // payment blew past Prisma's 5s interactive-transaction timeout and
+    // turned every payment into a 500. The rare cost is a receipt whose
+    // "paid before" figure could be stale by one concurrent payment on the
+    // same invoice — the invoice's real balance is always read live elsewhere.
+    const { recordedByName, ...context } = await gatherReceiptContext(this.prisma, actor.schoolId, invoiceId, actor.id);
+
     const year = new Date().getFullYear();
-    const payment = await this.prisma.$transaction(async (tx) => {
+    const { payment, receipt } = await this.prisma.$transaction(async (tx) => {
       const counter = await tx.receiptCounter.upsert({
         where: { schoolId_year: { schoolId: actor.schoolId, year } },
         create: { schoolId: actor.schoolId, year, lastNumber: 1 },
@@ -37,7 +46,6 @@ export class PaymentsService {
       });
       const receiptNumber = `RCT/${year}/${String(counter.lastNumber).padStart(4, "0")}`;
       const issuedAt = new Date();
-      const { recordedByName, ...context } = await gatherReceiptContext(tx, actor.schoolId, invoiceId, actor.id);
       const receipt = buildReceipt({
         ...context,
         receiptNumber,
@@ -52,7 +60,7 @@ export class PaymentsService {
         },
       });
 
-      return tx.payment.create({
+      const payment = await tx.payment.create({
         data: {
           schoolId: actor.schoolId,
           invoiceId,
@@ -67,6 +75,7 @@ export class PaymentsService {
           createdAt: issuedAt,
         },
       });
+      return { payment, receipt };
     });
 
     await this.audit.record({
@@ -85,7 +94,7 @@ export class PaymentsService {
       },
     });
 
-    await this.notifyReceipt(actor.id, actor.schoolId, invoice.studentId, payment);
+    await this.notifyReceipt(actor.id, actor.schoolId, invoice.studentId, payment, receipt);
     return payment;
   }
 
@@ -130,24 +139,19 @@ export class PaymentsService {
   }
 
   /** Confirmation of the payment, not a legal receipt — a receipt PDF is a separate, not-yet-built capability. */
+  /** Emails the guardian the same full receipt that prints; a missing guardian email simply sends nothing. */
   private async notifyReceipt(
     actorStaffId: string,
     schoolId: string,
     studentId: string,
     payment: Payment,
+    receipt: ReceiptSnapshot,
   ): Promise<void> {
-    const [guardianLink, school, student] = await Promise.all([
-      this.prisma.studentGuardian.findFirst({
-        where: { studentId, guardian: { email: { not: null } } },
-        include: { guardian: true },
-      }),
-      this.prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
-      this.prisma.student.findUnique({ where: { id: studentId }, select: { firstName: true, lastName: true } }),
-    ]);
-    if (!guardianLink?.guardian.email || !student) return;
-
-    const schoolName = school?.name ?? "your child's school";
-    const naira = (payment.amountKobo / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 });
+    const guardianLink = await this.prisma.studentGuardian.findFirst({
+      where: { studentId, guardian: { email: { not: null } } },
+      include: { guardian: true },
+    });
+    if (!guardianLink?.guardian.email) return;
 
     await this.email.send({
       schoolId,
@@ -155,16 +159,8 @@ export class PaymentsService {
       entityType: "Payment",
       entityId: payment.id,
       to: guardianLink.guardian.email,
-      subject: `Payment received — receipt ${payment.receiptNumber}`,
-      html: `
-        <p>Hello ${guardianLink.guardian.firstName},</p>
-        <p>We have received a payment of <strong>₦${naira}</strong> for ${student.firstName} ${student.lastName}
-           at ${schoolName}.</p>
-        <p>Receipt number: <strong>${payment.receiptNumber}</strong></p>
-        <p>Method: ${payment.method.toLowerCase()}${payment.reference ? ` (ref: ${payment.reference})` : ""}</p>
-        <p>Paid by: ${payment.payerName}</p>
-        <p>Received by: ${payment.receivedByName}</p>
-      `,
+      subject: `Official receipt ${payment.receiptNumber} — ${receipt.school.name}`,
+      html: renderReceiptEmail(receipt, guardianLink.guardian.firstName),
     });
   }
 }

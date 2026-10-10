@@ -20,6 +20,7 @@ import { useGetMyAccessQuery } from "@/store/api/access-api";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken } from "@/store/slices/auth-slice";
 import { StudentDeleteCard } from "@/components/students/student-delete-card";
+import { PrintIdCardButton } from "@/components/students/print-id-card-button";
 import { useGetStudentQuery, type StudentProfile } from "@/store/api/students-api";
 
 type Enrolment = StudentProfile["enrolments"][number];
@@ -101,12 +102,26 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           student.dateOfAdmission ? formatMonthYear(student.dateOfAdmission) : student.admissionYear
         }`}
         actions={
-          canEdit ? (
-            <AppLinkButton href={`/students/${student.id}/edit`} variant="secondary">
-              <Pencil aria-hidden="true" />
-              Edit details
-            </AppLinkButton>
-          ) : undefined
+          <div className="flex flex-wrap gap-2">
+            <PrintIdCardButton
+              studentId={student.id}
+              schoolName={access?.school.name ?? ""}
+              schoolAddress={null}
+              schoolPhone={null}
+              name={`${student.firstName} ${student.lastName}`}
+              admissionNo={student.admissionNo}
+              classLabel={current ? `${current.classArm.classLevel.name}${current.classArm.name}` : null}
+              session={current?.session.name ?? null}
+              photo={student.photo}
+              position={student.position}
+            />
+            {canEdit ? (
+              <AppLinkButton href={`/students/${student.id}/edit`} variant="secondary">
+                <Pencil aria-hidden="true" />
+                Edit details
+              </AppLinkButton>
+            ) : null}
+          </div>
         }
       />
 
@@ -128,13 +143,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           {roles.includes("SUPERADMIN") ? (
             <StudentDeleteCard studentId={student.id} name={`${student.firstName} ${student.lastName}`} />
           ) : null}
-          {canViewFees ? (
-            <StudentFeesCard
-              studentId={student.id}
-              studentName={`${student.firstName} ${student.lastName}`}
-              canRecordPayment={canRecordPayment}
-            />
-          ) : null}
+          {canViewFees ? <StudentFeesCard studentId={student.id} canRecordPayment={canRecordPayment} /> : null}
 
           <ContentCard flush>
             <h2 className="px-5 pt-5 pb-3 text-base">Enrolment history</h2>

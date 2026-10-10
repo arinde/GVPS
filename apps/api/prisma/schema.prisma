@@ -346,6 +346,9 @@ model Student {
   bloodGroup     String?
   medicalNote    String?
   previousSchool String?
+  // A leadership title — "Head Boy", "Senior Prefect" — printed on the ID
+  // card's front. Null means no title; most students have none.
+  position       String?
 
   // Soft delete (FEATURES.md §0): the row stays for history and is hidden from lists.
   deletedAt DateTime?
@@ -613,7 +616,13 @@ model SubjectAssignment {
   subjectId  String
   classArmId String
   staffId    String
-  createdAt  DateTime @default(now())
+  // How much of the week this subject needs in this class — what the
+  // timetable auto-generator uses to decide how many slots to give it.
+  periodsPerWeek Int        @default(1)
+  // Pins every occurrence to one day — Sports every Wednesday, Fellowship
+  // every Friday. Null means the auto-generator may spread it across the week.
+  fixedDay       DayOfWeek?
+  createdAt      DateTime   @default(now())
 
   session  AcademicSession @relation(fields: [sessionId], references: [id])
   subject  Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -934,4 +943,56 @@ model ReportCard {
   @@unique([termId, studentId])
   @@index([schoolId, studentId])
   @@map("report_cards")
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+// FEATURES.md §8.1: period definitions per section — a normal teaching slot,
+// a break or assembly. Times are wall-clock strings ("08:00"), not DateTime:
+// this is a daily recurring template, not a dated event.
+model Period {
+  id         String   @id @default(cuid())
+  schoolId   String
+  section    Section
+  name       String
+  startTime  String
+  endTime    String
+  sequence   Int
+  // False for break/assembly — the builder and clash checks skip these.
+  isTeaching Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  slots TimetableSlot[]
+
+  @@unique([schoolId, section, sequence])
+  @@map("periods")
+}
+
+// FEATURES.md §8.1: one lesson — arm, day, period, subject, teacher — for one
+// session. A teacher cannot hold two slots at the same day and period across
+// different arms; that clash is cross-row and is checked in the service, not
+// as a database constraint.
+model TimetableSlot {
+  id         String    @id @default(cuid())
+  schoolId   String
+  sessionId  String
+  classArmId String
+  dayOfWeek  DayOfWeek
+  periodId   String
+  subjectId  String
+  staffId    String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  period Period @relation(fields: [periodId], references: [id])
+
+  @@unique([classArmId, dayOfWeek, periodId])
+  @@index([schoolId, sessionId, staffId, dayOfWeek, periodId])
+  @@map("timetable_slots")
 }

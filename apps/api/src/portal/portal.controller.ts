@@ -38,4 +38,9 @@ export class PortalController {
   reportCard(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
     return this.portal.reportCard(parent, studentId);
   }
+
+  @Get("children/:studentId/timetable")
+  timetable(@CurrentParent() parent: AuthenticatedParent, @Param("studentId") studentId: string) {
+    return this.portal.timetable(parent, studentId);
+  }
 }

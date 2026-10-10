@@ -50,7 +50,10 @@ export type UpdateStudentRequest = Pick<
   | "medicalNote"
   | "previousSchool"
   | "dateOfAdmission"
->;
+> & {
+  /** A leadership title — "Head Boy", "Senior Prefect" — printed on the ID card. */
+  position?: string;
+};
 
 export type UpdateGuardianRequest = Pick<
   GuardianInput,
@@ -98,6 +101,8 @@ export type StudentProfile = {
   bloodGroup: string | null;
   medicalNote: string | null;
   previousSchool: string | null;
+  /** A leadership title — "Head Boy", "Senior Prefect" — printed on the ID card. Null for most students. */
+  position: string | null;
   admittedIntoLevel: { name: string };
   /** Present when a passport photograph exists; the image is fetched separately. */
   photo: { updatedAt: string } | null;

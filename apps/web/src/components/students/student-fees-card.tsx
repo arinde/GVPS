@@ -10,9 +10,9 @@ import { TextInput } from "@/components/common/text-input";
 import { formatKobo, parseNairaToKobo } from "@/lib/money";
 import { notify } from "@/lib/notify";
 import { printReceipt } from "@/lib/print-receipt";
-import { useGetMyAccessQuery } from "@/store/api/access-api";
 import {
   useGetStudentLedgerQuery,
+  useLazyGetPaymentReceiptQuery,
   useRecordPaymentMutation,
   useReversePaymentMutation,
   type Invoice,
@@ -20,7 +20,7 @@ import {
   type PaymentMethod,
 } from "@/store/api/fees-api";
 
-export type StudentFeesCardProps = { studentId: string; studentName: string; canRecordPayment: boolean };
+export type StudentFeesCardProps = { studentId: string; canRecordPayment: boolean };
 
 const METHODS: { value: PaymentMethod; label: string }[] = [
   { value: "CASH", label: "Cash" },
@@ -34,10 +34,8 @@ const METHODS: { value: PaymentMethod; label: string }[] = [
  * §14: even superadmin is read-only here) — `canRecordPayment` hides the
  * form rather than show it and let the API's 403 be the only feedback.
  */
-export function StudentFeesCard({ studentId, studentName, canRecordPayment }: StudentFeesCardProps) {
+export function StudentFeesCard({ studentId, canRecordPayment }: StudentFeesCardProps) {
   const { data: ledger, isLoading } = useGetStudentLedgerQuery(studentId);
-  const { data: access } = useGetMyAccessQuery();
-  const schoolName = access?.school.name ?? "";
   const latest = ledger?.invoices.at(-1);
 
   if (isLoading) {
@@ -86,39 +84,29 @@ export function StudentFeesCard({ studentId, studentName, canRecordPayment }: St
         ) : null}
       </ul>
 
-      {latest.payments.length > 0 ? (
-        <PaymentsList
-          invoice={latest}
-          canReverse={canRecordPayment}
-          schoolName={schoolName}
-          studentName={studentName}
-        />
-      ) : null}
+      {latest.payments.length > 0 ? <PaymentsList invoice={latest} canReverse={canRecordPayment} /> : null}
 
       {canRecordPayment && latest.balance.balance > 0 ? <RecordPaymentForm invoiceId={latest.id} /> : null}
     </ContentCard>
   );
 }
 
-type PaymentsListProps = { invoice: Invoice; canReverse: boolean; schoolName: string; studentName: string };
+type PaymentsListProps = { invoice: Invoice; canReverse: boolean };
 
-function PaymentsList({ invoice, canReverse, schoolName, studentName }: PaymentsListProps) {
+function PaymentsList({ invoice, canReverse }: PaymentsListProps) {
   const [reversePayment, reversing] = useReversePaymentMutation();
   const [reversingPaymentId, setReversingPaymentId] = useState<string>();
   const [reversalReason, setReversalReason] = useState("");
 
-  function print(payment: Payment) {
-    printReceipt({
-      schoolName,
-      studentName,
-      receiptNumber: payment.receiptNumber,
-      amountKobo: payment.amountKobo,
-      method: payment.method,
-      reference: payment.reference,
-      payerName: payment.payerName,
-      receivedByName: payment.receivedByName,
-      createdAt: payment.createdAt,
-    });
+  const [fetchReceipt] = useLazyGetPaymentReceiptQuery();
+
+  async function print(payment: Payment) {
+    try {
+      const receipt = await fetchReceipt(payment.id, true).unwrap();
+      printReceipt(receipt);
+    } catch (error) {
+      notify.error(error, "Could not load this receipt.");
+    }
   }
 
   async function confirmReverse(paymentId: string, receiptNumber: string) {

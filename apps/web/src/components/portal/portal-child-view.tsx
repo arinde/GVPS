@@ -7,6 +7,7 @@ import { DataTable } from "@/components/common/data-table";
 import { DetailList } from "@/components/common/detail-list";
 import { PageHeader } from "@/components/common/page-header";
 import { PortalChildFeesCard } from "@/components/portal/portal-child-fees-card";
+import { PortalChildTimetable } from "@/components/portal/portal-child-timetable";
 import { PortalChildPhoto } from "@/components/portal/portal-child-photo";
 import { currentClassLabel, DEPARTMENT, RELATIONSHIP, statusLabel } from "@/components/portal/portal-labels";
 import { PortalChildReportCard } from "@/components/portal/portal-child-report-card";
@@ -94,6 +95,7 @@ export function PortalChildView({ studentId }: { studentId: string }) {
         <div className="flex flex-col gap-5">
           <PortalChildReportCard studentId={child.id} />
           <PortalChildFeesCard studentId={child.id} />
+          <PortalChildTimetable studentId={child.id} />
 
           <ContentCard>
             <h2 className="mb-2 text-base">Personal details</h2>

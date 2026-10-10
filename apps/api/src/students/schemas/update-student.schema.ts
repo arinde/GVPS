@@ -24,6 +24,7 @@ export const UpdateStudentSchema = z
     bloodGroup: blankAsUndefined(z.enum(BLOOD_GROUPS, "Choose a blood group from the list")),
     medicalNote: blankAsUndefined(z.string().trim().max(500)),
     previousSchool: OptionalText,
+    position: OptionalText,
   })
   .refine((student) => !student.stateOfOrigin || isKnownState(student.stateOfOrigin), {
     message: "Choose a state from the list",

@@ -8,11 +8,12 @@ import { ParentJwtStrategy } from "@/portal/parent-auth.primitives";
 import { ParentAuthService } from "@/portal/parent-auth.service";
 import { PortalController } from "@/portal/portal.controller";
 import { PortalService } from "@/portal/portal.service";
+import { TimetableModule } from "@/timetable/timetable.module";
 
 // The family portal: parent sign-in, parents' read-only views of their own
 // children, and the school's side of issuing those logins.
 @Module({
-  imports: [PassportModule, JwtModule.register({})],
+  imports: [PassportModule, JwtModule.register({}), TimetableModule],
   controllers: [ParentAuthController, PortalController, ParentAccountsController],
   providers: [ParentAuthService, ParentJwtStrategy, PortalService, ParentAccountsService],
 })

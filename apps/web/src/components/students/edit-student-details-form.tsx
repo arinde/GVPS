@@ -88,6 +88,26 @@ export function EditStudentDetailsForm({
         </div>
       </FormSection>
 
+      <FormSection title="Role" description="Only for students who hold a leadership title.">
+        <FormField
+          id="position"
+          label="Position"
+          hint="e.g. Head Boy, Head Girl, Senior Prefect. Leave blank for most students."
+          error={fieldErrors.position}
+        >
+          <TextInput
+            {...controlProps(
+              "position",
+              fieldErrors.position,
+              "e.g. Head Boy, Head Girl, Senior Prefect. Leave blank for most students.",
+            )}
+            value={value.position ?? ""}
+            disabled={isSubmitting}
+            onChange={(event) => onChange({ position: event.target.value })}
+          />
+        </FormField>
+      </FormSection>
+
       {errorMessage ? (
         <Alert variant="destructive" role="alert">
           <AlertDescription>{errorMessage}</AlertDescription>

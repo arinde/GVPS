@@ -1,6 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuditService } from "@/audit/audit.service";
+import { renderEmailFooter } from "@/common/email-footer";
+import { PrismaService } from "@/prisma/prisma.service";
 
 export type SendEmailInput = {
   schoolId: string;
@@ -32,13 +34,14 @@ export class EmailService {
   constructor(
     config: ConfigService,
     private readonly audit: AuditService,
+    private readonly prisma: PrismaService,
   ) {
     this.apiKey = config.get<string>("SENDLIB_API_KEY") || undefined;
     this.from = config.get<string>("EMAIL_FROM") || undefined;
   }
 
   async send(input: SendEmailInput): Promise<void> {
-    const { to, subject, html } = input;
+    const { to, subject } = input;
     const target = { to, subject };
 
     if (!this.apiKey || !this.from) {
@@ -46,6 +49,8 @@ export class EmailService {
       await this.trail(input, "email.skipped", { ...target, reason: "Sending is not configured." });
       return;
     }
+
+    const html = input.html + (await this.footer(input.schoolId));
 
     try {
       const response = await fetch(SENDLIB_URL, {
@@ -66,6 +71,20 @@ export class EmailService {
       const reason = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Email "${subject}" to ${to} failed: ${reason}`);
       await this.trail(input, "email.failed", { ...target, reason });
+    }
+  }
+
+  /** Every email gets the same signature block, the way a mail client always appends one. */
+  private async footer(schoolId: string): Promise<string> {
+    try {
+      const school = await this.prisma.school.findUnique({
+        where: { id: schoolId },
+        select: { name: true, address: true, phone: true, email: true },
+      });
+      return school ? renderEmailFooter(school) : "";
+    } catch (error) {
+      this.logger.error(`Could not load the school profile for the email footer: ${String(error)}`);
+      return "";
     }
   }
 
