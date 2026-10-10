@@ -24,6 +24,8 @@ export type ReportCard = {
   promotion: { threshold: number; recommended: boolean } | null;
   remarks: { formComment: string | null; principalComment: string | null; traits: Record<string, number> | null };
   feeBalanceKobo: number;
+  // Optional: report cards published before attendance existed have no such field.
+  attendance?: { timesPresent: number };
   publishedAt: string;
 };
 

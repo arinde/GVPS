@@ -20,17 +20,17 @@ datasource db {
 
 // PLAN.md §4.1: school_id on every table, even single-tenant today.
 model School {
-  id        String   @id @default(cuid())
-  name      String
+  id         String   @id @default(cuid())
+  name       String
   // Printed on every receipt. Blank until the school fills them in.
-  address   String?
-  phone     String?
-  email     String?
-  taxNumber String?
+  address    String?
+  phone      String?
+  email      String?
+  taxNumber  String?
   // VAT in basis points (750 = 7.5%). Zero means the school charges none, which
   // is common for education — confirm with the school's accountant.
-  vatRateBps Int @default(0)
-  createdAt DateTime @default(now())
+  vatRateBps Int      @default(0)
+  createdAt  DateTime @default(now())
 
   // FEATURES.md §3.2: admission number format is configurable. Tokens are
   // {PREFIX}, {CODE}, {YEAR} and {SEQ}; {SEQ} is left-padded to
@@ -354,8 +354,8 @@ model Student {
 
   // Soft delete (FEATURES.md §0): the row stays for history and is hidden from lists.
   deletedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   school            School            @relation(fields: [schoolId], references: [id])
   admittedIntoLevel ClassLevel        @relation(fields: [admittedIntoLevelId], references: [id])
@@ -440,6 +440,44 @@ model Enrolment {
   @@unique([studentId, sessionId])
   @@index([schoolId, sessionId, classArmId])
   @@map("enrolments")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+// FEATURES.md §4.1/4.2: one mark a day for Primary/Junior (periodId null),
+// or one mark per period for Senior (periodId set) where a school marks
+// attendance that granularly. `date` is the calendar day regardless of mode,
+// so termly reporting (§4.3) never needs to know which mode produced a row.
+model Attendance {
+  id              String           @id @default(cuid())
+  schoolId        String
+  sessionId       String
+  termId          String
+  classArmId      String
+  studentId       String
+  date            DateTime         @db.Date
+  status          AttendanceStatus
+  // Senior, period-based marking only — null for a daily mark.
+  periodId        String?
+  subjectId       String?
+  markedByStaffId String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // One row per student per day for daily marking; one per student per day
+  // per period for period marking. Postgres treats two NULLs as distinct by
+  // default, which would let daily marking double up — overridden with a
+  // NULLS NOT DISTINCT index in the migration, which Prisma cannot express
+  // (same pattern as SubjectOffering's stream).
+  @@unique([classArmId, studentId, date, periodId])
+  @@index([schoolId, termId, studentId])
+  @@index([schoolId, classArmId, date])
+  @@map("attendance_records")
 }
 
 // The passport photograph, kept apart from Student so every list and search
@@ -572,13 +610,18 @@ model ParentRefreshToken {
 // teacher (ClassAssignment).
 // ---------------------------------------------------------------------------
 model Subject {
-  id        String   @id @default(cuid())
-  schoolId  String
-  name      String
+  id         String   @id @default(cuid())
+  schoolId   String
+  name       String
   // Short code for reports and broadsheets, e.g. "MTH", "ENG".
-  code      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  code       String
+  // Senior elective combo (owner's own groups, e.g. "Accounting/Chemistry/
+  // Government") — every subject sharing a combo is forced onto the same
+  // period across however many arms teach them, so a student can be in any
+  // of them at once. Null for subjects that aren't part of a combo.
+  comboGroup String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   offerings   SubjectOffering[]
   assignments SubjectAssignment[]
@@ -638,11 +681,11 @@ model SubjectAssignment {
 // the load lived on SubjectAssignment itself, removing or reassigning a
 // teacher would wipe the periods-per-week/fixedDay a form teacher already set.
 model ClassSubjectLoad {
-  id         String @id @default(cuid())
-  schoolId   String
-  sessionId  String
-  subjectId  String
-  classArmId String
+  id             String     @id @default(cuid())
+  schoolId       String
+  sessionId      String
+  subjectId      String
+  classArmId     String
   // How much of the week this subject needs in this class — what the
   // timetable auto-generator uses to decide how many slots to give it.
   periodsPerWeek Int        @default(1)
@@ -1019,7 +1062,12 @@ model TimetableSlot {
 
   period Period @relation(fields: [periodId], references: [id])
 
-  @@unique([classArmId, dayOfWeek, periodId])
+  // Not unique on (classArmId, dayOfWeek, periodId) alone: an elective combo
+  // (Accounting/Chemistry/Government) puts more than one subject in the same
+  // slot on purpose, since different students are in different combo rooms
+  // at once. Still exactly one row per subject per slot.
+  @@unique([classArmId, dayOfWeek, periodId, subjectId])
+  @@index([classArmId, dayOfWeek, periodId])
   @@index([schoolId, sessionId, staffId, dayOfWeek, periodId])
   @@map("timetable_slots")
 }

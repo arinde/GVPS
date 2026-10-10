@@ -24,7 +24,7 @@ export type SubjectLoadEditorProps = {
   removingSubjectId: string | null;
   onSave: (rows: { subjectId: string; draft: SubjectLoadDraft }[]) => void;
   onGenerate: () => void;
-  onAdd: (subjectId: string) => void;
+  onAdd: (subjectIds: string[]) => void;
   onRemove: (subjectId: string) => void;
 };
 
@@ -52,7 +52,7 @@ export function SubjectLoadEditor({
 }: SubjectLoadEditorProps) {
   const [drafts, setDrafts] = useState<Record<string, SubjectLoadDraft>>({});
   const [confirmingGenerate, setConfirmingGenerate] = useState(false);
-  const [newSubjectId, setNewSubjectId] = useState("");
+  const [checked, setChecked] = useState<Set<string>>(new Set());
 
   // A subject just added (or never touched) has no draft yet — fall back to
   // what the server already has for it rather than syncing state with an effect.
@@ -68,10 +68,19 @@ export function SubjectLoadEditor({
     onSave(subjects.map((subject) => ({ subjectId: subject.subjectId, draft: draftFor(subject) })));
   }
 
-  function addSubject() {
-    if (!newSubjectId) return;
-    onAdd(newSubjectId);
-    setNewSubjectId("");
+  function toggleChecked(subjectId: string) {
+    setChecked((current) => {
+      const next = new Set(current);
+      if (next.has(subjectId)) next.delete(subjectId);
+      else next.add(subjectId);
+      return next;
+    });
+  }
+
+  function addChecked() {
+    if (checked.size === 0) return;
+    onAdd([...checked]);
+    setChecked(new Set());
   }
 
   return (
@@ -136,21 +145,40 @@ export function SubjectLoadEditor({
         </div>
       )}
 
-      {addable.length > 0 ? (
-        <div className="mb-5 flex flex-wrap items-end gap-3 border-t pt-4">
-          <NativeSelect
-            aria-label="Add a subject"
-            placeholder="Add a subject…"
-            value={newSubjectId}
-            onChange={(event) => setNewSubjectId(event.target.value)}
-            options={addable.map((subject) => ({ value: subject.subjectId, label: subject.subjectName }))}
-            className="max-w-xs"
-          />
-          <AppButton type="button" variant="secondary" onClick={addSubject} disabled={!newSubjectId || adding}>
-            {adding ? "Adding…" : "Add subject"}
-          </AppButton>
-        </div>
-      ) : null}
+      <div className="mb-5 border-t pt-4">
+        <p className="mb-1 text-sm font-medium">Add subjects</p>
+        <p className="text-muted-foreground mb-3 text-xs">
+          Only subjects already offered at this class&apos;s level appear here. Missing one you just added? Open it
+          under Subjects and choose this level there first.
+        </p>
+
+        {addable.length === 0 ? (
+          <p className="text-muted-foreground text-sm">Every subject offered at this level is already on the list.</p>
+        ) : (
+          <>
+            <div className="mb-3 flex flex-wrap gap-x-5 gap-y-2">
+              {addable.map((subject) => (
+                <label key={subject.subjectId} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={checked.has(subject.subjectId)}
+                    onChange={() => toggleChecked(subject.subjectId)}
+                    className="h-4 w-4"
+                  />
+                  {subject.subjectName}
+                </label>
+              ))}
+            </div>
+            <AppButton type="button" variant="secondary" onClick={addChecked} disabled={checked.size === 0 || adding}>
+              {adding
+                ? "Adding…"
+                : checked.size > 0
+                  ? `Add ${checked.size} subject${checked.size === 1 ? "" : "s"}`
+                  : "Add subjects"}
+            </AppButton>
+          </>
+        )}
+      </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <AppButton type="button" variant="secondary" onClick={save} disabled={saving || subjects.length === 0}>

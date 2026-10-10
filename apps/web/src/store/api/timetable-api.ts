@@ -27,8 +27,11 @@ export type TimetableSlotView = {
   periodId: string;
   subjectId: string;
   subjectName: string;
-  staffId: string;
+  // Null until a teacher is assigned — placed anyway, filled in on the next regenerate.
+  staffId: string | null;
   staffName: string;
+  // Set when this subject is pinned to one day (Sports every Wednesday) — a fixture, not a regular lesson.
+  fixedDay: DayOfWeek | null;
 };
 
 export type ArmGrid = { classLabel: string; days: DayOfWeek[]; periods: Period[]; slots: TimetableSlotView[] };
@@ -45,7 +48,9 @@ export type AddableSubject = { subjectId: string; subjectName: string };
 
 export type AutoGenerateResult = {
   placed: number;
-  unplaced: { subjectId: string; subjectName: string; missing: number; reason: "noTeacher" | "noSpace" }[];
+  // Lessons placed with no teacher yet — still drafted, just unstaffed until one is assigned.
+  placedWithoutTeacher: number;
+  unplaced: { subjectId: string; subjectName: string; missing: number }[];
 };
 
 export type StaffScheduleSlot = { dayOfWeek: DayOfWeek; periodId: string; classLabel: string; subjectName: string };

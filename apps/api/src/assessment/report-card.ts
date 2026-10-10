@@ -37,6 +37,9 @@ export type ReportCardFrozen = {
   promotion: { threshold: number; recommended: boolean } | null;
   remarks: RemarkInput;
   feeBalanceKobo: number;
+  // FEATURES.md §4.3: days actually attended, against the term's own "times
+  // school opened" above — the report card's standard attendance field.
+  attendance: { timesPresent: number };
   publishedAt: string;
 };
 
@@ -53,6 +56,8 @@ export type ArmInput = {
   priorAverages: Map<string, number[]>;
   promotionThreshold: number | null;
   feeBalanceKobo: Map<string, number>;
+  /** Days actually attended this term, per student — see `ReportCardFrozen.attendance`. */
+  timesPresent: Map<string, number>;
   publishedAt: Date;
 };
 
@@ -156,6 +161,7 @@ export function buildReportCards(input: ArmInput): Map<string, ReportCardFrozen>
       promotion,
       remarks: input.remarks.get(student.studentId) ?? { formComment: null, principalComment: null, traits: null },
       feeBalanceKobo: input.feeBalanceKobo.get(student.studentId) ?? 0,
+      attendance: { timesPresent: input.timesPresent.get(student.studentId) ?? 0 },
       publishedAt: input.publishedAt.toISOString(),
     });
   }

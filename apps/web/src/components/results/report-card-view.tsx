@@ -35,6 +35,12 @@ export function ReportCardView({ card, schoolName, traitLabels }: ReportCardView
             <dt className="text-muted-foreground text-xs">School opened</dt>
             <dd className="font-semibold">{card.term.timesSchoolOpened ?? "—"} times</dd>
           </div>
+          {card.attendance ? (
+            <div>
+              <dt className="text-muted-foreground text-xs">Times present</dt>
+              <dd className="font-semibold">{card.attendance.timesPresent} times</dd>
+            </div>
+          ) : null}
           <div>
             <dt className="text-muted-foreground text-xs">Position in class</dt>
             <dd className="font-semibold">

@@ -4,6 +4,8 @@ import { AuditService } from "@/audit/audit.service";
 import type { AuthenticatedStaff } from "@/common/types/authenticated-staff";
 import { PrismaService } from "@/prisma/prisma.service";
 import type { AssignClassSubjectsDto, AssignSubjectDto } from "@/subjects/subjects.schemas";
+import { distributePeriods } from "@/timetable/default-periods-per-week";
+import { rosterForArm } from "@/timetable/timetable-subjects.service";
 
 const TEACHING_ROLES: Role[] = [Role.SUBJECT_TEACHER, Role.FORM_TEACHER];
 
@@ -62,23 +64,48 @@ export class SubjectAssignmentsService {
     const subject = await this.prisma.subject.findFirst({ where: { id: dto.subjectId, schoolId: actor.schoolId } });
     if (!subject) throw fieldError("subjectId", "Choose a subject from the list");
 
-    const arms = await this.prisma.classArm.findMany({
+    // A coarse pre-filter (the level offers it to *some* department) — the
+    // precise per-arm department check follows below, since Prisma can't
+    // compare each row's own `stream` against an offering's inside one query.
+    const candidates = await this.prisma.classArm.findMany({
       where: {
         schoolId: actor.schoolId,
         id: { in: dto.classArmIds },
         classLevel: { offerings: { some: { subjectId: subject.id } } },
       },
-      include: { classLevel: true },
+      include: { classLevel: { include: { offerings: { include: { subject: true } } } } },
     });
+    // Physics to a Science arm, Government to an Arts arm — not every arm at
+    // the level, just the one whose own department the subject is offered to.
+    const arms = candidates.filter((arm) =>
+      arm.classLevel.offerings.some(
+        (offering) => offering.subjectId === subject.id && (offering.stream === null || offering.stream === arm.stream),
+      ),
+    );
     if (arms.length !== dto.classArmIds.length) {
-      throw fieldError("classArmIds", `Choose classes whose level offers ${subject.name}`);
+      throw fieldError("classArmIds", `Choose classes whose department offers ${subject.name}`);
+    }
+
+    // Arms can span more than one class level (a secondary teacher taking one
+    // subject across several classes) — each level/department has its own
+    // offered roster, so its share of the 40 learning periods is its own too.
+    const subjectCode = subject.code;
+    const shareCache = new Map<string, number>();
+    function shareFor(arm: (typeof arms)[number]): number {
+      const cacheKey = `${arm.classLevel.id}|${arm.stream ?? ""}`;
+      const cached = shareCache.get(cacheKey);
+      if (cached !== undefined) return cached;
+      const roster = rosterForArm(arm.classLevel.offerings, arm.stream);
+      const share = distributePeriods(roster.map((candidate) => candidate.code)).get(subjectCode) ?? 1;
+      shareCache.set(cacheKey, share);
+      return share;
     }
 
     await this.upsertAll(
       actor.schoolId,
       session.id,
       staff.id,
-      arms.map((arm) => ({ armId: arm.id, subjectId: subject.id })),
+      arms.map((arm) => ({ armId: arm.id, subjectId: subject.id, periodsPerWeek: shareFor(arm) })),
     );
     await this.record(actor, "subject.teacher.assigned", staff.id, {
       subject: subject.name,
@@ -98,16 +125,24 @@ export class SubjectAssignmentsService {
     });
     if (!arm) throw fieldError("classArmId", "Choose a class from the list");
 
-    const subjects = [...new Map(arm.classLevel.offerings.map(({ subject }) => [subject.id, subject])).values()];
+    const subjects = rosterForArm(arm.classLevel.offerings, arm.stream);
     if (subjects.length === 0) {
-      throw fieldError("classArmId", `No subjects are offered at ${arm.classLevel.name} yet. Add them under Subjects.`);
+      throw fieldError(
+        "classArmId",
+        `No subjects are offered to ${arm.classLevel.name}'s department yet. Add them under Subjects.`,
+      );
     }
 
+    const shares = distributePeriods(subjects.map((subject) => subject.code));
     await this.upsertAll(
       actor.schoolId,
       session.id,
       staff.id,
-      subjects.map((subject) => ({ armId: arm.id, subjectId: subject.id })),
+      subjects.map((subject) => ({
+        armId: arm.id,
+        subjectId: subject.id,
+        periodsPerWeek: shares.get(subject.code) ?? 1,
+      })),
     );
     await this.record(actor, "subject.teacher.assigned", staff.id, {
       subject: "All subjects",
@@ -139,13 +174,13 @@ export class SubjectAssignmentsService {
     schoolId: string,
     sessionId: string,
     staffId: string,
-    pairs: { armId: string; subjectId: string }[],
+    pairs: { armId: string; subjectId: string; periodsPerWeek: number }[],
   ) {
     // Assigning a teacher also puts the subject on the class's timetable list
     // if it isn't there yet — but never touches an existing one, so a
     // periods-per-week/fixedDay a form teacher already set survives this.
     return this.prisma.$transaction(
-      pairs.flatMap(({ armId, subjectId }) => [
+      pairs.flatMap(({ armId, subjectId, periodsPerWeek }) => [
         this.prisma.subjectAssignment.upsert({
           where: { sessionId_subjectId_classArmId: { sessionId, subjectId, classArmId: armId } },
           create: { schoolId, sessionId, subjectId, classArmId: armId, staffId },
@@ -153,7 +188,7 @@ export class SubjectAssignmentsService {
         }),
         this.prisma.classSubjectLoad.upsert({
           where: { sessionId_subjectId_classArmId: { sessionId, subjectId, classArmId: armId } },
-          create: { schoolId, sessionId, subjectId, classArmId: armId, periodsPerWeek: 1, fixedDay: null },
+          create: { schoolId, sessionId, subjectId, classArmId: armId, periodsPerWeek, fixedDay: null },
           update: {},
         }),
       ]),

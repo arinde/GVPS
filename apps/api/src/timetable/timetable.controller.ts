@@ -11,6 +11,7 @@ import {
   type SetSlotDto,
   type SetSubjectLoadDto,
 } from "@/timetable/schemas/timetable.schema";
+import { TimetableSubjectsService } from "@/timetable/timetable-subjects.service";
 import { TimetableService } from "@/timetable/timetable.service";
 
 const DayParam = new ZodValidationPipe(z.enum(DayOfWeek));
@@ -21,7 +22,10 @@ const DayParam = new ZodValidationPipe(z.enum(DayOfWeek));
 @Controller("timetable")
 @UseGuards(JwtAuthGuard)
 export class TimetableController {
-  constructor(private readonly timetable: TimetableService) {}
+  constructor(
+    private readonly timetable: TimetableService,
+    private readonly subjects: TimetableSubjectsService,
+  ) {}
 
   @Get("sessions/:sessionId/arms/:classArmId")
   armGrid(
@@ -38,7 +42,7 @@ export class TimetableController {
     @Param("sessionId") sessionId: string,
     @Param("classArmId") classArmId: string,
   ) {
-    return this.timetable.availableSubjects(actor, sessionId, classArmId);
+    return this.subjects.availableSubjects(actor, sessionId, classArmId);
   }
 
   @Get("sessions/:sessionId/arms/:classArmId/subjects/addable")
@@ -47,7 +51,7 @@ export class TimetableController {
     @Param("sessionId") sessionId: string,
     @Param("classArmId") classArmId: string,
   ) {
-    return this.timetable.addableSubjects(actor, sessionId, classArmId);
+    return this.subjects.addableSubjects(actor, sessionId, classArmId);
   }
 
   @Post("sessions/:sessionId/arms/:classArmId/subjects/:subjectId")
@@ -57,7 +61,7 @@ export class TimetableController {
     @Param("classArmId") classArmId: string,
     @Param("subjectId") subjectId: string,
   ) {
-    return this.timetable.addSubject(actor, sessionId, classArmId, subjectId);
+    return this.subjects.addSubject(actor, sessionId, classArmId, subjectId);
   }
 
   @Delete("sessions/:sessionId/arms/:classArmId/subjects/:subjectId")
@@ -67,7 +71,7 @@ export class TimetableController {
     @Param("classArmId") classArmId: string,
     @Param("subjectId") subjectId: string,
   ) {
-    return this.timetable.removeSubject(actor, sessionId, classArmId, subjectId);
+    return this.subjects.removeSubject(actor, sessionId, classArmId, subjectId);
   }
 
   @Put("sessions/:sessionId/arms/:classArmId/subjects/:subjectId/load")
@@ -78,7 +82,7 @@ export class TimetableController {
     @Param("subjectId") subjectId: string,
     @Body(new ZodValidationPipe(SetSubjectLoadSchema)) body: SetSubjectLoadDto,
   ) {
-    return this.timetable.setSubjectLoad(actor, sessionId, classArmId, subjectId, body.periodsPerWeek, body.fixedDay);
+    return this.subjects.setSubjectLoad(actor, sessionId, classArmId, subjectId, body.periodsPerWeek, body.fixedDay);
   }
 
   @Post("sessions/:sessionId/arms/:classArmId/auto-generate")
@@ -87,7 +91,7 @@ export class TimetableController {
     @Param("sessionId") sessionId: string,
     @Param("classArmId") classArmId: string,
   ) {
-    return this.timetable.autoGenerate(actor, sessionId, classArmId);
+    return this.subjects.autoGenerate(actor, sessionId, classArmId);
   }
 
   @Put("sessions/:sessionId/arms/:classArmId/days/:day/periods/:periodId")

@@ -8,8 +8,11 @@ import { NativeSelect } from "@/components/common/native-select";
 import { PageContainer } from "@/components/common/page-container";
 import { PageHeader } from "@/components/common/page-header";
 import { SubjectLoadEditor, type SubjectLoadDraft } from "@/components/timetable/subject-load-editor";
+import { TimetableLegend } from "@/components/timetable/timetable-legend";
+import { WeeklyTimetableGrid } from "@/components/timetable/weekly-timetable-grid";
+import { WeeklyTimetableMobile } from "@/components/timetable/weekly-timetable-mobile";
 import { notify } from "@/lib/notify";
-import { printArmTimetable } from "@/lib/print-timetable";
+import { canShare, printArmTimetable, shareArmTimetable } from "@/lib/print-timetable";
 import { useGetCurrentPeriodQuery, useListClassArmsQuery } from "@/store/api/academic-api";
 import {
   DAY_LABELS,
@@ -74,15 +77,17 @@ export function TimetableBuilderView() {
   async function runAutoGenerate() {
     try {
       const result = await autoGenerate({ sessionId, classArmId }).unwrap();
+      const unstaffedNote =
+        result.placedWithoutTeacher > 0
+          ? ` ${result.placedWithoutTeacher} still need${result.placedWithoutTeacher === 1 ? "s" : ""} a teacher — regenerate once one's assigned.`
+          : "";
       if (result.unplaced.length === 0) {
-        notify.success(`Timetable generated — ${result.placed} lessons placed`);
+        notify.success(`Timetable generated — ${result.placed} lessons placed.${unstaffedNote}`, {
+          durationMs: unstaffedNote ? 10_000 : undefined,
+        });
       } else {
-        const described = result.unplaced.map((item) =>
-          item.reason === "noTeacher"
-            ? `${item.subjectName} (no teacher yet)`
-            : `${item.subjectName} (${item.missing} short)`,
-        );
-        notify.warning(`Generated ${result.placed} lessons, but couldn't fit: ${described.join(", ")}`, {
+        const missing = result.unplaced.map((item) => `${item.subjectName} (${item.missing} short)`).join(", ");
+        notify.warning(`Generated ${result.placed} lessons, but couldn't fit: ${missing}.${unstaffedNote}`, {
           durationMs: 10_000,
         });
       }
@@ -91,12 +96,12 @@ export function TimetableBuilderView() {
     }
   }
 
-  async function addSubjectToClass(subjectId: string) {
+  async function addSubjectsToClass(subjectIds: string[]) {
     try {
-      await addSubject({ sessionId, classArmId, subjectId }).unwrap();
-      notify.success("Subject added");
+      await Promise.all(subjectIds.map((subjectId) => addSubject({ sessionId, classArmId, subjectId }).unwrap()));
+      notify.success(subjectIds.length === 1 ? "Subject added" : `${subjectIds.length} subjects added`);
     } catch (error) {
-      notify.error(error, "Could not add this subject.");
+      notify.error(error, "Could not add these subjects.");
     }
   }
 
@@ -112,8 +117,21 @@ export function TimetableBuilderView() {
     }
   }
 
+  // navigator.share opens the phone's own share sheet — WhatsApp included — with no file to generate.
+  async function shareTimetable() {
+    if (!grid) return;
+    try {
+      await shareArmTimetable(grid);
+    } catch (error) {
+      notify.error(error, "Could not share this timetable.");
+    }
+  }
+
   const [editing, setEditing] = useState<Cell>();
   const [subjectId, setSubjectId] = useState("");
+  // Manually placing one lesson still needs a real teacher to assign — unlike
+  // auto-generate, which may draft a subject with none yet (FEATURES.md §8.1).
+  const teachableSubjects = subjects.filter((subject) => subject.staffName);
 
   function slotFor(day: DayOfWeek, periodId: string) {
     return grid?.slots.find((slot) => slot.dayOfWeek === day && slot.periodId === periodId);
@@ -193,7 +211,12 @@ export function TimetableBuilderView() {
             />
             {grid ? (
               <AppButton type="button" variant="secondary" onClick={() => printArmTimetable(grid)}>
-                Print this class&apos;s timetable
+                Print / Save as PDF
+              </AppButton>
+            ) : null}
+            {grid && canShare() ? (
+              <AppButton type="button" variant="secondary" onClick={shareTimetable}>
+                Share
               </AppButton>
             ) : null}
           </div>
@@ -214,7 +237,7 @@ export function TimetableBuilderView() {
             removingSubjectId={removingSubjectId}
             onSave={saveLoads}
             onGenerate={runAutoGenerate}
-            onAdd={addSubjectToClass}
+            onAdd={addSubjectsToClass}
             onRemove={removeSubjectFromClass}
           />
         )}
@@ -232,63 +255,14 @@ export function TimetableBuilderView() {
           </ContentCard>
         ) : (
           <ContentCard flush>
-            <div className="flex items-baseline justify-between px-5 pt-5 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-5 pb-3">
               <h2 className="text-base">{grid.classLabel}&apos;s timetable</h2>
-              <p className="text-muted-foreground text-xs">Click a cell to fix it by hand.</p>
+              <TimetableLegend />
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-muted-foreground border-b text-left text-xs">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Period</th>
-                    {grid.days.map((day) => (
-                      <th key={day} className="px-3 py-2 font-medium">
-                        {DAY_LABELS[day]}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {grid.periods.map((period) => (
-                    <tr key={period.id} className="border-b last:border-0">
-                      <td className="px-4 py-2.5 whitespace-nowrap">
-                        {period.name}
-                        <span className="text-muted-foreground block text-xs">
-                          {period.startTime}–{period.endTime}
-                        </span>
-                      </td>
-                      {grid.days.map((day) => {
-                        if (!period.isTeaching) {
-                          return (
-                            <td key={day} className="bg-muted text-muted-foreground px-3 py-2.5 text-xs">
-                              —
-                            </td>
-                          );
-                        }
-                        const slot = slotFor(day, period.id);
-                        return (
-                          <td key={day} className="px-3 py-2.5">
-                            <button
-                              type="button"
-                              onClick={() => openEditor(day, period)}
-                              className="hover:bg-zebra w-full rounded-md px-2 py-1 text-left"
-                            >
-                              {slot ? (
-                                <>
-                                  <span className="block font-medium">{slot.subjectName}</span>
-                                  <span className="text-muted-foreground block text-xs">{slot.staffName}</span>
-                                </>
-                              ) : (
-                                <span className="text-muted-foreground text-xs">Set lesson</span>
-                              )}
-                            </button>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <p className="text-muted-foreground px-5 pb-3 text-xs">Tap a cell to fix it by hand.</p>
+            <WeeklyTimetableGrid grid={grid} onCellClick={openEditor} />
+            <div className="px-5 pb-5">
+              <WeeklyTimetableMobile grid={grid} onCellClick={openEditor} />
             </div>
           </ContentCard>
         )}

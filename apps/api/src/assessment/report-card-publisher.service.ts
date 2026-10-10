@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EnrolmentStatus, ResultSheetStatus, type Prisma, type Term } from "@prisma/client";
+import { AttendanceStatus, EnrolmentStatus, ResultSheetStatus, type Prisma, type Term } from "@prisma/client";
 import { isSnapshot, type ResultSnapshot } from "@/assessment/result-snapshot";
 import { buildReportCards, isReportCard, type RemarkInput } from "@/assessment/report-card";
 import { fetchStudentLedger } from "@/fees/invoicing.service";
@@ -61,6 +61,12 @@ export class ReportCardPublisher {
       feeBalanceKobo.set(student.studentId, ledger.outstanding);
     }
 
+    const timesPresent = await this.timesPresentByStudent(
+      schoolId,
+      term.id,
+      students.map((student) => student.studentId),
+    );
+
     const cards = buildReportCards({
       term: { name: term.name, sequence: term.sequence, timesSchoolOpened: term.timesSchoolOpened },
       classLabel: `${classArm.classLevel.name}${classArm.name}`,
@@ -70,6 +76,7 @@ export class ReportCardPublisher {
       priorAverages,
       promotionThreshold: gradingScale?.promotionThreshold ?? null,
       feeBalanceKobo,
+      timesPresent,
       publishedAt: new Date(),
     });
 
@@ -81,6 +88,34 @@ export class ReportCardPublisher {
       });
     }
     return cards.size;
+  }
+
+  /** Distinct days each student was marked present or late this term (FEATURES.md §4.3) — present/late both attended. */
+  private async timesPresentByStudent(
+    schoolId: string,
+    termId: string,
+    studentIds: string[],
+  ): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (studentIds.length === 0) return counts;
+
+    const records = await this.prisma.attendance.findMany({
+      where: {
+        schoolId,
+        termId,
+        studentId: { in: studentIds },
+        status: { in: [AttendanceStatus.PRESENT, AttendanceStatus.LATE] },
+      },
+      select: { studentId: true, date: true },
+    });
+    const datesByStudent = new Map<string, Set<string>>();
+    for (const record of records) {
+      const dates = datesByStudent.get(record.studentId) ?? new Set<string>();
+      dates.add(record.date.toISOString());
+      datesByStudent.set(record.studentId, dates);
+    }
+    for (const studentId of studentIds) counts.set(studentId, datesByStudent.get(studentId)?.size ?? 0);
+    return counts;
   }
 
   /** Each student's term averages from the report cards already published earlier in the session. */
