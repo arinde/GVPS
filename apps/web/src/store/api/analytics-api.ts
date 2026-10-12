@@ -3,10 +3,15 @@ import { baseApi } from "@/store/api/base-api";
 export type EnrolmentAnalytics = {
   session: string;
   total: number;
+  totalStaff: number;
+  totalGuardians: number;
   byLevel: { name: string; count: number }[];
   byArm: { name: string; count: number }[];
   bySex: { sex: string; count: number }[];
 };
+
+export type ParentRow = { name: string; phone: string; wards: string[] };
+export type ParentsAnalytics = { session: string; rows: ParentRow[] };
 
 export type AttendanceAnalytics = {
   term: string;
@@ -38,6 +43,10 @@ export const analyticsApi = baseApi.injectEndpoints({
       query: () => ({ url: "/analytics/academic" }),
       providesTags: ["Dashboard"],
     }),
+    getParentsAnalytics: builder.query<ParentsAnalytics, void>({
+      query: () => ({ url: "/analytics/parents" }),
+      providesTags: ["Dashboard"],
+    }),
     getAttendanceAnalytics: builder.query<AttendanceAnalytics, void>({
       query: () => ({ url: "/analytics/attendance" }),
       providesTags: ["Dashboard"],
@@ -53,5 +62,6 @@ export const {
   useGetEnrolmentAnalyticsQuery,
   useGetAcademicAnalyticsQuery,
   useGetAttendanceAnalyticsQuery,
+  useGetParentsAnalyticsQuery,
   useGetFinancialAnalyticsQuery,
 } = analyticsApi;

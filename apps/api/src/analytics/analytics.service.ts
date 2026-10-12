@@ -19,15 +19,19 @@ export class AnalyticsService {
     this.assertAcademic(actor);
     const session = await this.currentSessionOrThrow(actor.schoolId);
 
-    const enrolments = await this.prisma.enrolment.findMany({
-      where: { schoolId: actor.schoolId, sessionId: session.id, status: EnrolmentStatus.ACTIVE },
-      select: {
-        student: { select: { sex: true } },
-        classArm: {
-          select: { id: true, name: true, classLevel: { select: { id: true, name: true, rank: true } } },
+    const [enrolments, totalStaff, totalGuardians] = await Promise.all([
+      this.prisma.enrolment.findMany({
+        where: { schoolId: actor.schoolId, sessionId: session.id, status: EnrolmentStatus.ACTIVE },
+        select: {
+          student: { select: { sex: true } },
+          classArm: {
+            select: { id: true, name: true, classLevel: { select: { id: true, name: true, rank: true } } },
+          },
         },
-      },
-    });
+      }),
+      this.prisma.staff.count({ where: { schoolId: actor.schoolId, deletedAt: null } }),
+      this.prisma.guardian.count({ where: { schoolId: actor.schoolId } }),
+    ]);
 
     const byLevel = new Map<string, { name: string; rank: number; count: number }>();
     const byArm = new Map<string, { name: string; rank: number; count: number }>();
@@ -49,6 +53,8 @@ export class AnalyticsService {
     return {
       session: session.name,
       total: enrolments.length,
+      totalStaff,
+      totalGuardians,
       byLevel: [...byLevel.values()].sort((a, b) => a.rank - b.rank).map(({ name, count }) => ({ name, count })),
       byArm: [...byArm.values()]
         .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name))
@@ -57,6 +63,44 @@ export class AnalyticsService {
         { sex: "Male", count: bySex.MALE },
         { sex: "Female", count: bySex.FEMALE },
       ],
+    };
+  }
+
+  /** FEATURES.md §10.2 — every guardian with a currently-enrolled ward, and which wards. */
+  async parents(actor: AuthenticatedStaff) {
+    this.assertAcademic(actor);
+    const session = await this.currentSessionOrThrow(actor.schoolId);
+
+    const enrolments = await this.prisma.enrolment.findMany({
+      where: { schoolId: actor.schoolId, sessionId: session.id, status: EnrolmentStatus.ACTIVE },
+      select: { studentId: true },
+    });
+    const studentIds = enrolments.map((enrolment) => enrolment.studentId);
+    if (studentIds.length === 0) return { session: session.name, rows: [] };
+
+    const links = await this.prisma.studentGuardian.findMany({
+      where: { schoolId: actor.schoolId, studentId: { in: studentIds } },
+      include: {
+        guardian: { select: { id: true, firstName: true, lastName: true, phone: true } },
+        student: { select: { firstName: true, lastName: true } },
+      },
+      orderBy: { guardian: { lastName: "asc" } },
+    });
+
+    const byGuardian = new Map<string, { name: string; phone: string; wards: string[] }>();
+    for (const link of links) {
+      const entry = byGuardian.get(link.guardian.id) ?? {
+        name: `${link.guardian.firstName} ${link.guardian.lastName}`,
+        phone: link.guardian.phone,
+        wards: [],
+      };
+      entry.wards.push(`${link.student.firstName} ${link.student.lastName}`);
+      byGuardian.set(link.guardian.id, entry);
+    }
+
+    return {
+      session: session.name,
+      rows: [...byGuardian.values()].sort((a, b) => a.name.localeCompare(b.name)),
     };
   }
 
