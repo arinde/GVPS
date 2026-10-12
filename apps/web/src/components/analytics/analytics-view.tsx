@@ -1,9 +1,12 @@
 "use client";
 
 import { BarChartCard } from "@/components/analytics/bar-chart-card";
+import { classRollColumns } from "@/components/analytics/class-roll-columns";
 import { LineChartCard } from "@/components/analytics/line-chart-card";
+import { parentColumns } from "@/components/analytics/parent-columns";
 import { PieChartCard } from "@/components/analytics/pie-chart-card";
 import { ContentCard } from "@/components/common/content-card";
+import { DataTable } from "@/components/common/data-table";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/spinner";
 import { PageContainer } from "@/components/common/page-container";
@@ -16,6 +19,7 @@ import {
   useGetAttendanceAnalyticsQuery,
   useGetEnrolmentAnalyticsQuery,
   useGetFinancialAnalyticsQuery,
+  useGetParentsAnalyticsQuery,
 } from "@/store/api/analytics-api";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken } from "@/store/slices/auth-slice";
@@ -39,6 +43,9 @@ export function AnalyticsView() {
     skip: !canSeeAcademic,
   });
   const { data: attendance, isLoading: loadingAttendance } = useGetAttendanceAnalyticsQuery(undefined, {
+    skip: !canSeeAcademic,
+  });
+  const { data: parents, isLoading: loadingParents } = useGetParentsAnalyticsQuery(undefined, {
     skip: !canSeeAcademic,
   });
   const { data: financial, isLoading: loadingFinancial } = useGetFinancialAnalyticsQuery(undefined, {
@@ -82,6 +89,11 @@ export function AnalyticsView() {
               <LoadingState />
             ) : (
               <>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <StatCard label="Students" value={String(enrolment.total)} wash="lavender" />
+                  <StatCard label="Staff" value={String(enrolment.totalStaff)} wash="yellow" />
+                  <StatCard label="Parents / guardians" value={String(enrolment.totalGuardians)} wash="lavender" />
+                </div>
                 <div className="grid gap-5 lg:grid-cols-2">
                   <BarChartCard
                     title="Enrolment by level"
@@ -97,14 +109,23 @@ export function AnalyticsView() {
                     data={enrolment.bySex.map((row) => ({ name: row.sex, value: row.count }))}
                   />
                 </div>
-                <BarChartCard
-                  title="Students per class"
-                  subtitle={enrolment.session}
-                  data={enrolment.byArm}
-                  categoryKey="name"
-                  valueKey="count"
-                  valueLabel="Students"
-                />
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <BarChartCard
+                    title="Students per class"
+                    subtitle={enrolment.session}
+                    data={enrolment.byArm}
+                    categoryKey="name"
+                    valueKey="count"
+                    valueLabel="Students"
+                  />
+                  <ContentCard flush>
+                    <div className="flex items-baseline justify-between px-5 pt-5 pb-3">
+                      <h2 className="text-base">Class roll</h2>
+                      <p className="text-muted-foreground text-xs">{enrolment.totalStaff} staff on record</p>
+                    </div>
+                    <DataTable columns={classRollColumns} data={enrolment.byArm} emptyTitle="No classes yet" />
+                  </ContentCard>
+                </div>
               </>
             )}
 
@@ -152,6 +173,23 @@ export function AnalyticsView() {
                   formatValue={(value) => `${value}%`}
                 />
               </div>
+            )}
+
+            {loadingParents || !parents ? (
+              <LoadingState />
+            ) : (
+              <ContentCard flush>
+                <div className="flex items-baseline justify-between px-5 pt-5 pb-3">
+                  <h2 className="text-base">Parents and guardians</h2>
+                  <p className="text-muted-foreground text-xs">{parents.session}</p>
+                </div>
+                <DataTable
+                  columns={parentColumns}
+                  data={parents.rows}
+                  emptyTitle="No guardians on record"
+                  emptyDescription="Guardians appear here once students are enrolled this session."
+                />
+              </ContentCard>
             )}
           </>
         ) : null}

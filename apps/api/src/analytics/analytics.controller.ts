@@ -21,6 +21,11 @@ export class AnalyticsController {
     return this.analytics.academic(actor);
   }
 
+  @Get("parents")
+  parents(@CurrentUser() actor: AuthenticatedStaff) {
+    return this.analytics.parents(actor);
+  }
+
   @Get("attendance")
   attendance(@CurrentUser() actor: AuthenticatedStaff) {
     return this.analytics.attendance(actor);
