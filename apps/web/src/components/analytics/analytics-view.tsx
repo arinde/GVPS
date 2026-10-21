@@ -1,11 +1,11 @@
 "use client";
 
-import { BarChartCard } from "@/components/analytics/bar-chart-card";
 import { classRollColumns } from "@/components/analytics/class-roll-columns";
-import { LineChartCard } from "@/components/analytics/line-chart-card";
 import { parentColumns } from "@/components/analytics/parent-columns";
-import { PieChartCard } from "@/components/analytics/pie-chart-card";
+import { BarChartCard } from "@/components/common/bar-chart-card";
 import { ContentCard } from "@/components/common/content-card";
+import { LineChartCard } from "@/components/common/line-chart-card";
+import { PieChartCard } from "@/components/common/pie-chart-card";
 import { DataTable } from "@/components/common/data-table";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/spinner";

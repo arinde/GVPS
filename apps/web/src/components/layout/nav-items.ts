@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   CircleUserRound,
   GraduationCap,
+  HeartPulse,
   Inbox,
   LayoutDashboard,
   LayoutGrid,
@@ -169,6 +170,9 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR"],
     group: "Admin",
   },
+  // Infrastructure health (database, email, server) — a superadmin concern,
+  // not a school-data one.
+  { href: "/system-health", label: "System health", icon: HeartPulse, roles: ["SUPERADMIN"], group: "Admin" },
 
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },
