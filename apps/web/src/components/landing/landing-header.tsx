@@ -34,7 +34,7 @@ export function LandingHeader({ schoolName, shortName, links }: LandingHeaderPro
         </nav>
 
         <div className="ml-auto flex items-center gap-2 md:ml-4">
-          <Link href="/login" className="hidden text-sm opacity-85 hover:underline hover:opacity-100 sm:inline">
+          <Link href="/login" className="text-sm opacity-85 hover:underline hover:opacity-100">
             Staff
           </Link>
           <AppLinkButton href="/portal/login" size="small">

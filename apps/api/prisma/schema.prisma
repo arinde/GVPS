@@ -1071,3 +1071,37 @@ model TimetableSlot {
   @@index([schoolId, sessionId, staffId, dayOfWeek, periodId])
   @@map("timetable_slots")
 }
+
+// ---------------------------------------------------------------------------
+// System monitoring — a lightweight, periodic snapshot of each dependency's
+// reachability, not a log of every API call (that would write on every
+// request forever with no retention policy). A cron job records one row per
+// service every few minutes; the status page turns the series into
+// uptime/downtime charts.
+// ---------------------------------------------------------------------------
+
+enum MonitoredService {
+  DATABASE
+  EMAIL
+  API_SERVER
+}
+
+enum ServiceHealthStatus {
+  UP
+  DOWN
+}
+
+model ServiceHealthCheck {
+  id        String               @id @default(cuid())
+  schoolId  String
+  service   MonitoredService
+  status    ServiceHealthStatus
+  // Round-trip time for the check itself (a `SELECT 1`, for example). Not
+  // meaningful for EMAIL, which is derived from the audit trail rather than
+  // a live ping — recorded as 0 there.
+  latencyMs Int
+  checkedAt DateTime             @default(now())
+
+  @@index([schoolId, service, checkedAt])
+  @@map("service_health_checks")
+}
