@@ -8,7 +8,9 @@ import {
   CalendarDays,
   ClipboardCheck,
   CircleUserRound,
+  FileText,
   GraduationCap,
+  HeartPulse,
   Inbox,
   LayoutDashboard,
   LayoutGrid,
@@ -94,6 +96,17 @@ export const NAV_ITEMS: NavItem[] = [
     group: "Academics",
   },
 
+  // Scheme of work, lecture notes and exam questions — open to every staff
+  // role, any class, with approval limited to the admin tier (the service
+  // checks that, not this menu).
+  {
+    href: "/teaching-resources",
+    label: "Teaching resources",
+    icon: FileText,
+    roles: [],
+    group: "Academics",
+  },
+
   // Score entry (FEATURES.md §5.3): a subject teacher's own assignments only;
   // superadmin can open any, for corrections.
   {
@@ -169,6 +182,9 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR"],
     group: "Admin",
   },
+  // Infrastructure health (database, email, server) — a superadmin concern,
+  // not a school-data one.
+  { href: "/system-health", label: "System health", icon: HeartPulse, roles: ["SUPERADMIN"], group: "Admin" },
 
   // Every staff member can see their own record.
   { href: "/profile", label: "My profile", icon: CircleUserRound, roles: [] },

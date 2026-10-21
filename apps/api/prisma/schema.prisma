@@ -1071,3 +1071,81 @@ model TimetableSlot {
   @@index([schoolId, sessionId, staffId, dayOfWeek, periodId])
   @@map("timetable_slots")
 }
+
+// ---------------------------------------------------------------------------
+// System monitoring — a lightweight, periodic snapshot of each dependency's
+// reachability, not a log of every API call (that would write on every
+// request forever with no retention policy). A cron job records one row per
+// service every few minutes; the status page turns the series into
+// uptime/downtime charts.
+// ---------------------------------------------------------------------------
+
+enum MonitoredService {
+  DATABASE
+  EMAIL
+  API_SERVER
+}
+
+enum ServiceHealthStatus {
+  UP
+  DOWN
+}
+
+model ServiceHealthCheck {
+  id        String               @id @default(cuid())
+  schoolId  String
+  service   MonitoredService
+  status    ServiceHealthStatus
+  // Round-trip time for the check itself (a `SELECT 1`, for example). Not
+  // meaningful for EMAIL, which is derived from the audit trail rather than
+  // a live ping — recorded as 0 there.
+  latencyMs Int
+  checkedAt DateTime             @default(now())
+
+  @@index([schoolId, service, checkedAt])
+  @@map("service_health_checks")
+}
+
+// ---------------------------------------------------------------------------
+// Teaching resources — scheme of work, lecture notes and exam questions.
+// Structured templates filled in by staff, not AI-generated (the owner chose
+// plain data entry over an LLM call). The three types share the same
+// lifecycle and metadata, differing only in the shape of `content`, which is
+// validated per type at the zod boundary rather than split into three
+// tables. Scalar FKs only, no Prisma relations (same lean-schema pattern as
+// TimetableSlot) — a resource outlives the staff member who wrote it.
+// ---------------------------------------------------------------------------
+
+enum TeachingResourceType {
+  SCHEME_OF_WORK
+  LECTURE_NOTE
+  EXAM_QUESTIONS
+}
+
+enum TeachingResourceStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+}
+
+model TeachingResource {
+  id            String                 @id @default(cuid())
+  schoolId      String
+  type          TeachingResourceType
+  title         String
+  subjectId     String
+  classLevelId  String
+  termId        String
+  status        TeachingResourceStatus @default(DRAFT)
+  content       Json
+  createdById   String
+  submittedAt   DateTime?
+  submittedById String?
+  approvedAt    DateTime?
+  approvedById  String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@index([schoolId, type, subjectId, classLevelId, termId])
+  @@map("teaching_resources")
+}

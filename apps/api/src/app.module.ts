@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppController } from "@/app.controller";
 import { AppService } from "@/app.service";
 import { AcademicModule } from "@/academic/academic.module";
@@ -22,11 +23,14 @@ import { EmailModule } from "@/common/email.module";
 import { FeesModule } from "@/fees/fees.module";
 import { PrismaModule } from "@/prisma/prisma.module";
 import { SchoolModule } from "@/school/school.module";
+import { SystemHealthModule } from "@/system-health/system-health.module";
+import { TeachingResourcesModule } from "@/teaching-resources/teaching-resources.module";
 import { TimetableModule } from "@/timetable/timetable.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuditModule,
     EmailModule,
@@ -47,6 +51,8 @@ import { TimetableModule } from "@/timetable/timetable.module";
     ResultsModule,
     FeesModule,
     SchoolModule,
+    SystemHealthModule,
+    TeachingResourcesModule,
     TimetableModule,
   ],
   controllers: [AppController],

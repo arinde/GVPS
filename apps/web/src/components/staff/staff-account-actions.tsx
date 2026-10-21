@@ -34,7 +34,8 @@ export function StaffAccountActions({ staffId, name, email, schoolName }: StaffA
       const result = await resetPassword(staffId).unwrap();
       setNewPassword(result);
       setConfirmingReset(false);
-      notify.success(`New temporary password created for ${name}`);
+      notify.success(`New temporary password created for ${name}`, { description: "Opening the sign-in slip…" });
+      printSignInSlip({ schoolName, name, email, temporaryPassword: result.temporaryPassword });
     } catch (error) {
       notify.error(error, "Could not reset this password.");
     }
@@ -60,14 +61,17 @@ export function StaffAccountActions({ staffId, name, email, schoolName }: StaffA
       <section className="flex flex-col gap-2">
         <h2 className="text-base">Password</h2>
         <p className="text-muted-foreground text-sm">
-          Forgotten it? Reset it here. This signs them out everywhere and gives them a new temporary password.
+          Lost their slip, or forgotten their password? Printing a new sign-in slip generates a fresh temporary password
+          and signs them out everywhere.
         </p>
         {newPassword ? (
           <div className="flex flex-col gap-2 rounded-md border p-3 text-sm">
             <p>
               New temporary password: <strong className="font-mono">{newPassword.temporaryPassword}</strong>
             </p>
-            <p className="text-muted-foreground text-xs">Shown once. Print the slip now and hand it over in person.</p>
+            <p className="text-muted-foreground text-xs">
+              Shown once. If the print window did not open, use the button below.
+            </p>
             <div>
               <AppButton
                 type="button"
@@ -77,7 +81,7 @@ export function StaffAccountActions({ staffId, name, email, schoolName }: StaffA
                   printSignInSlip({ schoolName, name, email, temporaryPassword: newPassword.temporaryPassword })
                 }
               >
-                Print sign-in slip
+                Print again
               </AppButton>
             </div>
           </div>
@@ -85,7 +89,7 @@ export function StaffAccountActions({ staffId, name, email, schoolName }: StaffA
         {confirmingReset ? (
           <div className="flex flex-wrap items-center gap-2">
             <AppButton type="button" variant="danger" onClick={reset} disabled={resetting.isLoading}>
-              {resetting.isLoading ? "Resetting…" : "Yes, reset password"}
+              {resetting.isLoading ? "Generating…" : "Yes, generate & print"}
             </AppButton>
             <AppButton type="button" variant="ghost" onClick={() => setConfirmingReset(false)}>
               Cancel
@@ -94,7 +98,7 @@ export function StaffAccountActions({ staffId, name, email, schoolName }: StaffA
         ) : (
           <div>
             <AppButton type="button" variant="secondary" onClick={() => setConfirmingReset(true)}>
-              Reset password
+              Print sign-in slip
             </AppButton>
           </div>
         )}
