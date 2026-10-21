@@ -8,6 +8,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   CircleUserRound,
+  FileText,
   GraduationCap,
   HeartPulse,
   Inbox,
@@ -92,6 +93,17 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Timetable",
     icon: CalendarClock,
     roles: ["SUPERADMIN", "PRINCIPAL", "ADMIN_SECRETARY", "FORM_TEACHER", "SUBJECT_TEACHER"],
+    group: "Academics",
+  },
+
+  // Scheme of work, lecture notes and exam questions — open to every staff
+  // role, any class, with approval limited to the admin tier (the service
+  // checks that, not this menu).
+  {
+    href: "/teaching-resources",
+    label: "Teaching resources",
+    icon: FileText,
+    roles: [],
     group: "Academics",
   },
 

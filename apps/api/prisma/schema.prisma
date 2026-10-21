@@ -1105,3 +1105,47 @@ model ServiceHealthCheck {
   @@index([schoolId, service, checkedAt])
   @@map("service_health_checks")
 }
+
+// ---------------------------------------------------------------------------
+// Teaching resources — scheme of work, lecture notes and exam questions.
+// Structured templates filled in by staff, not AI-generated (the owner chose
+// plain data entry over an LLM call). The three types share the same
+// lifecycle and metadata, differing only in the shape of `content`, which is
+// validated per type at the zod boundary rather than split into three
+// tables. Scalar FKs only, no Prisma relations (same lean-schema pattern as
+// TimetableSlot) — a resource outlives the staff member who wrote it.
+// ---------------------------------------------------------------------------
+
+enum TeachingResourceType {
+  SCHEME_OF_WORK
+  LECTURE_NOTE
+  EXAM_QUESTIONS
+}
+
+enum TeachingResourceStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+}
+
+model TeachingResource {
+  id            String                 @id @default(cuid())
+  schoolId      String
+  type          TeachingResourceType
+  title         String
+  subjectId     String
+  classLevelId  String
+  termId        String
+  status        TeachingResourceStatus @default(DRAFT)
+  content       Json
+  createdById   String
+  submittedAt   DateTime?
+  submittedById String?
+  approvedAt    DateTime?
+  approvedById  String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@index([schoolId, type, subjectId, classLevelId, termId])
+  @@map("teaching_resources")
+}

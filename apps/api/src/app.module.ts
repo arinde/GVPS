@@ -24,6 +24,7 @@ import { FeesModule } from "@/fees/fees.module";
 import { PrismaModule } from "@/prisma/prisma.module";
 import { SchoolModule } from "@/school/school.module";
 import { SystemHealthModule } from "@/system-health/system-health.module";
+import { TeachingResourcesModule } from "@/teaching-resources/teaching-resources.module";
 import { TimetableModule } from "@/timetable/timetable.module";
 
 @Module({
@@ -51,6 +52,7 @@ import { TimetableModule } from "@/timetable/timetable.module";
     FeesModule,
     SchoolModule,
     SystemHealthModule,
+    TeachingResourcesModule,
     TimetableModule,
   ],
   controllers: [AppController],
