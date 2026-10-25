@@ -3,6 +3,7 @@
 import { Pencil } from "lucide-react";
 import { AppLinkButton } from "@/components/common/app-button";
 import { PageContainer } from "@/components/common/page-container";
+import { MyPayslipsCard } from "@/components/payroll/my-payslips-card";
 import { LoadingState } from "@/components/common/spinner";
 import { StaffProfileDetails } from "@/components/staff/staff-profile-details";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -56,6 +57,9 @@ export function MyProfileView() {
           ) : undefined
         }
       />
+      <div className="mt-5">
+        <MyPayslipsCard />
+      </div>
     </PageContainer>
   );
 }

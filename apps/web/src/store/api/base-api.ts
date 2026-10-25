@@ -87,6 +87,9 @@ export const baseApi = createApi({
     "FeeStructure",
     "Debtor",
     "TeachingResource",
+    "Salary",
+    "PayrollRun",
+    "Payslip",
   ],
   endpoints: () => ({}),
 });

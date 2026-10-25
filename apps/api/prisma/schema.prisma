@@ -1092,7 +1092,7 @@ enum ServiceHealthStatus {
 }
 
 model ServiceHealthCheck {
-  id        String               @id @default(cuid())
+  id        String              @id @default(cuid())
   schoolId  String
   service   MonitoredService
   status    ServiceHealthStatus
@@ -1100,7 +1100,7 @@ model ServiceHealthCheck {
   // meaningful for EMAIL, which is derived from the audit trail rather than
   // a live ping — recorded as 0 there.
   latencyMs Int
-  checkedAt DateTime             @default(now())
+  checkedAt DateTime            @default(now())
 
   @@index([schoolId, service, checkedAt])
   @@map("service_health_checks")
@@ -1148,4 +1148,82 @@ model TeachingResource {
 
   @@index([schoolId, type, subjectId, classLevelId, termId])
   @@map("teaching_resources")
+}
+
+// ---------------------------------------------------------------------------
+// Payroll — FEATURES.md §9.4. "Deliberately last … getting it wrong has
+// consequences", so it is kept simple and explicit: every allowance and
+// deduction (tax and pension included) is a fixed amount the school enters,
+// never a rate the system computes. The school's accountant owns PAYE; this
+// module records what they decided and prints it.
+// ---------------------------------------------------------------------------
+
+// One per staff member: what a normal month pays. Allowances and deductions
+// are [{ name, amountKobo }], validated at the zod boundary (same pattern as
+// TeachingResource.content) and replaced as a whole on every save.
+model StaffSalary {
+  id          String   @id @default(cuid())
+  schoolId    String
+  staffId     String   @unique
+  basicKobo   Int
+  allowances  Json
+  deductions  Json
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@map("staff_salaries")
+}
+
+// A draft run can be refreshed from the salary structures, adjusted payslip
+// by payslip, or deleted. Finalising locks it: from then on the payslips are
+// what was paid (same principle as a published result, PLAN.md §4.3).
+enum PayrollRunStatus {
+  DRAFT
+  FINALISED
+}
+
+model PayrollRun {
+  id            String           @id @default(cuid())
+  schoolId      String
+  year          Int
+  month         Int // 1–12
+  status        PayrollRunStatus @default(DRAFT)
+  createdById   String
+  finalisedAt   DateTime?
+  finalisedById String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  payslips Payslip[]
+
+  @@unique([schoolId, year, month])
+  @@map("payroll_runs")
+}
+
+// Lines are copied from StaffSalary when the run is generated, so a later
+// salary change never rewrites a month already paid. `staff` is the name,
+// roles and salary account as at generation — account number masked, since
+// the principal, bursar and office read payslips too (FEATURES.md §14).
+model Payslip {
+  id             String   @id @default(cuid())
+  schoolId       String
+  runId          String
+  staffId        String
+  basicKobo      Int
+  allowances     Json
+  deductions     Json
+  grossKobo      Int
+  deductionsKobo Int
+  netKobo        Int
+  staff          Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  run PayrollRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, staffId])
+  @@index([schoolId, staffId])
+  @@map("payslips")
 }

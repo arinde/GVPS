@@ -21,6 +21,7 @@ import { AuditModule } from "@/audit/audit.module";
 import { AuthModule } from "@/auth/auth.module";
 import { EmailModule } from "@/common/email.module";
 import { FeesModule } from "@/fees/fees.module";
+import { PayrollModule } from "@/payroll/payroll.module";
 import { PrismaModule } from "@/prisma/prisma.module";
 import { SchoolModule } from "@/school/school.module";
 import { SystemHealthModule } from "@/system-health/system-health.module";
@@ -50,6 +51,7 @@ import { TimetableModule } from "@/timetable/timetable.module";
     PromotionsModule,
     ResultsModule,
     FeesModule,
+    PayrollModule,
     SchoolModule,
     SystemHealthModule,
     TeachingResourcesModule,

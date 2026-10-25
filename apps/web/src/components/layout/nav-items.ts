@@ -1,5 +1,6 @@
 import {
   ArrowUpRight,
+  Banknote,
   BarChart3,
   Building2,
   BookOpenText,
@@ -160,6 +161,15 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Fees",
     icon: Wallet,
     roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR", "FORM_TEACHER"],
+    group: "Finance",
+  },
+  // FEATURES.md §14 "Staff / payroll" row: superadmin runs it; principal,
+  // bursar and office read. Everyone sees their own payslips on My profile.
+  {
+    href: "/payroll",
+    label: "Payroll",
+    icon: Banknote,
+    roles: ["SUPERADMIN", "PRINCIPAL", "BURSAR", "ADMIN_SECRETARY"],
     group: "Finance",
   },
 

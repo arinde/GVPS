@@ -1,11 +1,8 @@
+import { downloadCsv } from "@/lib/csv";
 import type { Broadsheet } from "@/store/api/broadsheet-api";
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
-}
-
-function escapeCsv(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
 const STYLES = `
@@ -64,21 +61,13 @@ export function downloadBroadsheetCsv(sheet: Broadsheet): void {
     "Total",
     "Average",
   ];
-  const lines = [header.map(escapeCsv).join(",")];
-  for (const row of sheet.rows) {
-    const cells = row.scores.map((cell) => (cell ? String(cell.total) : ""));
-    lines.push(
-      [String(row.position), row.name, row.admissionNo, ...cells, String(row.total), String(row.average)]
-        .map(escapeCsv)
-        .join(","),
-    );
-  }
-
-  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${sheet.classLabel} ${sheet.term.name} broadsheet.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
+  const rows = sheet.rows.map((row) => [
+    String(row.position),
+    row.name,
+    row.admissionNo,
+    ...row.scores.map((cell) => (cell ? String(cell.total) : "")),
+    String(row.total),
+    String(row.average),
+  ]);
+  downloadCsv([header, ...rows], `${sheet.classLabel} ${sheet.term.name} broadsheet.csv`);
 }
